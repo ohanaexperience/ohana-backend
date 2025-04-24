@@ -1,0 +1,102 @@
+authPhoneRegister:
+    handler: src/auth.phoneRegister
+    events:
+        - http:
+              path: /v1/auth/phone/register
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authEmailRegister:
+    handler: src/auth.emailRegister
+    events:
+        - http:
+              path: /v1/auth/email/register
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authResendEmailCode:
+    handler: src/auth.emailResendCode
+    events:
+        - http:
+              path: /v1/auth/email/resend-code
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authConfirmEmailCode:
+    handler: src/auth.emailConfirmCode
+    events:
+        - http:
+              path: /v1/auth/email/confirm-code
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authForgotPassword:
+    handler: src/auth.forgotPassword
+    events:
+        - http:
+              path: /v1/auth/email/forgot-password
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authConfirmForgotPassword:
+    handler: src/auth.confirmForgotPassword
+    events:
+        - http:
+              path: /v1/auth/email/change-password
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authLogin:
+    handler: src/auth.emailLogin
+    events:
+        - http:
+              path: /v1/auth/email/login
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_ID: !Ref UserPool
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+authRefreshTokens:
+    handler: src/auth.refreshTokens
+    events:
+        - http:
+              path: /v1/auth/tokens/refresh
+              method: POST
+              cors: true
+    environment:
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+
+# userPreSignUp:
+#     handler: src/auth.preSignUp
+#     events:
+#         - cognitoUserPool:
+#               pool: ${self:custom.resourceNames.userPool}
+#               trigger: PreSignUp
+#               existing: true
+
+authGoogleLogin:
+    handler: src/auth.googleSignIn
+    events:
+        - http:
+              path: /v1/auth/google/sign-in
+              method: POST
+              cors: true
+    environment:
+        USER_POOL: ${self:custom.resourceNames.userPool}
+        USER_POOL_CLIENT: ${self:custom.resourceNames.userPoolClient}
+        USER_POOL_ID: !Ref UserPool
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+        IDENTITY_POOL_ID: !Ref CognitoIdentityPool

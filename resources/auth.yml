@@ -1,0 +1,191 @@
+Resources:
+    CognitoSnsRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: CognitoSnsRole
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: cognito-idp.amazonaws.com
+                      Action: sts:AssumeRole
+                      Condition:
+                          StringEquals:
+                              sts:ExternalId: de79ea4afeea
+            Policies:
+                - PolicyName: SNSPublishPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                # - mobiletargeting:SendMessages
+                                # - mobiletargeting:GetSMSSandboxAccountStatus
+                                - sns:Publish
+                            Resource: "*"
+
+    # PinpointProject:
+    #     Type: AWS::Pinpoint::App
+    #     Properties:
+    #         Name: ${self:custom.resourceNames.pinpoint}
+
+    # PinpointSMSChannel:
+    #     Type: AWS::Pinpoint::SMSChannel
+    #     Properties:
+    #         ApplicationId: !Ref PinpointProject
+    #         Enabled: true
+    #         MessageType: TRANSACTIONAL
+
+    UserPool:
+        Type: AWS::Cognito::UserPool
+        Properties:
+            UserPoolName: ${self:custom.resourceNames.userPool}
+            AutoVerifiedAttributes:
+                - phone_number
+                - email
+            SmsConfiguration:
+                SnsCallerArn: !GetAtt CognitoSnsRole.Arn
+                ExternalId: de79ea4afeea
+                # SenderId: !Ref SNSOriginationNumber
+            UserPoolAddOns:
+                AdvancedSecurityMode: OFF
+            Policies:
+                PasswordPolicy:
+                    MinimumLength: 8
+                    RequireUppercase: true
+                    RequireLowercase: true
+                    RequireNumbers: true
+                    RequireSymbols: true
+            Schema:
+                - Name: phone_number
+                  AttributeDataType: String
+                  Required: false # Make phone number optional
+                  Mutable: true
+                - Name: email
+                  AttributeDataType: String
+                  Required: false
+                  Mutable: true
+            UsernameAttributes:
+                - email
+                - phone_number
+            MfaConfiguration: OPTIONAL
+            SmsAuthenticationMessage: "Your authentication code is {####}"
+            EnabledMfas:
+                - SMS_MFA
+
+    UserPoolDomain:
+        Type: AWS::Cognito::UserPoolDomain
+        Properties:
+            Domain: ${self:custom.resourceNames.userPoolDomain}
+            UserPoolId: !Ref UserPool
+
+    # Identity Pool
+    # GoogleIdentityPoolRole:
+    #     Type: AWS::IAM::Role
+    #     Properties:
+    #         AssumeRolePolicyDocument:
+    #             Version: "2012-10-17"
+    #             Statement:
+    #                 - Effect: Allow
+    #                   Principal:
+    #                       Federated: accounts.google.com
+    #                   Action: sts:AssumeRoleWithWebIdentity
+    #                   Condition:
+    #                       StringEquals:
+    #                           accounts.google.com:aud: ${env:GOOGLE_CLIENT_ID}
+
+    CognitoIdentityPool:
+        Type: AWS::Cognito::IdentityPool
+        Properties:
+            IdentityPoolName: ${self:custom.resourceNames.identityPool}
+            AllowUnauthenticatedIdentities: false
+            CognitoIdentityProviders:
+                - ClientId: !Ref UserPoolClient
+                  ProviderName: !GetAtt UserPool.ProviderName
+                  ServerSideTokenCheck: true
+            SupportedLoginProviders:
+                accounts.google.com: ${env:GOOGLE_CLIENT_ID}
+
+    IdentityPoolRoleAttachment:
+        Type: AWS::Cognito::IdentityPoolRoleAttachment
+        Properties:
+            IdentityPoolId: !Ref CognitoIdentityPool
+            Roles:
+                authenticated: !GetAtt AuthenticatedRole.Arn
+
+    AuthenticatedRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Federated: cognito-identity.amazonaws.com
+                      Action: sts:AssumeRoleWithWebIdentity
+                      Condition:
+                          StringEquals:
+                              cognito-identity.amazonaws.com:aud: !Ref CognitoIdentityPool
+
+    UserPoolGoogleIdP:
+        Type: AWS::Cognito::UserPoolIdentityProvider
+        Properties:
+            ProviderName: Google
+            ProviderType: Google
+            ProviderDetails:
+                client_id: ${env:GOOGLE_CLIENT_ID}
+                client_secret: ${env:GOOGLE_CLIENT_SECRET}
+                authorize_scopes: email profile openid
+            AttributeMapping:
+                email: email
+                given_name: given_name
+                family_name: family_name
+                email_verified: email_verified
+                name: name
+                picture: picture
+            UserPoolId: !Ref UserPool
+            IdpIdentifiers:
+                - accounts.google.com
+
+    UserPoolClient:
+        Type: AWS::Cognito::UserPoolClient
+        DependsOn:
+            - UserPoolGoogleIdP
+        Properties:
+            ClientName: ${self:custom.resourceNames.userPoolClient}
+            UserPoolId: !Ref UserPool
+            GenerateSecret: false
+            ExplicitAuthFlows:
+                - ALLOW_USER_PASSWORD_AUTH
+                - ALLOW_REFRESH_TOKEN_AUTH
+                - ALLOW_CUSTOM_AUTH
+                - ALLOW_USER_SRP_AUTH
+                - ALLOW_ADMIN_USER_PASSWORD_AUTH
+            PreventUserExistenceErrors: ENABLED
+            ReadAttributes:
+                - email
+                - phone_number
+                - phone_number_verified
+                - email_verified
+            WriteAttributes:
+                - email
+                - phone_number
+            AllowedOAuthFlows:
+                - implicit
+                - code
+            AllowedOAuthFlowsUserPoolClient: true
+            AllowedOAuthScopes:
+                - email
+                - openid
+                - profile
+            CallbackURLs:
+                - "https://unluksv3ee.execute-api.us-east-1.amazonaws.com/dev/v1/users/google/signin"
+                - "myapp://auth/callback"
+            LogoutURLs:
+                - "http://localhost:3000/auth/logout"
+                - "myapp://auth/logout"
+            SupportedIdentityProviders:
+                - COGNITO
+                - Google
+                # - SignInWithApple

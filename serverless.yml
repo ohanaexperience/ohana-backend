@@ -1,0 +1,76 @@
+service: ohana
+frameworkVersion: "4"
+useDotenv: true
+
+provider:
+    name: aws
+    stage: ${opt:stage, 'dev'}
+    profile: ohana-deployer
+    versionFunctions: false
+    runtime: nodejs20.x
+    region: us-east-1
+    environment:
+        SERVICE: ${self:service}
+        NODE_ENV: ${opt:stage, 'dev'}
+    iam:
+        role:
+            statements:
+                - Effect: Allow
+                  Action:
+                      - s3:*
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - lambda:InvokeFunction
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - lambda:RemovePermission
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - lambda:InvokeFunctionUrl
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - dynamodb:*
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - cognito-idp:*
+                  Resource: "*"
+
+package:
+    individually: true
+
+plugins:
+    # - serverless-offline
+    - serverless-finch
+
+custom:
+    # serverless-offline:
+    #     httpPort: 3000
+    #     lambdaPort: 3002
+    #     noPrependStageInUrl: true
+    #     lambdaUrls: true
+    client:
+        bucketName: ohana-docs
+        distributionFolder: docs/dist
+
+    resourceNames:
+        userPool: ${self:service}-user-pool-${self:provider.stage}
+        userPoolClient: ${self:service}-user-pool-client-${self:provider.stage}
+        userPoolDomain: ${self:service}-${self:provider.stage}
+        pinpoint: ${self:service}-pinpoint-${self:provider.stage}
+        identityPool: ${self:service}-identity-pool-${self:provider.stage}
+
+functions:
+    - ${file(functions/auth.yml)}
+
+resources:
+    - ${file(resources/auth.yml)}

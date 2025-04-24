@@ -1,0 +1,18 @@
+# Ignore all files in the serverless directory
+.serverless
+
+# Ignore all files in the node_modules directory
+node_modules
+
+# Ignore all files in the .env directory
+.env*
+
+# Ignore vscode files
+.vscode
+
+# Ignore all html files
+*.html
+
+
+
+

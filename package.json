@@ -1,0 +1,26 @@
+{
+    "name": "ohana",
+    "version": "1.0.0",
+    "description": "Ohana API",
+    "scripts": {
+        "build-docs": "redocly build-docs docs/ohana.json --output docs/dist/index.html",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@aws-sdk/client-cognito-identity": "^3.787.0",
+        "@aws-sdk/client-cognito-identity-provider": "^3.782.0",
+        "@aws-sdk/client-sns": "^3.787.0",
+        "@types/aws-lambda": "^8.10.149",
+        "@types/node": "^22.14.0",
+        "serverless-finch": "^4.0.4"
+    },
+    "dependencies": {
+        "@middy/core": "^6.1.6",
+        "@middy/http-cors": "^6.1.6",
+        "google-auth-library": "^9.15.1",
+        "jwt-decode": "^4.0.0"
+    }
+}

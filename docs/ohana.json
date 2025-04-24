@@ -1,0 +1,958 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Ohana API",
+        "description": "API documentation for Ohana backend\n\nBase URL: https://ikfwakanfh.execute-api.us-east-1.amazonaws.com",
+        "version": "1.0.0",
+        "contact": {
+            "email": "support@ohana.com"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://ikfwakanfh.execute-api.us-east-1.amazonaws.com/dev",
+            "description": "Development server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "User authentication endpoints"
+        }
+    ],
+    "paths": {
+        "/v1/auth/phone/register": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Phone Registration",
+                "description": "Registers a user with a phone number.",
+                "operationId": "userPhoneRegister",
+                "requestBody": {
+                    "description": "Phone number object",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "phoneNumber": {
+                                        "type": "string",
+                                        "format": "phone",
+                                        "example": "+1234567890"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Verification code successfully sent."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Phone Number": {
+                                        "value": {
+                                            "error": "Missing phone number",
+                                            "message": "Phone number is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/register": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Email Address Registration",
+                "description": "Creates a new user with an email and password.",
+                "operationId": "authEmailRegister",
+                "requestBody": {
+                    "description": "Email registration details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email", "password"],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "Pa$$word!",
+                                        "format": "Pa$$word!"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User successfully created."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    },
+                                    "Missing Password": {
+                                        "value": {
+                                            "error": "Missing password",
+                                            "message": "Password is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/resend-code": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Resend Email Verification Code",
+                "description": "Resends the confirmation code to the user's email address.",
+                "operationId": "emailResendCode",
+                "requestBody": {
+                    "description": "Email details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email"],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email verification code sent."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/confirm-code": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Confirm Email Registration",
+                "description": "Confirms a user's email registration using the verification code.",
+                "operationId": "emailConfirmCode",
+                "requestBody": {
+                    "description": "Email confirmation details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["username", "confirmationCode"],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    },
+                                    "confirmationCode": {
+                                        "type": "string",
+                                        "example": "123456",
+                                        "format": "123456"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Verification code confirmed."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    },
+                                    "Missing Confirmation Code": {
+                                        "value": {
+                                            "error": "Missing confirmation code",
+                                            "message": "Confirmation code is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/forgot-password": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Forgot Password",
+                "description": "Sends a reset password email to the user's email address.",
+                "operationId": "emailForgotPassword",
+                "requestBody": {
+                    "description": "Email confirmation details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email"],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email sent with instructions to reset password."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/change-password": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Change Password",
+                "description": "Changes a user's password.",
+                "operationId": "authChangePassword",
+                "requestBody": {
+                    "description": "Change password details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "email",
+                                    "confirmationCode",
+                                    "newPassword"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    },
+                                    "confirmationCode": {
+                                        "type": "string",
+                                        "example": "123456",
+                                        "format": "123456"
+                                    },
+                                    "newPassword": {
+                                        "type": "string",
+                                        "example": "Pa$$word!",
+                                        "format": "Pa$$word!"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Password successfully changed."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    },
+                                    "Missing Confirmation Code": {
+                                        "value": {
+                                            "error": "Missing confirmation code",
+                                            "message": "Confirmation code is required."
+                                        }
+                                    },
+                                    "Missing New Password": {
+                                        "value": {
+                                            "error": "Missing new password",
+                                            "message": "New password is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/email/login": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Email Login",
+                "description": "Logs in a user with an email and password.",
+                "operationId": "authEmailLogin",
+                "requestBody": {
+                    "description": "Login details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["email", "password"],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com",
+                                        "format": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "Pa$$word!",
+                                        "format": "Pa$$word!"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "AccessToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJtTGE5Y0pzQTV4R1N6RHJKNGJBdmcrR3BRY2YwUWNOQTJ5WElUYUNSSUxrPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9CbWR6Ym1iRjMiLCJjbGllbnRfaWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJldmVudF9pZCI6ImI2ZTQ5ZGFmLWIwZjAtNDVjMS1hZDY1LTM2ZGMyM2FkMWRiYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwYjYxMDVlYS1mYzYxLTRmMzktYWEyZi03NjlhN2YwMjJjYjkiLCJ1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiJ9.jLcZDQTkq7T3UTMmwaL22HWGeAfttW4StYOwX9dtlk2Vm4VIvPhuvb7HjJjvS_SDsGO19YZF9bG-DA-Pyc2JiUMes7A28I-_L5B_kDt9ucaKYcEJBpwGeFp0svmpFDX8wZ__VdhZZauC8Go-6bbQW49lVehBSwXN8DAS37I9VOAclE2OKnpgFP1zwBMKjGtKjG84pEoZJ9AQ_GOZ3jtJE9jMvTzyNI3-cTAVwY47SbqIKyGQWjtK_LEKahlmmRKKn0CdqnfiRbJV50XElbceq3lCvl1HOzCSFfcbLPtxZ_OPL3hmEETyg5uK7L_OEERzZTxOGarXqSJf2td3oxXC_A"
+                                        },
+                                        "ExpiresIn": {
+                                            "type": "number",
+                                            "example": "3600"
+                                        },
+                                        "IdToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJwbFhDUE9IZ3d6ZVdkYkpLZXg5Z0pcL2JabVwvb2luMndjOUQ2V3hIWlwvbGtZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfQm1kemJtYkYzIiwiY29nbml0bzp1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJhdWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsImV2ZW50X2lkIjoiYjZlNDlkYWYtYjBmMC00NWMxLWFkNjUtMzZkYzIzYWQxZGJiIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwZjcxNjJiNC0zYmU3LTRkODgtOTE3My00ZTdmOTdjM2FhYmMiLCJlbWFpbCI6Imh5YW4yODkzQGdtYWlsLmNvbSJ9.bmQ9KOzyUiSpPH1QrZvDtGwk8VnK3HQfbU6eaVJ1_6QOlhi4-xeRCWBCZJIfcK2F18LXhQJ17Hwx-7dnm4HnVDBVyZb80qmVXO-vGX8JauA8ulwsZhyjX09TiqBmTEhip-MqpPq6SRyR5tErpJ6dF1IFg6i18JU1mLqE2XIy3SxZc4RtK5VW7J92y-Sd_8z0qgsXdfkDOEWi96DnQcrR1YXIjWonhj0T8WkcH_p94Bfp_SUxKLhTu-PpLU8W0HLNtgMC-VwtaxcPdNaT84uE8qjho9aXxu08GNgquqElTqkZi1Ru9njCkixPpYq4tt5mud-Qr1CHu9qLx5UG2zGeVg"
+                                        },
+                                        "RefreshToken": {
+                                            "type": "string",
+                                            "example": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.c7_A1VYdJPxjjpiU6_a7kTWCYZjXpeYzV1HdH3GcPok524dKEK_7IXDkujqQxPEhGiEmW3MuReskJhJy9Jv8xS4jI01QD4RSBcQYid1RqfTO0zYGsN0mrJfkkW9qbtgk7hNw4YJDVCrsBBY2Q2q9PTQkZojwkXEhVvkA4H1JU9XEx1Z6rKljHVfIvUyl93Be0qA7cDHsRgAOnde9BeMX_1bxJmVmgX_1I0AwGH5hrKf3L1wAY2qQR5aXw6NfeHOz63YJxfv9B5gRW57GfgncRkYbo7zs4PdTTug9FmciUcOR73bg5__aYC--RpQtTjP9cnUPWaZKhangYmnDv45AfA.YMKu7gsb08Lg47pI.53cIDAtFzHVfIk-U9-0VrKRYqHKjA287noa7fnMJdh7I9KpV5JDNHxRPDbFPvdyuRYdcjKEOsxM9R0ebX0PbwL7NcCyd0WbDBn8EysvEWvtj8FweJ-z3OiQSZkwydWxV3RAWe4q-D1U7aZLJwOsqAP3rgjMXH0ThysiBfjBt54euGNsd1x2bMDBy66qYFYAR1MpqCCdVL468kGUi9grLOedwynsrdEFZkggWQ7ZLbjL1jQpg8AkdnjFSX5lLrL4eMYyAP2ZVkFOnfC4g59QJocsEvdhV0PFKxgePW8IPPar9R8kmCFzeRHYmm7nih7d__tgVBI8zfqjxskUwmMNqdArC4GLBqmMXDFUw_GjTgAs8RyaWDUPyVEI5ezy-J1p0Nq4TVFs6Ac_AYgv3muarpnfA6ZMPxiHWGFzTjYeqAS6EvhgzMW8_99bJ_uDgsHnomA9IF4VOW1yIXxsVoMb__QK5Db02bLueMCMkau33ugSF8JS9pnI41tkBWhuiXSEWEui4G3WMJ8_yM_JNWyGbDVFXBsGeC6J8J0U7SLmjNOmfD2zEbx-UWBc5JLs1nGSkHV3UMHarGgOIlFVHGunnakCPyRo9RJmpsAhxuywALUveHJPSrwpJx-QJ6dcs5DYWb19HyvEZc5kJbAb0PeImVJ5hnMNzZY9xO5eOIDAh7sznZr_ORuKuFdj2Tk1IhfxueHre8-L7Ntap8MTW8rw6kbcuQ1EHac4-2phqZftLuHrvBQXlqHf-n_WW8OqGlwWzYQahLKw6tNT3qbYhHOyGCxVuUME5ABxlK5qUwt1uOsQ250McRYskfSVneeztZYvTFBcBfcfVciQ41FKVcCKswDuGl1-n60Dp7wAL_vHqXf2j93GH5KUocttrpMgqOF4QyujnnEZBZt6uT9IHCBFGXezGX-UcnPM_LLMY7m0cwHqHClCJgg9D13pwwRukjtlCrBm9jZAA7VTibBxatwlC8awaNG978JILk9CrIj72q6wFVxogWO1jv2-pOyNrgf_ZVhdaFEYIlVeIu6XyJ04KIfvbTMIoqTd6hnd5XgzlVDWpfeDzslbcRlFHEogIvLCpKyDhymfHsnpImTbYGkM6zVbRPcoVqppcx6XxSlBkOoZjuvobR1y9D4iok77bZD28UngixD0eIhTE1_nKDdS12qFYhsRMHPJevtRXFj59G9sCQZDtBg0ev2v9wEMBh_LGXwm87nwGdhAulZ7mdaGcpjqo69tGM0lAtz4LJeViGjQwGRHszmXFQ3VsHyS17kZk-6vAfyXeHe_xs4QDjjPXTd9rHYW0quMMfupfqnIG35D0nTBRNAp2lzvUxw.FMMP5l6-X1lE_zTB8M_55A"
+                                        },
+                                        "TokenType": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Email": {
+                                        "value": {
+                                            "error": "Missing email",
+                                            "message": "Email is required."
+                                        }
+                                    },
+                                    "Missing Password": {
+                                        "value": {
+                                            "error": "Missing password",
+                                            "message": "Password is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/tokens/refresh": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Refresh Tokens",
+                "description": "Refreshes a user's tokens.",
+                "operationId": "authRefreshTokens",
+                "requestBody": {
+                    "description": "Refresh token details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["refreshToken"],
+                                "properties": {
+                                    "refreshToken": {
+                                        "type": "string",
+                                        "example": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.c7_A1VYdJPxjjpiU6_a7kTWCYZjXpeYzV1HdH3GcPok524dKEK_7IXDkujqQxPEhGiEmW3MuReskJhJy9Jv8xS4jI01QD4RSBcQYid1RqfTO0zYGsN0mrJfkkW9qbtgk7hNw4YJDVCrsBBY2Q2q9PTQkZojwkXEhVvkA4H1JU9XEx1Z6rKljHVfIvUyl93Be0qA7cDHsRgAOnde9BeMX_1bxJmVmgX_1I0AwGH5hrKf3L1wAY2qQR5aXw6NfeHOz63YJxfv9B5gRW57GfgncRkYbo7zs4PdTTug9FmciUcOR73bg5__aYC--RpQtTjP9cnUPWaZKhangYmnDv45AfA.YMKu7gsb08Lg47pI.53cIDAtFzHVfIk-U9-0VrKRYqHKjA287noa7fnMJdh7I9KpV5JDNHxRPDbFPvdyuRYdcjKEOsxM9R0ebX0PbwL7NcCyd0WbDBn8EysvEWvtj8FweJ-z3OiQSZkwydWxV3RAWe4q-D1U7aZLJwOsqAP3rgjMXH0ThysiBfjBt54euGNsd1x2bMDBy66qYFYAR1MpqCCdVL468kGUi9grLOedwynsrdEFZkggWQ7ZLbjL1jQpg8AkdnjFSX5lLrL4eMYyAP2ZVkFOnfC4g59QJocsEvdhV0PFKxgePW8IPPar9R8kmCFzeRHYmm7nih7d__tgVBI8zfqjxskUwmMNqdArC4GLBqmMXDFUw_GjTgAs8RyaWDUPyVEI5ezy-J1p0Nq4TVFs6Ac_AYgv3muarpnfA6ZMPxiHWGFzTjYeqAS6EvhgzMW8_99bJ_uDgsHnomA9IF4VOW1yIXxsVoMb__QK5Db02bLueMCMkau33ugSF8JS9pnI41tkBWhuiXSEWEui4G3WMJ8_yM_JNWyGbDVFXBsGeC6J8J0U7SLmjNOmfD2zEbx-UWBc5JLs1nGSkHV3UMHarGgOIlFVHGunnakCPyRo9RJmpsAhxuywALUveHJPSrwpJx-QJ6dcs5DYWb19HyvEZc5kJbAb0PeImVJ5hnMNzZY9xO5eOIDAh7sznZr_ORuKuFdj2Tk1IhfxueHre8-L7Ntap8MTW8rw6kbcuQ1EHac4-2phqZftLuHrvBQXlqHf-n_WW8OqGlwWzYQahLKw6tNT3qbYhHOyGCxVuUME5ABxlK5qUwt1uOsQ250McRYskfSVneeztZYvTFBcBfcfVciQ41FKVcCKswDuGl1-n60Dp7wAL_vHqXf2j93GH5KUocttrpMgqOF4QyujnnEZBZt6uT9IHCBFGXezGX-UcnPM_LLMY7m0cwHqHClCJgg9D13pwwRukjtlCrBm9jZAA7VTibBxatwlC8awaNG978JILk9CrIj72q6wFVxogWO1jv2-pOyNrgf_ZVhdaFEYIlVeIu6XyJ04KIfvbTMIoqTd6hnd5XgzlVDWpfeDzslbcRlFHEogIvLCpKyDhymfHsnpImTbYGkM6zVbRPcoVqppcx6XxSlBkOoZjuvobR1y9D4iok77bZD28UngixD0eIhTE1_nKDdS12qFYhsRMHPJevtRXFj59G9sCQZDtBg0ev2v9wEMBh_LGXwm87nwGdhAulZ7mdaGcpjqo69tGM0lAtz4LJeViGjQwGRHszmXFQ3VsHyS17kZk-6vAfyXeHe_xs4QDjjPXTd9rHYW0quMMfupfqnIG35D0nTBRNAp2lzvUxw.FMMP5l6-X1lE_zTB8M_55A",
+                                        "format": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.c7_A1VYdJPxjjpiU6_a7kTWCYZjXpeYzV1HdH3GcPok524dKEK_7IXDkujqQxPEhGiEmW3MuReskJhJy9Jv8xS4jI01QD4RSBcQYid1RqfTO0zYGsN0mrJfkkW9qbtgk7hNw4YJDVCrsBBY2Q2q9PTQkZojwkXEhVvkA4H1JU9XEx1Z6rKljHVfIvUyl93Be0qA7cDHsRgAOnde9BeMX_1bxJmVmgX_1I0AwGH5hrKf3L1wAY2qQR5aXw6NfeHOz63YJxfv9B5gRW57GfgncRkYbo7zs4PdTTug9FmciUcOR73bg5__aYC--RpQtTjP9cnUPWaZKhangYmnDv45AfA.YMKu7gsb08Lg47pI.53cIDAtFzHVfIk-U9-0VrKRYqHKjA287noa7fnMJdh7I9KpV5JDNHxRPDbFPvdyuRYdcjKEOsxM9R0ebX0PbwL7NcCyd0WbDBn8EysvEWvtj8FweJ-z3OiQSZkwydWxV3RAWe4q-D1U7aZLJwOsqAP3rgjMXH0ThysiBfjBt54euGNsd1x2bMDBy66qYFYAR1MpqCCdVL468kGUi9grLOedwynsrdEFZkggWQ7ZLbjL1jQpg8AkdnjFSX5lLrL4eMYyAP2ZVkFOnfC4g59QJocsEvdhV0PFKxgePW8IPPar9R8kmCFzeRHYmm7nih7d__tgVBI8zfqjxskUwmMNqdArC4GLBqmMXDFUw_GjTgAs8RyaWDUPyVEI5ezy-J1p0Nq4TVFs6Ac_AYgv3muarpnfA6ZMPxiHWGFzTjYeqAS6EvhgzMW8_99bJ_uDgsHnomA9IF4VOW1yIXxsVoMb__QK5Db02bLueMCMkau33ugSF8JS9pnI41tkBWhuiXSEWEui4G3WMJ8_yM_JNWyGbDVFXBsGeC6J8J0U7SLmjNOmfD2zEbx-UWBc5JLs1nGSkHV3UMHarGgOIlFVHGunnakCPyRo9RJmpsAhxuywALUveHJPSrwpJx-QJ6dcs5DYWb19HyvEZc5kJbAb0PeImVJ5hnMNzZY9xO5eOIDAh7sznZr_ORuKuFdj2Tk1IhfxueHre8-L7Ntap8MTW8rw6kbcuQ1EHac4-2phqZftLuHrvBQXlqHf-n_WW8OqGlwWzYQahLKw6tNT3qbYhHOyGCxVuUME5ABxlK5qUwt1uOsQ250McRYskfSVneeztZYvTFBcBfcfVciQ41FKVcCKswDuGl1-n60Dp7wAL_vHqXf2j93GH5KUocttrpMgqOF4QyujnnEZBZt6uT9IHCBFGXezGX-UcnPM_LLMY7m0cwHqHClCJgg9D13pwwRukjtlCrBm9jZAA7VTibBxatwlC8awaNG978JILk9CrIj72q6wFVxogWO1jv2-pOyNrgf_ZVhdaFEYIlVeIu6XyJ04KIfvbTMIoqTd6hnd5XgzlVDWpfeDzslbcRlFHEogIvLCpKyDhymfHsnpImTbYGkM6zVbRPcoVqppcx6XxSlBkOoZjuvobR1y9D4iok77bZD28UngixD0eIhTE1_nKDdS12qFYhsRMHPJevtRXFj59G9sCQZDtBg0ev2v9wEMBh_LGXwm87nwGdhAulZ7mdaGcpjqo69tGM0lAtz4LJeViGjQwGRHszmXFQ3VsHyS17kZk-6vAfyXeHe_xs4QDjjPXTd9rHYW0quMMfupfqnIG35D0nTBRNAp2lzvUxw.FMMP5l6-X1lE_zTB8M_55A"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "AccessToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJtTGE5Y0pzQTV4R1N6RHJKNGJBdmcrR3BRY2YwUWNOQTJ5WElUYUNSSUxrPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9CbWR6Ym1iRjMiLCJjbGllbnRfaWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJldmVudF9pZCI6ImI2ZTQ5ZGFmLWIwZjAtNDVjMS1hZDY1LTM2ZGMyM2FkMWRiYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwYjYxMDVlYS1mYzYxLTRmMzktYWEyZi03NjlhN2YwMjJjYjkiLCJ1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiJ9.jLcZDQTkq7T3UTMmwaL22HWGeAfttW4StYOwX9dtlk2Vm4VIvPhuvb7HjJjvS_SDsGO19YZF9bG-DA-Pyc2JiUMes7A28I-_L5B_kDt9ucaKYcEJBpwGeFp0svmpFDX8wZ__VdhZZauC8Go-6bbQW49lVehBSwXN8DAS37I9VOAclE2OKnpgFP1zwBMKjGtKjG84pEoZJ9AQ_GOZ3jtJE9jMvTzyNI3-cTAVwY47SbqIKyGQWjtK_LEKahlmmRKKn0CdqnfiRbJV50XElbceq3lCvl1HOzCSFfcbLPtxZ_OPL3hmEETyg5uK7L_OEERzZTxOGarXqSJf2td3oxXC_A"
+                                        },
+                                        "ExpiresIn": {
+                                            "type": "number",
+                                            "example": "3600"
+                                        },
+                                        "IdToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJwbFhDUE9IZ3d6ZVdkYkpLZXg5Z0pcL2JabVwvb2luMndjOUQ2V3hIWlwvbGtZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfQm1kemJtYkYzIiwiY29nbml0bzp1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJhdWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsImV2ZW50X2lkIjoiYjZlNDlkYWYtYjBmMC00NWMxLWFkNjUtMzZkYzIzYWQxZGJiIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwZjcxNjJiNC0zYmU3LTRkODgtOTE3My00ZTdmOTdjM2FhYmMiLCJlbWFpbCI6Imh5YW4yODkzQGdtYWlsLmNvbSJ9.bmQ9KOzyUiSpPH1QrZvDtGwk8VnK3HQfbU6eaVJ1_6QOlhi4-xeRCWBCZJIfcK2F18LXhQJ17Hwx-7dnm4HnVDBVyZb80qmVXO-vGX8JauA8ulwsZhyjX09TiqBmTEhip-MqpPq6SRyR5tErpJ6dF1IFg6i18JU1mLqE2XIy3SxZc4RtK5VW7J92y-Sd_8z0qgsXdfkDOEWi96DnQcrR1YXIjWonhj0T8WkcH_p94Bfp_SUxKLhTu-PpLU8W0HLNtgMC-VwtaxcPdNaT84uE8qjho9aXxu08GNgquqElTqkZi1Ru9njCkixPpYq4tt5mud-Qr1CHu9qLx5UG2zGeVg"
+                                        },
+                                        "RefreshToken": {
+                                            "type": "string",
+                                            "example": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.c7_A1VYdJPxjjpiU6_a7kTWCYZjXpeYzV1HdH3GcPok524dKEK_7IXDkujqQxPEhGiEmW3MuReskJhJy9Jv8xS4jI01QD4RSBcQYid1RqfTO0zYGsN0mrJfkkW9qbtgk7hNw4YJDVCrsBBY2Q2q9PTQkZojwkXEhVvkA4H1JU9XEx1Z6rKljHVfIvUyl93Be0qA7cDHsRgAOnde9BeMX_1bxJmVmgX_1I0AwGH5hrKf3L1wAY2qQR5aXw6NfeHOz63YJxfv9B5gRW57GfgncRkYbo7zs4PdTTug9FmciUcOR73bg5__aYC--RpQtTjP9cnUPWaZKhangYmnDv45AfA.YMKu7gsb08Lg47pI.53cIDAtFzHVfIk-U9-0VrKRYqHKjA287noa7fnMJdh7I9KpV5JDNHxRPDbFPvdyuRYdcjKEOsxM9R0ebX0PbwL7NcCyd0WbDBn8EysvEWvtj8FweJ-z3OiQSZkwydWxV3RAWe4q-D1U7aZLJwOsqAP3rgjMXH0ThysiBfjBt54euGNsd1x2bMDBy66qYFYAR1MpqCCdVL468kGUi9grLOedwynsrdEFZkggWQ7ZLbjL1jQpg8AkdnjFSX5lLrL4eMYyAP2ZVkFOnfC4g59QJocsEvdhV0PFKxgePW8IPPar9R8kmCFzeRHYmm7nih7d__tgVBI8zfqjxskUwmMNqdArC4GLBqmMXDFUw_GjTgAs8RyaWDUPyVEI5ezy-J1p0Nq4TVFs6Ac_AYgv3muarpnfA6ZMPxiHWGFzTjYeqAS6EvhgzMW8_99bJ_uDgsHnomA9IF4VOW1yIXxsVoMb__QK5Db02bLueMCMkau33ugSF8JS9pnI41tkBWhuiXSEWEui4G3WMJ8_yM_JNWyGbDVFXBsGeC6J8J0U7SLmjNOmfD2zEbx-UWBc5JLs1nGSkHV3UMHarGgOIlFVHGunnakCPyRo9RJmpsAhxuywALUveHJPSrwpJx-QJ6dcs5DYWb19HyvEZc5kJbAb0PeImVJ5hnMNzZY9xO5eOIDAh7sznZr_ORuKuFdj2Tk1IhfxueHre8-L7Ntap8MTW8rw6kbcuQ1EHac4-2phqZftLuHrvBQXlqHf-n_WW8OqGlwWzYQahLKw6tNT3qbYhHOyGCxVuUME5ABxlK5qUwt1uOsQ250McRYskfSVneeztZYvTFBcBfcfVciQ41FKVcCKswDuGl1-n60Dp7wAL_vHqXf2j93GH5KUocttrpMgqOF4QyujnnEZBZt6uT9IHCBFGXezGX-UcnPM_LLMY7m0cwHqHClCJgg9D13pwwRukjtlCrBm9jZAA7VTibBxatwlC8awaNG978JILk9CrIj72q6wFVxogWO1jv2-pOyNrgf_ZVhdaFEYIlVeIu6XyJ04KIfvbTMIoqTd6hnd5XgzlVDWpfeDzslbcRlFHEogIvLCpKyDhymfHsnpImTbYGkM6zVbRPcoVqppcx6XxSlBkOoZjuvobR1y9D4iok77bZD28UngixD0eIhTE1_nKDdS12qFYhsRMHPJevtRXFj59G9sCQZDtBg0ev2v9wEMBh_LGXwm87nwGdhAulZ7mdaGcpjqo69tGM0lAtz4LJeViGjQwGRHszmXFQ3VsHyS17kZk-6vAfyXeHe_xs4QDjjPXTd9rHYW0quMMfupfqnIG35D0nTBRNAp2lzvUxw.FMMP5l6-X1lE_zTB8M_55A"
+                                        },
+                                        "TokenType": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Refresh Token": {
+                                        "value": {
+                                            "error": "Missing refresh token",
+                                            "message": "Refresh token is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/google/sign-in": {
+            "post": {
+                "tags": ["Auth"],
+                "summary": "Google Sign In",
+                "description": "Signs in a user using Google Id Token.",
+                "operationId": "googleSignIn",
+                "requestBody": {
+                    "description": "Google token details",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["idToken"],
+                                "properties": {
+                                    "idToken": {
+                                        "type": "string",
+                                        "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImMzN2RhNzVjOWZiZTE4YzJjZTkxMjViOWFhMWYzMDBkY2IzMWU4ZDkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIxMDY2MjMyNjQ2MTU0LTZsMnVqZ3Qxdmo2NW9udWt1NWZvcjRlYzhwaTVubzZ1LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiMTA2NjIzMjY0NjE1NC02bDJ1amd0MXZqNjVvbnVrdTVmb3I0ZWM4cGk1bm82dS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwODQ0OTU2MzYwNzcyMDgzMzU4MSIsImVtYWlsIjoiaHlhbjI4OTNAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJGMGQyZEpoemtTRVNBRnBiMmxnVlFRIiwibmFtZSI6IkhhbmsgWWFuIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0xZU3l1YU52aGI4SVJQRHJiaFJRS3hQSE5LU0NZM3ZPcDFZaV9hY05QRjNoUEFLUT1zOTYtYyIsImdpdmVuX25hbWUiOiJIYW5rIiwiZmFtaWx5X25hbWUiOiJZYW4iLCJpYXQiOjE3NDQ5MDc3MzYsImV4cCI6MTc0NDkxMTMzNn0.WeKiBnKKJqYTiaIQ2bLL-a49uWVQbuGJWqYQ31pJjvP-VfI0VD-IV4dIurSi-jYKLc4-G9A59FMCY9V4S4EFZ0PERno8SZSdJMEJdoA2tGsqqFbIzhi0wSJedaQMSdkr0kbUqejvWaWDggBsMZuOzTczd4Q-UR6PfZlPfNYmlF-RqMerEhbbOEZiIaZiGDPUXQnb5V7m6zYkcGU9_tWN8iMDR7qR0Ajc5OBoRONSYICgceXuU-ABGxCCKGKxjc8lFOPWTB0GUaqQSJYykLebK8n3nUGxOdmTBKTNitxgq8VCX6nQsPfRJUUZmwy36EGlEm6LryFyfNoqA8hged8YNQ"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "AccessToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJtTGE5Y0pzQTV4R1N6RHJKNGJBdmcrR3BRY2YwUWNOQTJ5WElUYUNSSUxrPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9CbWR6Ym1iRjMiLCJjbGllbnRfaWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJldmVudF9pZCI6ImI2ZTQ5ZGFmLWIwZjAtNDVjMS1hZDY1LTM2ZGMyM2FkMWRiYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwYjYxMDVlYS1mYzYxLTRmMzktYWEyZi03NjlhN2YwMjJjYjkiLCJ1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiJ9.jLcZDQTkq7T3UTMmwaL22HWGeAfttW4StYOwX9dtlk2Vm4VIvPhuvb7HjJjvS_SDsGO19YZF9bG-DA-Pyc2JiUMes7A28I-_L5B_kDt9ucaKYcEJBpwGeFp0svmpFDX8wZ__VdhZZauC8Go-6bbQW49lVehBSwXN8DAS37I9VOAclE2OKnpgFP1zwBMKjGtKjG84pEoZJ9AQ_GOZ3jtJE9jMvTzyNI3-cTAVwY47SbqIKyGQWjtK_LEKahlmmRKKn0CdqnfiRbJV50XElbceq3lCvl1HOzCSFfcbLPtxZ_OPL3hmEETyg5uK7L_OEERzZTxOGarXqSJf2td3oxXC_A"
+                                        },
+                                        "ExpiresIn": {
+                                            "type": "number",
+                                            "example": "3600"
+                                        },
+                                        "IdToken": {
+                                            "type": "string",
+                                            "example": "eyJraWQiOiJwbFhDUE9IZ3d6ZVdkYkpLZXg5Z0pcL2JabVwvb2luMndjOUQ2V3hIWlwvbGtZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyNDg4ODQzOC1jMDgxLTcwMWQtNGQ3Yi1hYWFjNzNhMThmODYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfQm1kemJtYkYzIiwiY29nbml0bzp1c2VybmFtZSI6IjI0ODg4NDM4LWMwODEtNzAxZC00ZDdiLWFhYWM3M2ExOGY4NiIsIm9yaWdpbl9qdGkiOiIxM2Q4MDA0Ny05ZDcyLTQwOWUtOTA4Ny03MjViYzU1ZDhjYjciLCJhdWQiOiIydGk3NTJndWFyZTdpY2UzcWZxcThvZGg0cyIsImV2ZW50X2lkIjoiYjZlNDlkYWYtYjBmMC00NWMxLWFkNjUtMzZkYzIzYWQxZGJiIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3NDUxNjYyMzUsImV4cCI6MTc0NTE2OTgzNSwiaWF0IjoxNzQ1MTY2MjM1LCJqdGkiOiIwZjcxNjJiNC0zYmU3LTRkODgtOTE3My00ZTdmOTdjM2FhYmMiLCJlbWFpbCI6Imh5YW4yODkzQGdtYWlsLmNvbSJ9.bmQ9KOzyUiSpPH1QrZvDtGwk8VnK3HQfbU6eaVJ1_6QOlhi4-xeRCWBCZJIfcK2F18LXhQJ17Hwx-7dnm4HnVDBVyZb80qmVXO-vGX8JauA8ulwsZhyjX09TiqBmTEhip-MqpPq6SRyR5tErpJ6dF1IFg6i18JU1mLqE2XIy3SxZc4RtK5VW7J92y-Sd_8z0qgsXdfkDOEWi96DnQcrR1YXIjWonhj0T8WkcH_p94Bfp_SUxKLhTu-PpLU8W0HLNtgMC-VwtaxcPdNaT84uE8qjho9aXxu08GNgquqElTqkZi1Ru9njCkixPpYq4tt5mud-Qr1CHu9qLx5UG2zGeVg"
+                                        },
+                                        "RefreshToken": {
+                                            "type": "string",
+                                            "example": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.c7_A1VYdJPxjjpiU6_a7kTWCYZjXpeYzV1HdH3GcPok524dKEK_7IXDkujqQxPEhGiEmW3MuReskJhJy9Jv8xS4jI01QD4RSBcQYid1RqfTO0zYGsN0mrJfkkW9qbtgk7hNw4YJDVCrsBBY2Q2q9PTQkZojwkXEhVvkA4H1JU9XEx1Z6rKljHVfIvUyl93Be0qA7cDHsRgAOnde9BeMX_1bxJmVmgX_1I0AwGH5hrKf3L1wAY2qQR5aXw6NfeHOz63YJxfv9B5gRW57GfgncRkYbo7zs4PdTTug9FmciUcOR73bg5__aYC--RpQtTjP9cnUPWaZKhangYmnDv45AfA.YMKu7gsb08Lg47pI.53cIDAtFzHVfIk-U9-0VrKRYqHKjA287noa7fnMJdh7I9KpV5JDNHxRPDbFPvdyuRYdcjKEOsxM9R0ebX0PbwL7NcCyd0WbDBn8EysvEWvtj8FweJ-z3OiQSZkwydWxV3RAWe4q-D1U7aZLJwOsqAP3rgjMXH0ThysiBfjBt54euGNsd1x2bMDBy66qYFYAR1MpqCCdVL468kGUi9grLOedwynsrdEFZkggWQ7ZLbjL1jQpg8AkdnjFSX5lLrL4eMYyAP2ZVkFOnfC4g59QJocsEvdhV0PFKxgePW8IPPar9R8kmCFzeRHYmm7nih7d__tgVBI8zfqjxskUwmMNqdArC4GLBqmMXDFUw_GjTgAs8RyaWDUPyVEI5ezy-J1p0Nq4TVFs6Ac_AYgv3muarpnfA6ZMPxiHWGFzTjYeqAS6EvhgzMW8_99bJ_uDgsHnomA9IF4VOW1yIXxsVoMb__QK5Db02bLueMCMkau33ugSF8JS9pnI41tkBWhuiXSEWEui4G3WMJ8_yM_JNWyGbDVFXBsGeC6J8J0U7SLmjNOmfD2zEbx-UWBc5JLs1nGSkHV3UMHarGgOIlFVHGunnakCPyRo9RJmpsAhxuywALUveHJPSrwpJx-QJ6dcs5DYWb19HyvEZc5kJbAb0PeImVJ5hnMNzZY9xO5eOIDAh7sznZr_ORuKuFdj2Tk1IhfxueHre8-L7Ntap8MTW8rw6kbcuQ1EHac4-2phqZftLuHrvBQXlqHf-n_WW8OqGlwWzYQahLKw6tNT3qbYhHOyGCxVuUME5ABxlK5qUwt1uOsQ250McRYskfSVneeztZYvTFBcBfcfVciQ41FKVcCKswDuGl1-n60Dp7wAL_vHqXf2j93GH5KUocttrpMgqOF4QyujnnEZBZt6uT9IHCBFGXezGX-UcnPM_LLMY7m0cwHqHClCJgg9D13pwwRukjtlCrBm9jZAA7VTibBxatwlC8awaNG978JILk9CrIj72q6wFVxogWO1jv2-pOyNrgf_ZVhdaFEYIlVeIu6XyJ04KIfvbTMIoqTd6hnd5XgzlVDWpfeDzslbcRlFHEogIvLCpKyDhymfHsnpImTbYGkM6zVbRPcoVqppcx6XxSlBkOoZjuvobR1y9D4iok77bZD28UngixD0eIhTE1_nKDdS12qFYhsRMHPJevtRXFj59G9sCQZDtBg0ev2v9wEMBh_LGXwm87nwGdhAulZ7mdaGcpjqo69tGM0lAtz4LJeViGjQwGRHszmXFQ3VsHyS17kZk-6vAfyXeHe_xs4QDjjPXTd9rHYW0quMMfupfqnIG35D0nTBRNAp2lzvUxw.FMMP5l6-X1lE_zTB8M_55A"
+                                        },
+                                        "TokenType": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing ID Token": {
+                                        "value": {
+                                            "error": "Missing id token",
+                                            "message": "Id token is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
