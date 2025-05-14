@@ -39,7 +39,19 @@ authConfirmEmailCode:
               path: /v1/auth/email/confirm-code
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authForgotPassword:
@@ -112,24 +124,3 @@ authGoogleLogin:
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
         IDENTITY_POOL_ID: !Ref CognitoIdentityPool
-
-# Auth Triggers
-authPostConfirmationTrigger:
-    handler: src/auth.postConfirmationTrigger
-    events:
-        - cognitoUserPool:
-              pool: ${self:custom.resourceNames.userPool}
-              trigger: PostConfirmation
-              existing: true
-    vpc:
-        securityGroupIds:
-            - !Ref LambdaSecurityGroup
-        subnetIds:
-            - !Ref PrivateSubnetA
-            - !Ref PrivateSubnetB
-    environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}

@@ -1,5 +1,5 @@
 {
-  "id": "fb836783-77be-4a9e-aefc-e65636e76582",
+  "id": "c14bdcbb-41ec-47b4-baff-4fe48aa06305",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -198,6 +198,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "session_client_secret": {
+          "name": "session_client_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "status": {
           "name": "status",

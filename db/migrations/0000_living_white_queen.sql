@@ -30,6 +30,7 @@ CREATE TABLE "host_verifications" (
 	"user_id" uuid NOT NULL,
 	"provider" "host_verification_provider" DEFAULT 'stripe_identity',
 	"provider_verification_id" text,
+	"session_client_secret" text NOT NULL,
 	"status" "host_verification_status" DEFAULT 'pending',
 	"submitted_at" timestamp with time zone,
 	"approved_at" timestamp with time zone,

@@ -25,27 +25,10 @@ Resources:
                                 - sns:Publish
                             Resource: "*"
 
-    # PinpointProject:
-    #     Type: AWS::Pinpoint::App
-    #     Properties:
-    #         Name: ${self:custom.resourceNames.pinpoint}
-
-    # PinpointSMSChannel:
-    #     Type: AWS::Pinpoint::SMSChannel
-    #     Properties:
-    #         ApplicationId: !Ref PinpointProject
-    #         Enabled: true
-    #         MessageType: TRANSACTIONAL
-
     UserPool:
         Type: AWS::Cognito::UserPool
         Properties:
             UserPoolName: ${self:custom.resourceNames.userPool}
-            LambdaConfig:
-                PostConfirmation:
-                    Fn::GetAtt:
-                        - AuthPostConfirmationTriggerLambdaFunction
-                        - Arn
             AutoVerifiedAttributes:
                 - phone_number
                 - email
@@ -191,14 +174,3 @@ Resources:
             Type: COGNITO_USER_POOLS
             ProviderARNs:
                 - !GetAtt UserPool.Arn
-
-    AuthPostConfirmationTriggerInvokePermission:
-        Type: AWS::Lambda::Permission
-        Properties:
-            Action: lambda:InvokeFunction
-            FunctionName:
-                Fn::GetAtt:
-                    - AuthPostConfirmationTriggerLambdaFunction
-                    - Arn
-            Principal: cognito-idp.amazonaws.com
-            SourceArn: !GetAtt UserPool.Arn

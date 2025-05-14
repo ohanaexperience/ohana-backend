@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747198774437,
-      "tag": "0000_simple_darwin",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747200922151,
-      "tag": "0001_puzzling_speed",
+      "when": 1747224071437,
+      "tag": "0000_living_white_queen",
       "breakpoints": true
     }
   ]

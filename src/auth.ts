@@ -262,6 +262,20 @@ export const emailConfirmCode = middy(async (event: EmailConfirmCodeData) => {
             confirmSignUpCommand
         );
 
+        const getUserCommand = new AdminGetUserCommand({
+            UserPoolId: USER_POOL_ID,
+            Username: email,
+        });
+        const user = await cognitoIdentityProviderClient.send(getUserCommand);
+
+        const sub = user.UserAttributes?.find(
+            (attr) => attr.Name === "sub"
+        )?.Value;
+
+        if (sub) {
+            await db.users.create({ id: sub, email });
+        }
+
         console.log("Email confirmation code resent successfully:", response);
 
         return {
@@ -698,17 +712,3 @@ export const googleSignIn = middy(async (event: GoogleSignInData) => {
     .use(requireBody())
     .use(zodValidator(GoogleSignInSchema))
     .use(cors());
-
-// Triggers
-export const postConfirmationTrigger = middy(
-    async (event: PostAuthenticationTriggerEvent) => {
-        console.log("event", event);
-
-        const { userAttributes } = event.request;
-        const { sub, email } = userAttributes;
-
-        await db.users.create({ id: sub, email });
-
-        return event;
-    }
-).use(cors());
