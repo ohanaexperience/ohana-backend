@@ -5,16 +5,12 @@ useDotenv: true
 provider:
     name: aws
     stage: ${opt:stage, 'dev'}
-    profile: ohana-deployer
     versionFunctions: false
     runtime: nodejs20.x
     region: us-east-1
     environment:
         SERVICE: ${self:service}
         NODE_ENV: ${opt:stage, 'dev'}
-        # DATABASE_URL: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        # POSTGRES_CLUSTER_ARN: !GetAtt PostgresRDSServerlessCluster.DBClusterArn
-        # OHANA_SECRETS_MANAGER_ARN: !Ref SecretsManager
     iam:
         role:
             statements:
@@ -89,6 +85,7 @@ custom:
         postgresDB: ${self:service}_postgres_${self:provider.stage}
         secretsManager: ${self:service}-secrets-manager-${self:provider.stage}
         imagesBucket: ${self:service}-images-bucket-${self:provider.stage}
+        cognitoSnsRole: ${self:service}-cognito-sns-role-${self:provider.stage}
 
 functions:
     - ${file(functions/auth.yml)}

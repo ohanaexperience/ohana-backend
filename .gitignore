@@ -1,11 +1,12 @@
-# Ignore all files in the serverless directory
+# Ignore all serverless files
 .serverless
 
-# Ignore all files in the node_modules directory
+# Ignore all files in node_modules
 node_modules
 
-# Ignore all files in the .env directory
+# Ignore all env files
 .env*
+.secrets*
 
 # Ignore vscode files
 .vscode

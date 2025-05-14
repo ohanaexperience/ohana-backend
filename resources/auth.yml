@@ -2,7 +2,7 @@ Resources:
     CognitoSnsRole:
         Type: AWS::IAM::Role
         Properties:
-            RoleName: CognitoSnsRole
+            RoleName: ${self:custom.resourceNames.cognitoSnsRole}
             AssumeRolePolicyDocument:
                 Version: "2012-10-17"
                 Statement:
