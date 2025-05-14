@@ -2,11 +2,11 @@ name: Ohana Serverless CI/CD Pipeline
 
 on:
     push:
-        environment: production
         branches: [main]
 
 jobs:
     deploy:
+        environment: production
         runs-on: ubuntu-latest
 
         steps:
