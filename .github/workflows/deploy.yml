@@ -2,6 +2,7 @@ name: Ohana Serverless CI/CD Pipeline
 
 on:
     push:
+        environment: production
         branches: [main]
 
 jobs:
@@ -24,9 +25,6 @@ jobs:
 
             - name: Install serverless framework
               run: npm install -g serverless
-
-            - name: Serverless Login
-              run: serverless login --provider aws --key ${{ secrets.SERVERLESS_ACCESS_KEY }}
 
             - name: Deploy
               env:
