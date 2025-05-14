@@ -1,0 +1,51 @@
+Resources:
+    PostgresRDSServerlessCluster:
+        Type: AWS::RDS::DBCluster
+        Properties:
+            Engine: aurora-postgresql
+            EngineVersion: 13.9
+            EngineMode: provisioned
+            DatabaseName: ${self:custom.resourceNames.postgresDB}
+            Port: 5432
+            MasterUsername: ${env:POSTGRES_USERNAME}
+            MasterUserPassword: ${env:POSTGRES_PASSWORD}
+            DeletionProtection: false
+            ServerlessV2ScalingConfiguration:
+                MinCapacity: 0.5
+                MaxCapacity: 8
+            VpcSecurityGroupIds:
+                - !Ref DBSecurityGroup
+            DBSubnetGroupName: !Ref PostgresRDSSubnetGroup
+
+    PostgresRDSSubnetGroup:
+        Type: AWS::RDS::DBSubnetGroup
+        Properties:
+            DBSubnetGroupDescription: Postgres subnet group
+            SubnetIds:
+                - !Ref PrivateSubnetA
+                - !Ref PrivateSubnetB
+
+    PostgresInstance:
+        Type: AWS::RDS::DBInstance
+        Properties:
+            DBClusterIdentifier: !Ref PostgresRDSServerlessCluster
+            Engine: aurora-postgresql
+            DBInstanceClass: db.serverless
+
+    # PostgresVPC:
+    #     Type: AWS::EC2::VPC
+    #     Properties:
+    #         CidrBlock: 10.0.0.0/16
+    #         EnableDnsHostnames: true
+    #         EnableDnsSupport: true
+
+    # PostgresSecurityGroup:
+    #     Type: AWS::EC2::SecurityGroup
+    #     Properties:
+    #         GroupDescription: Security group for Aurora Serverless PostgreSQL
+    #         VpcId: !Ref PostgresVPC
+    #         SecurityGroupIngress:
+    #             - IpProtocol: tcp
+    #               FromPort: 5432
+    #               ToPort: 5432
+    #               CidrIp: 10.0.0.0/16

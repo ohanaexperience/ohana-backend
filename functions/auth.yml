@@ -1,5 +1,6 @@
 authPhoneRegister:
     handler: src/auth.phoneRegister
+    timeout: 29
     events:
         - http:
               path: /v1/auth/phone/register
@@ -10,6 +11,7 @@ authPhoneRegister:
 
 authEmailRegister:
     handler: src/auth.emailRegister
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/register
@@ -20,6 +22,7 @@ authEmailRegister:
 
 authResendEmailCode:
     handler: src/auth.emailResendCode
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/resend-code
@@ -30,6 +33,7 @@ authResendEmailCode:
 
 authConfirmEmailCode:
     handler: src/auth.emailConfirmCode
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/confirm-code
@@ -40,6 +44,7 @@ authConfirmEmailCode:
 
 authForgotPassword:
     handler: src/auth.forgotPassword
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/forgot-password
@@ -50,6 +55,7 @@ authForgotPassword:
 
 authConfirmForgotPassword:
     handler: src/auth.confirmForgotPassword
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/change-password
@@ -58,8 +64,9 @@ authConfirmForgotPassword:
     environment:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
-authLogin:
+authEmailLogin:
     handler: src/auth.emailLogin
+    timeout: 29
     events:
         - http:
               path: /v1/auth/email/login
@@ -71,6 +78,7 @@ authLogin:
 
 authRefreshTokens:
     handler: src/auth.refreshTokens
+    timeout: 29
     events:
         - http:
               path: /v1/auth/tokens/refresh
@@ -79,24 +87,49 @@ authRefreshTokens:
     environment:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
-# userPreSignUp:
-#     handler: src/auth.preSignUp
-#     events:
-#         - cognitoUserPool:
-#               pool: ${self:custom.resourceNames.userPool}
-#               trigger: PreSignUp
-#               existing: true
-
 authGoogleLogin:
     handler: src/auth.googleSignIn
+    timeout: 29
     events:
         - http:
               path: /v1/auth/google/sign-in
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
         USER_POOL: ${self:custom.resourceNames.userPool}
         USER_POOL_CLIENT: ${self:custom.resourceNames.userPoolClient}
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
         IDENTITY_POOL_ID: !Ref CognitoIdentityPool
+
+# Auth Triggers
+authPostConfirmationTrigger:
+    handler: src/auth.postConfirmationTrigger
+    events:
+        - cognitoUserPool:
+              pool: ${self:custom.resourceNames.userPool}
+              trigger: PostConfirmation
+              existing: true
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}

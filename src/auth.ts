@@ -1,13 +1,13 @@
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
+import httpJsonBodyParser from "@middy/http-json-body-parser";
+
 import { jwtDecode } from "jwt-decode";
 import { OAuth2Client } from "google-auth-library";
+import passwordGenerator from "generate-password";
 
-import {
-    CognitoIdentityClient,
-    GetCredentialsForIdentityCommand,
-    GetIdCommand,
-} from "@aws-sdk/client-cognito-identity";
+import DatabaseFactory from "./database/database_factory";
+
 import {
     CognitoIdentityProviderClient,
     AdminInitiateAuthCommand,
@@ -22,57 +22,77 @@ import {
     AdminLinkProviderForUserCommand,
     AdminSetUserPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
-import { APIGatewayEvent } from "aws-lambda";
+import { PostAuthenticationTriggerEvent } from "aws-lambda";
+
+import { requireBody, zodValidator } from "./middleware";
+import {
+    PhoneRegisterSchema,
+    PhoneRegisterData,
+    EmailRegisterSchema,
+    EmailRegisterData,
+    EmailResendCodeSchema,
+    EmailResendCodeData,
+    EmailConfirmCodeSchema,
+    EmailConfirmCodeData,
+    EmailForgotPasswordSchema,
+    EmailForgotPasswordData,
+    ConfirmForgotPasswordSchema,
+    ConfirmForgotPasswordData,
+    EmailLoginSchema,
+    EmailLoginData,
+    RefreshTokensSchema,
+    RefreshTokensData,
+    GoogleSignInSchema,
+    GoogleSignInData,
+} from "./constants/validations/schemas";
+import ERRORS from "./constants/validations/errors";
 
 const {
     USER_POOL_ID,
     USER_POOL_CLIENT_ID,
-    IDENTITY_POOL_ID,
     GOOGLE_CLIENT_ID,
+    DB_ENDPOINT,
+    DB_PORT,
+    DB_NAME,
+    DB_USER,
+    DB_PASSWORD,
 } = process.env;
 
-const snsClient = new SNSClient({ region: "us-east-1" });
-const cognitoIdentityClient = new CognitoIdentityClient({
-    region: "us-east-1",
-});
 const cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
     region: "us-east-1",
 });
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-export const phoneRegister = middy(async (event: APIGatewayEvent) => {
-    console.log("user pool id", USER_POOL_ID);
-    console.log("user pool client id", USER_POOL_CLIENT_ID);
+const db = DatabaseFactory.create({
+    postgres: {
+        host: DB_ENDPOINT,
+        port: DB_PORT,
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PASSWORD,
+        ssl: false,
+    },
+});
 
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
+export const phoneRegister = middy(async (event: PhoneRegisterData) => {
+    const { phoneNumber } = event.body;
 
-    const { phoneNumber } = JSON.parse(event.body);
-
-    if (!phoneNumber) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing phone number",
-                message: "Phone number is required.",
-            }),
-        };
-    }
+    console.log("event", event);
 
     try {
+        const password = passwordGenerator.generate({
+            length: 16,
+            numbers: true,
+            uppercase: true,
+            symbols: true,
+            lowercase: true,
+        });
+
         const signUpCommand = new SignUpCommand({
             ClientId: USER_POOL_CLIENT_ID,
             Username: phoneNumber,
-            Password: "Temp2425%",
+            Password: password,
             UserAttributes: [
                 {
                     Name: "phone_number",
@@ -114,52 +134,22 @@ export const phoneRegister = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(PhoneRegisterSchema))
+    .use(cors());
 
-export const emailRegister = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
+export const emailRegister = middy(async (event: EmailRegisterData) => {
+    const { email, password } = event.body;
 
-    const { email, password } = JSON.parse(event.body);
-
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
-
-    if (!password) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing password",
-                message: "Password is required.",
-            }),
-        };
-    }
+    console.log("event", event);
 
     try {
         const signUpCommand = new SignUpCommand({
             ClientId: USER_POOL_CLIENT_ID,
             Username: email,
             Password: password,
-            // UserAttributes: [
-            //     {
-            //         Name: "phone_number",
-            //         Value: phoneNumber,
-            //     },
-            // ],
         });
         const response = await cognitoIdentityProviderClient.send(
             signUpCommand
@@ -194,30 +184,14 @@ export const emailRegister = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(EmailRegisterSchema))
+    .use(cors());
 
-export const emailResendCode = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { email } = JSON.parse(event.body);
-
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
+export const emailResendCode = middy(async (event: EmailResendCodeData) => {
+    const { email } = event.body;
 
     try {
         // const getUserCommand = new AdminGetUserCommand({
@@ -269,40 +243,14 @@ export const emailResendCode = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(EmailResendCodeSchema))
+    .use(cors());
 
-export const emailConfirmCode = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { email, confirmationCode } = JSON.parse(event.body);
-
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
-
-    if (!confirmationCode) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing confirmation code",
-                message: "Confirmation code is required.",
-            }),
-        };
-    }
+export const emailConfirmCode = middy(async (event: EmailConfirmCodeData) => {
+    const { email, confirmationCode } = event.body;
 
     try {
         const confirmSignUpCommand = new ConfirmSignUpCommand({
@@ -343,30 +291,14 @@ export const emailConfirmCode = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(EmailConfirmCodeSchema))
+    .use(cors());
 
-export const forgotPassword = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { email } = JSON.parse(event.body);
-
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
+export const forgotPassword = middy(async (event: EmailForgotPasswordData) => {
+    const { email } = event.body;
 
     try {
         const forgotPasswordCommand = new ForgotPasswordCommand({
@@ -406,125 +338,66 @@ export const forgotPassword = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(EmailForgotPasswordSchema))
+    .use(cors());
 
-export const confirmForgotPassword = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
+export const confirmForgotPassword = middy(
+    async (event: ConfirmForgotPasswordData) => {
+        const { email, newPassword, confirmationCode } = event.body;
 
-    const { email, newPassword, confirmationCode } = JSON.parse(event.body);
+        try {
+            const confirmForgotPasswordCommand =
+                new ConfirmForgotPasswordCommand({
+                    ClientId: USER_POOL_CLIENT_ID,
+                    ConfirmationCode: confirmationCode,
+                    Username: email,
+                    Password: newPassword,
+                });
+            const response = await cognitoIdentityProviderClient.send(
+                confirmForgotPasswordCommand
+            );
 
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
+            console.log("New password set successfully:", response);
 
-    if (!newPassword) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing new password",
-                message: "New password is required.",
-            }),
-        };
-    }
-
-    if (!confirmationCode) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing confirmation code",
-                message: "Confirmation code is required.",
-            }),
-        };
-    }
-
-    try {
-        const confirmForgotPasswordCommand = new ConfirmForgotPasswordCommand({
-            ClientId: USER_POOL_CLIENT_ID,
-            ConfirmationCode: confirmationCode,
-            Username: email,
-            Password: newPassword,
-        });
-        const response = await cognitoIdentityProviderClient.send(
-            confirmForgotPasswordCommand
-        );
-
-        console.log("New password set successfully:", response);
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: "Password successfully changed.",
-            }),
-        };
-    } catch (err: any) {
-        console.error("Error changing password:", err);
-
-        if (err.message) {
             return {
-                statusCode: err.statusCode,
+                statusCode: 200,
                 body: JSON.stringify({
-                    error: err.__type,
-                    message: err.message,
+                    message: "Password successfully changed.",
+                }),
+            };
+        } catch (err: any) {
+            console.error("Error changing password:", err);
+
+            if (err.message) {
+                return {
+                    statusCode: err.statusCode,
+                    body: JSON.stringify({
+                        error: err.__type,
+                        message: err.message,
+                    }),
+                };
+            }
+
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    error: "Internal server error",
+                    message: "An unexpected error occurred",
                 }),
             };
         }
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: "Internal server error",
-                message: "An unexpected error occurred",
-            }),
-        };
     }
-}).use(cors());
+)
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(ConfirmForgotPasswordSchema))
+    .use(cors());
 
-export const emailLogin = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { email, password } = JSON.parse(event.body);
-
-    if (!email) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing email",
-                message: "Email is required.",
-            }),
-        };
-    }
-
-    if (!password) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing new password",
-                message: "New password is required.",
-            }),
-        };
-    }
+export const emailLogin = middy(async (event: EmailLoginData) => {
+    const { email, password } = event.body;
 
     try {
         const adminInitiateAuthCommand = new AdminInitiateAuthCommand({
@@ -542,7 +415,7 @@ export const emailLogin = middy(async (event: APIGatewayEvent) => {
 
         console.log("Successfully logged in with email:", data);
 
-        if (!data.AuthenticationResult) {
+        if (!data.AuthenticationResult || !data.AuthenticationResult.IdToken) {
             return {
                 statusCode: 200,
                 body: JSON.stringify({
@@ -578,30 +451,14 @@ export const emailLogin = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(EmailLoginSchema))
+    .use(cors());
 
-export const refreshTokens = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { refreshToken } = JSON.parse(event.body);
-
-    if (!refreshToken) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing refresh token",
-                message: "Refresh token is required.",
-            }),
-        };
-    }
+export const refreshTokens = middy(async (event: RefreshTokensData) => {
+    const { refreshToken } = event.body;
 
     try {
         const initiateAuthCommand = new InitiateAuthCommand({
@@ -653,7 +510,11 @@ export const refreshTokens = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(RefreshTokensSchema))
+    .use(cors());
 
 async function verifyGoogleToken(token: string) {
     try {
@@ -689,28 +550,8 @@ async function cognitoUserExists(email: string) {
     }
 }
 
-export const googleSignIn = middy(async (event: APIGatewayEvent) => {
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing request body",
-                message: "A request body is required.",
-            }),
-        };
-    }
-
-    const { idToken } = JSON.parse(event.body);
-
-    if (!idToken) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                error: "Missing id token",
-                message: "Id token is required.",
-            }),
-        };
-    }
+export const googleSignIn = middy(async (event: GoogleSignInData) => {
+    const { idToken } = event.body;
 
     try {
         // Validate ID Token With Google
@@ -722,7 +563,7 @@ export const googleSignIn = middy(async (event: APIGatewayEvent) => {
             return {
                 statusCode: 401,
                 body: JSON.stringify({
-                    error: "Invalid token",
+                    error: ERRORS.GOOGLE_ID_TOKEN.INVALID.CODE,
                     message: payload,
                 }),
             };
@@ -772,7 +613,21 @@ export const googleSignIn = middy(async (event: APIGatewayEvent) => {
             ],
             MessageAction: "SUPPRESS",
         });
-        await cognitoIdentityProviderClient.send(createUserCommand);
+        const newUser = await cognitoIdentityProviderClient.send(
+            createUserCommand
+        );
+        const sub = newUser.User?.Attributes?.find(
+            (attr) => attr.Name === "sub"
+        )?.Value;
+
+        if (sub) {
+            // Create the user in the database
+            await db.users.create({
+                id: sub,
+                email: decodedToken.email,
+                authProvider: "google",
+            });
+        }
 
         // Set permanent password for user
         const setPasswordCommand = new AdminSetUserPasswordCommand({
@@ -838,4 +693,22 @@ export const googleSignIn = middy(async (event: APIGatewayEvent) => {
             }),
         };
     }
-}).use(cors());
+})
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator(GoogleSignInSchema))
+    .use(cors());
+
+// Triggers
+export const postConfirmationTrigger = middy(
+    async (event: PostAuthenticationTriggerEvent) => {
+        console.log("event", event);
+
+        const { userAttributes } = event.request;
+        const { sub, email } = userAttributes;
+
+        await db.users.create({ id: sub, email });
+
+        return event;
+    }
+).use(cors());

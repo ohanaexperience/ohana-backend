@@ -12,6 +12,9 @@ provider:
     environment:
         SERVICE: ${self:service}
         NODE_ENV: ${opt:stage, 'dev'}
+        # DATABASE_URL: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        # POSTGRES_CLUSTER_ARN: !GetAtt PostgresRDSServerlessCluster.DBClusterArn
+        # OHANA_SECRETS_MANAGER_ARN: !Ref SecretsManager
     iam:
         role:
             statements:
@@ -45,12 +48,23 @@ provider:
                       - cognito-idp:*
                   Resource: "*"
 
+                - Effect: Allow
+                  Action:
+                      - secretsmanager:*
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                      - rds-data:*
+                  Resource: "*"
+
 package:
     individually: true
 
 plugins:
     # - serverless-offline
     - serverless-finch
+    - serverless-plugin-scripts
 
 custom:
     # serverless-offline:
@@ -62,15 +76,32 @@ custom:
         bucketName: ohana-docs
         distributionFolder: docs/dist
 
+    scripts:
+        hooks:
+            after:deploy:deploy: serverless invoke -f runMigrations
+
     resourceNames:
         userPool: ${self:service}-user-pool-${self:provider.stage}
         userPoolClient: ${self:service}-user-pool-client-${self:provider.stage}
         userPoolDomain: ${self:service}-${self:provider.stage}
         pinpoint: ${self:service}-pinpoint-${self:provider.stage}
         identityPool: ${self:service}-identity-pool-${self:provider.stage}
+        postgresDB: ${self:service}_postgres_${self:provider.stage}
+        secretsManager: ${self:service}-secrets-manager-${self:provider.stage}
+        imagesBucket: ${self:service}-images-bucket-${self:provider.stage}
 
 functions:
     - ${file(functions/auth.yml)}
+    - ${file(functions/database.yml)}
+    - ${file(functions/user.yml)}
+    - ${file(functions/stripe.yml)}
+    # - ${file(functions/host.yml)}
+    - ${file(functions/webhooks.yml)}
 
 resources:
     - ${file(resources/auth.yml)}
+    - ${file(resources/database.yml)}
+    - ${file(resources/gateway.yml)}
+    - ${file(resources/vpc.yml)}
+    - ${file(resources/storage.yml)}
+    # - ${file(resources/secrets.yml)}

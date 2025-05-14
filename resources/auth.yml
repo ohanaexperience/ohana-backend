@@ -41,6 +41,11 @@ Resources:
         Type: AWS::Cognito::UserPool
         Properties:
             UserPoolName: ${self:custom.resourceNames.userPool}
+            LambdaConfig:
+                PostConfirmation:
+                    Fn::GetAtt:
+                        - AuthPostConfirmationTriggerLambdaFunction
+                        - Arn
             AutoVerifiedAttributes:
                 - phone_number
                 - email
@@ -79,21 +84,6 @@ Resources:
         Properties:
             Domain: ${self:custom.resourceNames.userPoolDomain}
             UserPoolId: !Ref UserPool
-
-    # Identity Pool
-    # GoogleIdentityPoolRole:
-    #     Type: AWS::IAM::Role
-    #     Properties:
-    #         AssumeRolePolicyDocument:
-    #             Version: "2012-10-17"
-    #             Statement:
-    #                 - Effect: Allow
-    #                   Principal:
-    #                       Federated: accounts.google.com
-    #                   Action: sts:AssumeRoleWithWebIdentity
-    #                   Condition:
-    #                       StringEquals:
-    #                           accounts.google.com:aud: ${env:GOOGLE_CLIENT_ID}
 
     CognitoIdentityPool:
         Type: AWS::Cognito::IdentityPool
@@ -189,3 +179,26 @@ Resources:
                 - COGNITO
                 - Google
                 # - SignInWithApple
+
+    ApiGatewayAuthorizer:
+        Type: AWS::ApiGateway::Authorizer
+        Properties:
+            AuthorizerResultTtlInSeconds: 300
+            IdentitySource: method.request.header.Authorization
+            Name: CognitoAuthorizer
+            RestApiId:
+                Ref: ApiGatewayRestApi
+            Type: COGNITO_USER_POOLS
+            ProviderARNs:
+                - !GetAtt UserPool.Arn
+
+    AuthPostConfirmationTriggerInvokePermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName:
+                Fn::GetAtt:
+                    - AuthPostConfirmationTriggerLambdaFunction
+                    - Arn
+            Principal: cognito-idp.amazonaws.com
+            SourceArn: !GetAtt UserPool.Arn

@@ -4,6 +4,16 @@ declare global {
             SERVICE: string;
             NODE_ENV: string;
             USER_POOL_CLIENT_ID: string;
+            DATABASE_URL: string;
+            STRIPE_SECRET_KEY: string;
+            STRIPE_WEBHOOK_SECRET: string;
+            TWILIO_ACCOUNT_SID: string;
+            TWILIO_AUTH_TOKEN: string;
+            DB_ENDPOINT: string;
+            DB_PORT: string;
+            DB_NAME: string;
+            DB_USER: string;
+            DB_PASSWORD: string;
         }
     }
 }

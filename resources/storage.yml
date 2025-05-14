@@ -1,0 +1,15 @@
+Resources:
+    ImagesBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: ${self:custom.resourceNames.imagesBucket}
+            CorsConfiguration:
+                CorsRules:
+                    - AllowedHeaders:
+                          - "*"
+                      AllowedMethods:
+                          - PUT
+                          - GET
+                      AllowedOrigins:
+                          - "*"
+                      MaxAge: 3000

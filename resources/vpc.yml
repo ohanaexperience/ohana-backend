@@ -1,0 +1,146 @@
+Resources:
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-vpc-${self:provider.stage}
+
+    # Internet Gateway for public subnets
+    InternetGateway:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-igw-${self:provider.stage}
+
+    AttachInternetGateway:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref VPC
+            InternetGatewayId: !Ref InternetGateway
+
+    # Public Subnet for NAT Gateway
+    PublicSubnetA:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            CidrBlock: 10.0.0.0/24
+            AvailabilityZone: !Select [0, !GetAZs ""]
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-public-subnet-a-${self:provider.stage}
+
+    # NAT Gateway and Elastic IP
+    NatGatewayEIP:
+        Type: AWS::EC2::EIP
+        DependsOn: AttachInternetGateway
+        Properties:
+            Domain: vpc
+
+    NatGateway:
+        Type: AWS::EC2::NatGateway
+        Properties:
+            AllocationId: !GetAtt NatGatewayEIP.AllocationId
+            SubnetId: !Ref PublicSubnetA
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-nat-gateway-${self:provider.stage}
+
+    # Route Tables
+    PublicRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-public-rt-${self:provider.stage}
+
+    PublicRoute:
+        Type: AWS::EC2::Route
+        DependsOn: AttachInternetGateway
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+
+    PublicSubnetRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnetA
+            RouteTableId: !Ref PublicRouteTable
+
+    PrivateRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-private-rt-${self:provider.stage}
+
+    PrivateRoute:
+        Type: AWS::EC2::Route
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NatGateway
+
+    # Private Subnets
+    PrivateSubnetA:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            CidrBlock: 10.0.1.0/24
+            AvailabilityZone: !Select [0, !GetAZs ""]
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-private-subnet-a-${self:provider.stage}
+
+    PrivateSubnetB:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            CidrBlock: 10.0.2.0/24
+            AvailabilityZone: !Select [1, !GetAZs ""]
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-private-subnet-b-${self:provider.stage}
+
+    PrivateSubnetARouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetA
+            RouteTableId: !Ref PrivateRouteTable
+
+    PrivateSubnetBRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetB
+            RouteTableId: !Ref PrivateRouteTable
+
+    # Security Groups
+    DBSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow access to the database
+            VpcId: !Ref VPC
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: ${env:POSTGRES_PORT}
+                  ToPort: ${env:POSTGRES_PORT}
+                  SourceSecurityGroupId: !Ref LambdaSecurityGroup
+
+    LambdaSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow Lambda outbound
+            VpcId: !Ref VPC
+            SecurityGroupEgress:
+                - IpProtocol: -1
+                  CidrIp: 0.0.0.0/0

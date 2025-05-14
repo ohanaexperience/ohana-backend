@@ -4,7 +4,8 @@
     "description": "Ohana API",
     "scripts": {
         "build-docs": "redocly build-docs docs/ohana.json --output docs/dist/index.html",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "generate": "drizzle-kit generate"
     },
     "keywords": [],
     "author": "",
@@ -12,15 +13,31 @@
     "devDependencies": {
         "@aws-sdk/client-cognito-identity": "^3.787.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.782.0",
+        "@aws-sdk/client-rds": "^3.797.0",
+        "@aws-sdk/client-s3": "^3.806.0",
         "@aws-sdk/client-sns": "^3.787.0",
+        "@aws-sdk/s3-request-presigner": "^3.806.0",
         "@types/aws-lambda": "^8.10.149",
         "@types/node": "^22.14.0",
-        "serverless-finch": "^4.0.4"
+        "drizzle-kit": "^0.31.0",
+        "serverless-finch": "^4.0.4",
+        "serverless-plugin-scripts": "^1.0.2"
     },
     "dependencies": {
+        "@aws-sdk/rds-signer": "^3.797.0",
         "@middy/core": "^6.1.6",
         "@middy/http-cors": "^6.1.6",
+        "@middy/http-header-normalizer": "^6.2.3",
+        "@middy/http-json-body-parser": "^6.2.2",
+        "drizzle-orm": "^0.43.1",
+        "generate-password": "^1.7.1",
         "google-auth-library": "^9.15.1",
-        "jwt-decode": "^4.0.0"
+        "jwt-decode": "^4.0.0",
+        "mime-types": "^3.0.1",
+        "pg": "^8.15.6",
+        "postgres": "^3.4.5",
+        "stripe": "^18.1.0",
+        "twilio": "^5.5.2",
+        "zod": "^3.24.3"
     }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "host_verifications" ADD COLUMN "session_client_secret" text NOT NULL;
