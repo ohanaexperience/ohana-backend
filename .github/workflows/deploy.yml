@@ -2,11 +2,11 @@ name: Ohana Serverless CI/CD Pipeline
 
 on:
     push:
-        branches: [production]
+        branches: [development]
 
 jobs:
     deploy:
-        environment: production
+        environment: development
         runs-on: ubuntu-latest
 
         steps:
@@ -48,4 +48,4 @@ jobs:
                   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
                   STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
 
-              run: serverless deploy --stage prod
+              run: serverless deploy --stage dev
