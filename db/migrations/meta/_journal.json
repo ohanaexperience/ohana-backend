@@ -15,6 +15,20 @@
       "when": 1747286492273,
       "tag": "0001_busy_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747311429086,
+      "tag": "0002_fancy_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747313396768,
+      "tag": "0003_tearful_nick_fury",
+      "breakpoints": true
     }
   ]
 }

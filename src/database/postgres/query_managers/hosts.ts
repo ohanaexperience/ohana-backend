@@ -1,0 +1,44 @@
+import { eq, InferInsertModel } from "drizzle-orm";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+
+import { hostsTable } from "../../../../db/schema/hosts";
+
+export class HostsQueryManager {
+    private db: NodePgDatabase;
+
+    constructor(database: NodePgDatabase) {
+        this.db = database;
+    }
+
+    public async getAll() {
+        return await this.db.select().from(hostsTable);
+    }
+
+    public async getByUserId(userId: string) {
+        return await this.db
+            .select()
+            .from(hostsTable)
+            .where(eq(hostsTable.id, userId));
+    }
+
+    public async create(data: InsertHost) {
+        return await this.db.insert(hostsTable).values(data).returning();
+    }
+
+    public async update(userId: string, data: UpdateHost) {
+        return await this.db
+            .update(hostsTable)
+            .set(data)
+            .where(eq(hostsTable.id, userId))
+            .returning();
+    }
+
+    public async delete(userId: string) {
+        return await this.db
+            .delete(hostsTable)
+            .where(eq(hostsTable.id, userId));
+    }
+}
+
+export type InsertHost = InferInsertModel<typeof hostsTable>;
+export type UpdateHost = Partial<Omit<InsertHost, "id">>;

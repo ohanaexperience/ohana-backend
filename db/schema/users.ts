@@ -15,7 +15,6 @@ export const usersTable = pgTable("users", {
     phoneNumber: text("phone_number").unique(),
     firstName: text("first_name"),
     lastName: text("last_name"),
-    bio: text("bio"),
     profileImageUrl: text("profile_image_url").unique(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

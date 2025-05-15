@@ -6,6 +6,7 @@ import { PostgresConfig } from "../database_factory";
 import {
     UsersQueryManager,
     HostVerificationsQueryManager,
+    HostsQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -14,6 +15,7 @@ export default class Postgres {
     public instance: NodePgDatabase;
     public users: UsersQueryManager;
     public hostVerifications: HostVerificationsQueryManager;
+    public hosts: HostsQueryManager;
 
     constructor(config: PostgresConfig) {
         this.pool = new Pool(config);
@@ -24,5 +26,6 @@ export default class Postgres {
         this.hostVerifications = new HostVerificationsQueryManager(
             this.instance
         );
+        this.hosts = new HostsQueryManager(this.instance);
     }
 }

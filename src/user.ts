@@ -102,7 +102,7 @@ export const getProfile = middy(async (event: UserGetProfileData) => {
 
 export const updateProfile = middy(async (event: UserUpdateProfileData) => {
     const { authorization } = event.headers;
-    const { firstName, lastName, bio, profileImageUrl } = event.body;
+    const { firstName, lastName, phoneNumber, profileImageUrl } = event.body;
 
     console.log("event", event);
 
@@ -126,7 +126,7 @@ export const updateProfile = middy(async (event: UserUpdateProfileData) => {
         const updatedUser = await db.users.update(sub, {
             firstName,
             lastName,
-            bio,
+            phoneNumber,
             profileImageUrl,
             updatedAt: new Date(),
         });

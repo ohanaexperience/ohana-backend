@@ -138,6 +138,19 @@ export const createVerificationSession = middy(
             );
 
             if (hostVerification.length > 0) {
+                if (hostVerification[0].status === "approved") {
+                    return {
+                        statusCode: 400,
+                        body: JSON.stringify({
+                            error: ERRORS.STRIPE.VERIFICATION.ALREADY_APPROVED
+                                .CODE,
+                            message:
+                                ERRORS.STRIPE.VERIFICATION.ALREADY_APPROVED
+                                    .MESSAGE,
+                        }),
+                    };
+                }
+
                 return handleExistingVerification(hostVerification[0], sub);
             }
 

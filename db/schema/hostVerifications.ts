@@ -46,24 +46,3 @@ export const hostVerificationsTable = pgTable("host_verifications", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
-
-// export const hostVerificationsTable = pgTable(
-//     "host_verifications",
-//     {
-//         id: serial("id").primaryKey(),
-//         userId: uuid("user_id")
-//             .references(() => usersTable.id)
-//             .notNull()
-//             .unique(),
-//         provider: providerEnum("provider").default("stripe_identity"),
-//         providerVerificationId: text("provider_verification_id"),
-//         status: verificationStatusEnum("status").default("pending"),
-//         submittedAt: timestamp("submitted_at", { withTimezone: true }),
-//         approvedAt: timestamp("approved_at", { withTimezone: true }),
-//         createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-//         updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-//     },
-//     (table) => [
-//         index("provider_verification_id_idx").on(table.providerVerificationId),
-//     ]
-// );

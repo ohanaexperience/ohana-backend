@@ -52,11 +52,9 @@ const confirmationCodeSchema = z
     .min(6, ERRORS.CONFIRMATION_CODE.MIN_LENGTH.CODE);
 
 // Phone Schema
-export const PhoneRegisterSchema = z.object({
-    phoneNumber: z.string({
-        required_error: ERRORS.PHONE_NUMBER.MISSING.CODE,
-        invalid_type_error: ERRORS.PHONE_NUMBER.INVALID_TYPE.CODE,
-    }),
+export const PhoneRegisterSchema = z.string({
+    required_error: ERRORS.PHONE_NUMBER.MISSING.CODE,
+    invalid_type_error: ERRORS.PHONE_NUMBER.INVALID_TYPE.CODE,
 });
 
 // Email Schema
@@ -113,7 +111,7 @@ export const UserUpdateProfileSchema = z
     .object({
         firstName: firstNameSchema.optional(),
         lastName: lastNameSchema.optional(),
-        bio: bioSchema.optional(),
+        phoneNumber: PhoneRegisterSchema.optional(),
         profileImageUrl: imageUrlSchema.optional(),
     })
     .refine(

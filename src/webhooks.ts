@@ -6,9 +6,24 @@ import stripe from "stripe";
 
 import { APIGatewayEvent } from "aws-lambda";
 
+import DatabaseFactory from "./database/database_factory";
+
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } = process.env;
 
 const stripeClient = new stripe(STRIPE_SECRET_KEY);
+
+const { DB_ENDPOINT, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
+
+const db = DatabaseFactory.create({
+    postgres: {
+        host: DB_ENDPOINT,
+        port: DB_PORT,
+        database: DB_NAME,
+        user: DB_USER,
+        password: DB_PASSWORD,
+        ssl: false,
+    },
+});
 
 export const stripeWebhook = middy(async (event: APIGatewayEvent) => {
     console.log("event", event);
@@ -44,14 +59,22 @@ export const stripeWebhook = middy(async (event: APIGatewayEvent) => {
 
         if (stripeEvent.type === "identity.verification_session.verified") {
             const session = stripeEvent.data.object;
+            const userId = session.metadata.userId;
 
             console.log("Identity verification session successful:", session);
+
+            await db.hostVerifications.update(userId, {
+                status: "approved",
+            });
+            await db.hosts.create({
+                id: userId,
+            });
         }
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                message: "User successfully created.",
+                message: "User successfully verified.",
             }),
         };
     } catch (err: any) {

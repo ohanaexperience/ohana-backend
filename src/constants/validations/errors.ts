@@ -218,6 +218,10 @@ export default {
                 CODE: "FAILED_TO_CREATE_VERIFICATION_SESSION",
                 MESSAGE: "Failed to create verification session",
             },
+            ALREADY_APPROVED: {
+                CODE: "VERIFICATION_ALREADY_APPROVED",
+                MESSAGE: "Verification already approved.",
+            },
         },
     },
 };
