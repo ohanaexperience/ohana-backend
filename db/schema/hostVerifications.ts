@@ -5,9 +5,18 @@ import {
     serial,
     timestamp,
     text,
+    jsonb,
 } from "drizzle-orm/pg-core";
 
+import Stripe from "stripe";
+
 import { usersTable } from "./users";
+
+type StripeIdentityData = {
+    verificationSession: Stripe.Identity.VerificationSession;
+    ephemeralKey: Stripe.EphemeralKey;
+};
+type ProviderData = StripeIdentityData;
 
 export const hostVerificationProviderEnum = pgEnum(
     "host_verification_provider",
@@ -26,10 +35,11 @@ export const hostVerificationsTable = pgTable("host_verifications", {
         .references(() => usersTable.id)
         .notNull()
         .unique(),
+
     provider:
         hostVerificationProviderEnum("provider").default("stripe_identity"),
-    providerVerificationId: text("provider_verification_id"),
-    sessionClientSecret: text("session_client_secret").notNull(),
+    providerData: jsonb("provider_data").$type<ProviderData>(),
+
     status: hostVerificationStatusEnum("status").default("pending"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),

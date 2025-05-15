@@ -32,7 +32,6 @@ export class HostVerificationsQueryManager {
         return await this.db
             .update(hostVerificationsTable)
             .set(data)
-            .from(hostVerificationsTable)
             .where(eq(hostVerificationsTable.userId, userId))
             .returning();
     }

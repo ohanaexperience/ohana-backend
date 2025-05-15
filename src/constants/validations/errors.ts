@@ -208,4 +208,16 @@ export default {
             MESSAGE: "Verification must be a string.",
         },
     },
+    STRIPE: {
+        VERIFICATION: {
+            SESSION_NOT_FOUND: {
+                CODE: "VERIFICATION_SESSION_NOT_FOUND",
+                MESSAGE: "No verification session found.",
+            },
+            FAILED_TO_CREATE: {
+                CODE: "FAILED_TO_CREATE_VERIFICATION_SESSION",
+                MESSAGE: "Failed to create verification session",
+            },
+        },
+    },
 };

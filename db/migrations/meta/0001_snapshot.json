@@ -1,6 +1,6 @@
 {
-  "id": "119e2851-52a3-4d2c-8cdf-67ad792d7f46",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "476304ed-4aa8-4275-8f57-59ae385f7ec2",
+  "prevId": "119e2851-52a3-4d2c-8cdf-67ad792d7f46",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -193,9 +193,9 @@
           "notNull": false,
           "default": "'stripe_identity'"
         },
-        "provider_verification_id": {
-          "name": "provider_verification_id",
-          "type": "text",
+        "provider_data": {
+          "name": "provider_data",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -206,12 +206,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'pending'"
-        },
-        "provider_data": {
-          "name": "provider_data",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
         },
         "submitted_at": {
           "name": "submitted_at",
