@@ -3,6 +3,8 @@ import cors from "@middy/http-cors";
 import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 
+import dayjs from "dayjs";
+
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { APIGatewayEvent } from "aws-lambda";
@@ -192,8 +194,9 @@ export const getProfileImageUploadUrl = middy(
 
         try {
             const { sub } = decodeToken(authorization);
+            const timeNowUnix = dayjs().unix();
 
-            const fileName = `${sub}-${Date.now()}.${fileType}`;
+            const fileName = `${sub}-${timeNowUnix}.${fileType}`;
             const key = `users/${sub}/${fileName}`;
 
             const command = new PutObjectCommand({
