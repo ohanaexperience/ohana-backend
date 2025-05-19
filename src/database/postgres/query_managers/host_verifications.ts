@@ -15,10 +15,13 @@ export class HostVerificationsQueryManager {
     }
 
     public async getByUserId(userId: string) {
-        return await this.db
+        const results = await this.db
             .select()
             .from(hostVerificationsTable)
-            .where(eq(hostVerificationsTable.userId, userId));
+            .where(eq(hostVerificationsTable.userId, userId))
+            .limit(1);
+
+        return results[0] || null;
     }
 
     public async create(data: InsertHostVerifications) {

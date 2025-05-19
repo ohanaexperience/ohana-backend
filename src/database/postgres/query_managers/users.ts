@@ -15,10 +15,12 @@ export class UsersQueryManager {
     }
 
     public async getByUserId(userId: string) {
-        return await this.db
+        const results = await this.db
             .select()
             .from(usersTable)
             .where(eq(usersTable.id, userId));
+
+        return results[0] || null;
     }
 
     public async create(data: InsertUser) {

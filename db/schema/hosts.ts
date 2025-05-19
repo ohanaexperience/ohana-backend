@@ -9,8 +9,9 @@ export const hostsTable = pgTable("hosts", {
         .notNull()
         .unique(),
     bio: text("bio"),
-    isActive: boolean("is_active").default(true).notNull(),
+    languages: text("languages").array().default([]).notNull(),
     socials: text("socials").array().default([]).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

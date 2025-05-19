@@ -7,7 +7,8 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
-        "generate": "drizzle-kit generate"
+        "generate": "drizzle-kit generate",
+        "deploy-docs": "serverless client deploy"
     },
     "keywords": [],
     "author": "",
@@ -21,6 +22,7 @@
         "@aws-sdk/s3-request-presigner": "^3.806.0",
         "@types/aws-lambda": "^8.10.149",
         "@types/jest": "^29.5.14",
+        "@types/mime-types": "^2.1.4",
         "@types/node": "^22.14.0",
         "drizzle-kit": "^0.31.0",
         "jest": "^29.7.0",

@@ -32,11 +32,6 @@ const lastNameSchema = z.string({
     invalid_type_error: ERRORS.LAST_NAME.INVALID_TYPE.CODE,
 });
 
-const bioSchema = z.string({
-    required_error: ERRORS.BIO.MISSING.CODE,
-    invalid_type_error: ERRORS.BIO.INVALID_TYPE.CODE,
-});
-
 const imageUrlSchema = z
     .string({
         required_error: ERRORS.IMAGE_URL.MISSING.CODE,
@@ -134,59 +129,39 @@ export const CreateVerificationSessionSchema = z.object({
         .uuid(ERRORS.USER_ID.INVALID.CODE),
 });
 
-// Host Register Schema
-export const HostRegisterSchema = z.object({
-    firstName: z
-        .string({
-            required_error: "MISSING_FIRST_NAME",
-            invalid_type_error: "INVALID_FIRST_NAME_TYPE",
-        })
-        .min(1, "First name is required."),
-    lastName: z
-        .string({
-            required_error: "MISSING_LAST_NAME",
-            invalid_type_error: "INVALID_LAST_NAME_TYPE",
-        })
-        .min(1, "Last name is required."),
-    email: z
-        .string({
-            required_error: "MISSING_EMAIL",
-            invalid_type_error: "INVALID_EMAIL_TYPE",
-        })
-        .email("INVALID_EMAIL"),
-    phoneNumber: z
-        .string({
-            required_error: "MISSING_PHONE_NUMBER",
-            invalid_type_error: "INVALID_PHONE_NUMBER_TYPE",
-        })
-        .min(1, "Phone number is required."),
-    languages: z
-        .array(
-            z.string({
-                required_error: "MISSING_LANGUAGES",
-                invalid_type_error: "INVALID_LANGUAGES_TYPE",
-            }),
-            {
-                required_error: "MISSING_LANGUAGES_ARRAY",
-                invalid_type_error: "INVALID_LANGUAGES_ARRAY_TYPE",
-            }
-        )
-        .min(1, "Languages are required."),
-    bio: z
-        .string({
-            required_error: "MISSING_BIO",
-            invalid_type_error: "INVALID_BIO_TYPE",
-        })
-        .min(1, "Bio is required."),
-    idVerified: z.boolean({
-        required_error: "MISSING_ID_VERIFIED",
-        invalid_type_error: "INVALID_ID_VERIFIED_TYPE",
-    }),
-    termsAccepted: z.boolean({
-        required_error: "MISSING_TERMS_ACCEPTED",
-        invalid_type_error: "INVALID_TERMS_ACCEPTED_TYPE",
-    }),
-});
+// Host Schema
+export const UpdateHostProfileSchema = z
+    .object({
+        languages: z
+            .array(
+                z.string({
+                    required_error: "MISSING_LANGUAGES",
+                    invalid_type_error: "INVALID_LANGUAGES_TYPE",
+                }),
+                {
+                    required_error: "MISSING_LANGUAGES_ARRAY",
+                    invalid_type_error: "INVALID_LANGUAGES_ARRAY_TYPE",
+                }
+            )
+            .min(1, "Languages are required.")
+            .optional(),
+        bio: z
+            .string({
+                required_error: "MISSING_BIO",
+                invalid_type_error: "INVALID_BIO_TYPE",
+            })
+            .min(1, "Bio is required.")
+            .optional(),
+    })
+    .refine(
+        (data) => {
+            return Object.values(data).some((value) => value !== undefined);
+        },
+        {
+            message: "At least one field is required.",
+            path: ["_errors"],
+        }
+    );
 
 // Base Input Types
 interface APIGatewayEvent<T> {
@@ -236,6 +211,6 @@ export type CreateVerificationSessionData = APIGatewayEvent<
 >;
 
 // Host
-export type HostRegisterData = APIGatewayEvent<
-    z.infer<typeof HostRegisterSchema>
+export type UpdateHostProfileData = APIGatewayEvent<
+    z.infer<typeof UpdateHostProfileSchema>
 >;

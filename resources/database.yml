@@ -1,15 +1,24 @@
 Resources:
+    PostgresParameterGroup:
+        Type: AWS::RDS::DBClusterParameterGroup
+        Properties:
+            Description: Parameter group for Aurora PostgreSQL 17.4 without SSL verification
+            Family: aurora-postgresql17
+            Parameters:
+                rds.force_ssl: 0
+
     PostgresRDSServerlessCluster:
         Type: AWS::RDS::DBCluster
         Properties:
             Engine: aurora-postgresql
-            EngineVersion: 13.9
+            EngineVersion: 17.4
             EngineMode: provisioned
             DatabaseName: ${self:custom.resourceNames.postgresDB}
             Port: 5432
             MasterUsername: ${env:POSTGRES_USERNAME}
             MasterUserPassword: ${env:POSTGRES_PASSWORD}
             DeletionProtection: false
+            DBClusterParameterGroupName: !Ref PostgresParameterGroup
             ServerlessV2ScalingConfiguration:
                 MinCapacity: 0.5
                 MaxCapacity: 8

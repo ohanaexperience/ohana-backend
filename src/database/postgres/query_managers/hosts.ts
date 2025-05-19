@@ -2,6 +2,10 @@ import { eq, InferInsertModel } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 import { hostsTable } from "../../../../db/schema/hosts";
+import {
+    hostVerificationsTable,
+    hostVerificationStatusTable,
+} from "../../../../db/schema/hostVerifications";
 
 export class HostsQueryManager {
     private db: NodePgDatabase;
@@ -15,10 +19,13 @@ export class HostsQueryManager {
     }
 
     public async getByUserId(userId: string) {
-        return await this.db
+        const results = await this.db
             .select()
             .from(hostsTable)
-            .where(eq(hostsTable.id, userId));
+            .where(eq(hostsTable.id, userId))
+            .limit(1);
+
+        return results[0] || null;
     }
 
     public async create(data: InsertHost) {

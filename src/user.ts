@@ -4,6 +4,7 @@ import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 
 import dayjs from "dayjs";
+import { extension } from "mime-types";
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -27,7 +28,7 @@ const {
     DB_NAME,
     DB_USER,
     DB_PASSWORD,
-    IMAGES_BUCKET_NAME,
+    ASSETS_BUCKET_NAME,
 } = process.env;
 
 const db = DatabaseFactory.create({
@@ -50,9 +51,9 @@ export const getProfile = middy(async (event: UserGetProfileData) => {
     try {
         const { sub } = decodeToken(authorization);
 
-        const query = await db.users.getByUserId(sub);
+        const user = await db.users.getByUserId(sub);
 
-        if (query.length === 0) {
+        if (!user) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
@@ -62,7 +63,6 @@ export const getProfile = middy(async (event: UserGetProfileData) => {
             };
         }
 
-        const user = query[0];
         const { id, createdAt, updatedAt, ...publicUserInfo } = user;
 
         const cleanedUserInfo = Object.fromEntries(
@@ -115,7 +115,7 @@ export const updateProfile = middy(async (event: UserUpdateProfileData) => {
 
         const user = await db.users.getByUserId(sub);
 
-        if (user.length === 0) {
+        if (!user) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
@@ -189,20 +189,42 @@ export const getProfileImageUploadUrl = middy(
             };
         }
 
-        const { fileType } = event.queryStringParameters;
+        const { mimeType } = event.queryStringParameters;
         console.log("event", event);
 
+        if (!mimeType) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    error: ERRORS.MIME_TYPE.MISSING.CODE,
+                    message: ERRORS.MIME_TYPE.MISSING.MESSAGE,
+                }),
+            };
+        }
+
+        if (!mimeType.includes("/") || !mimeType.startsWith("image/")) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    error: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.CODE,
+                    message: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.MESSAGE,
+                }),
+            };
+        }
+
         try {
+            const fileExtension = extension(mimeType);
+
             const { sub } = decodeToken(authorization);
             const timeNowUnix = dayjs().unix();
 
-            const fileName = `${sub}-${timeNowUnix}.${fileType}`;
-            const key = `users/${sub}/${fileName}`;
+            const fileName = `${sub}_${timeNowUnix}.${fileExtension}`;
+            const key = `users/${sub}/profile/images/${fileName}`;
 
             const command = new PutObjectCommand({
-                Bucket: IMAGES_BUCKET_NAME,
+                Bucket: ASSETS_BUCKET_NAME,
                 Key: key,
-                ContentType: fileType,
+                ContentType: mimeType,
             });
 
             const preSignedUrl = await getSignedUrl(s3Client, command, {
@@ -211,7 +233,7 @@ export const getProfileImageUploadUrl = middy(
 
             return {
                 statusCode: 200,
-                body: JSON.stringify(preSignedUrl),
+                body: JSON.stringify({ uploadUrl: preSignedUrl }),
             };
         } catch (err: unknown) {
             console.error("Error creating pre-signed URL:", err);

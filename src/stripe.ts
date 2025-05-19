@@ -133,12 +133,13 @@ export const createVerificationSession = middy(
 
         try {
             const { sub } = decodeToken(authorization);
+
             const hostVerification = await db.hostVerifications.getByUserId(
                 sub
             );
 
-            if (hostVerification.length > 0) {
-                if (hostVerification[0].status === "approved") {
+            if (hostVerification) {
+                if (hostVerification.status === "approved") {
                     return {
                         statusCode: 400,
                         body: JSON.stringify({
@@ -151,7 +152,7 @@ export const createVerificationSession = middy(
                     };
                 }
 
-                return handleExistingVerification(hostVerification[0], sub);
+                return handleExistingVerification(hostVerification, sub);
             }
 
             return createNewVerification(sub);

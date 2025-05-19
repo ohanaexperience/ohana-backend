@@ -22,6 +22,10 @@
         {
             "name": "User",
             "description": "User endpoints"
+        },
+        {
+            "name": "Host",
+            "description": "Host endpoints"
         }
     ],
     "paths": {
@@ -1083,6 +1087,11 @@
                                             "type": "string",
                                             "description": "Stripe verification session client secret",
                                             "example": "vs_1RLiciDVprfwF09mtJgSfMAY_secret_live_YWNjdF8xUktCZkxEVnByZndGMDltLF9TR0Y2TlAydDFMMFJEZ2ltVGRUQnRZOVRRVVNKbWRP0100p65i04pT"
+                                        },
+                                        "ephemeralKey": {
+                                            "type": "string",
+                                            "description": "Stripe verification session client secret",
+                                            "example": "ek_live_YWNjdF8xUktCZkxEVnByZndGMDltLGRqS1ptTTJuZThQTERoRVZyZkhUNDFydnJSR21HWTQ_00f0TdCQUo"
                                         }
                                     }
                                 }
@@ -1139,11 +1148,6 @@
                                             "type": "string",
                                             "description": "User's last name",
                                             "example": "Doe"
-                                        },
-                                        "bio": {
-                                            "type": "string",
-                                            "description": "User's biography",
-                                            "example": "Software engineer passionate about travel"
                                         },
                                         "profileImageUrl": {
                                             "type": "string",
@@ -1229,6 +1233,277 @@
                                         "type": "string",
                                         "description": "User's last name",
                                         "example": "Doe"
+                                    },
+                                    "phoneNumber": {
+                                        "type": "string",
+                                        "description": "User's phone number",
+                                        "example": "+1234567890"
+                                    },
+                                    "profileImageUrl": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "URL to user's profile image",
+                                        "example": "https://example.com/images/profile.jpg"
+                                    }
+                                },
+                                "minProperties": 1
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User profile successfully updated."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "User Not Found": {
+                                        "value": {
+                                            "error": "USER_NOT_FOUND",
+                                            "message": "User does not exist."
+                                        }
+                                    },
+                                    "At least one field is required": {
+                                        "value": {
+                                            "error": "VALIDATION_ERROR",
+                                            "message": "At least one field is required."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/user/profile/image/upload-url": {
+            "get": {
+                "tags": ["User"],
+                "summary": "Get Profile Image Upload URL",
+                "description": "Retrieves an profile image upload URL for authenticated user.",
+                "operationId": "userGetProfileImageUploadUrl",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "uploadUrl": {
+                                            "type": "string",
+                                            "format": "uri",
+                                            "description": "URL to upload the profile image",
+                                            "example": "https://ohana-assets-bucket-dev.s3.us-east-1.amazonaws.com/users/443844d8-f0c1-7078-d71f-11cb010411f7/profile/images/443844d8-f0c1-7078-d71f-11cb010411f7_1747672978.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAVYDV5VSHCSHFV3VW%2F20250519%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250519T164258Z&X-Amz-Expires=600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjENn%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIHpNuF18iA8ia6HyS3qXv0y4fGE7wlJ6qx3hDJMDs7%2B3AiAg5y14LupT9gW6lkxotBe2uLX7c6Ytr0G5mUUSFqkJbCqqAwiS%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDM5NTM4NDMwMjczNCIMSWVO2cHfDEh68xrNKv4Ck9RlsJpqkAXe4hxTJPP%2BridzXq2jnFH8EoHVJ9tCCptEG2SNACE3LSnyAvpZJtmBB9eEoyqwS33D2dfV5cyl0576Fy7q%2BR237lGuB%2Fp4aI9RI4XAJzPQZ7aevhEhO0bSEnPa6At49hHxp3Eobcdga2Ole%2B1AXnIU76dYjEN8C3DpraFc3l6%2BUqXPcf6SSz1F%2B8osk9AwPRQ5oq8ZjbNmF7kLoAblH%2Bw%2BhiNBCWpF3EWlCSrtl4UM2tt30uLskcUA1TKOD8bhJDozam%2F5xOf%2BSabJaQAShW2PyiGuhACXh0D0R4LfwNl9dliZQ0saruCgrsxsQOR8AE2Ygl54MPpVqqkWfRPdVIQkdMqg%2F7ZATUQ3Gg%2BLeB0CY8C48BA56bpskqCakuRe7aDxtij9zm7YzifhFtIVJ8e0F009oKJHMh%2FGD0JIhylnqWONApPnIsr2%2Fp8vLOYGI%2FTYpXNy76PIkn%2F7rPM4VanqpYKHR%2Bst1TRXyG5K2ypZji0Ut2wxojCSv63BBjqeAWsA2ALM%2FVseA%2BwlLG8nX3ALzlO82mMPWwgc1p8oZAWDZZ8B5z5rMUy11yJIP8mOalrzjsA9zL1%2FvrOzsFxQPy2K5Y%2BFGdUWy2VdUzGtPcvbCfgqYvjUc2dfovRqEvBCRZGr61BVLDwnKa0dk%2Fqol8KdWb%2BO8dI7eCIsnimz5fo8rciMe8ZpdyA%2BKf5sQ5nB%2BdUh8EzsztOP77dD8cbJ&X-Amz-Signature=00fc28979eb33aa79bc2f7ba42f5b1b30ef5d1411cba9c05fd9a0a00469b64ce&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "User Not Found": {
+                                        "value": {
+                                            "error": "USER_NOT_FOUND",
+                                            "message": "User does not exist."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+
+        "/v1/host/profile": {
+            "get": {
+                "tags": ["Host"],
+                "summary": "Get Host Profile",
+                "description": "Retrieves the authenticated host's profile information",
+                "operationId": "getHostProfile",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "bio": {
+                                            "type": "string",
+                                            "format": "string",
+                                            "description": "Host's biography",
+                                            "example": "Software engineer, Dog lover, occasional hiker, and amateur baker based in Seattle."
+                                        },
+                                        "languages": {
+                                            "type": "array",
+                                            "format": "string",
+                                            "description": "Languages spoken by the host",
+                                            "example": [
+                                                "English",
+                                                "Thai",
+                                                "Mandarin"
+                                            ]
+                                        },
+                                        "socials": {
+                                            "type": "array",
+                                            "format": "string",
+                                            "description": "Host's social media links",
+                                            "example": [
+                                                "https://www.instagram.com/john_doe",
+                                                "https://www.facebook.com/john.doe",
+                                                "https://www.twitter.com/john_doe"
+                                            ]
+                                        },
+                                        "isActive": {
+                                            "type": "boolean",
+                                            "format": "boolean",
+                                            "description": "Host's active status",
+                                            "example": true
+                                        },
+                                        "profileImageUrl": {
+                                            "type": "string",
+                                            "format": "uri",
+                                            "description": "URL to user's profile image",
+                                            "example": "https://example.com/images/profile.jpg"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Host Not Found": {
+                                        "value": {
+                                            "error": "HOST_NOT_FOUND",
+                                            "message": "Host does not exist."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Host"],
+                "summary": "Update Host Profile",
+                "description": "Update the host's profile information",
+                "operationId": "updateHostProfile",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Host profile update data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "bio": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "description": "Host's biography",
+                                        "example": "Software engineer, Dog lover, occasional hiker, and amateur baker based in Seattle."
+                                    },
+                                    "languages": {
+                                        "type": "array",
+                                        "format": "string",
+                                        "description": "Languages spoken by the host",
+                                        "example": [
+                                            "English",
+                                            "Thai",
+                                            "Mandarin"
+                                        ]
                                     },
                                     "phoneNumber": {
                                         "type": "string",
