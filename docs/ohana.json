@@ -1238,12 +1238,6 @@
                                         "type": "string",
                                         "description": "User's phone number",
                                         "example": "+1234567890"
-                                    },
-                                    "profileImageUrl": {
-                                        "type": "string",
-                                        "format": "uri",
-                                        "description": "URL to user's profile image",
-                                        "example": "https://example.com/images/profile.jpg"
                                     }
                                 },
                                 "minProperties": 1
@@ -1318,6 +1312,17 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "query",
+                        "name": "mimeType",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "image/jpeg"
+                        },
+                        "description": "MIME type of the image to be uploaded",
+                        "example": "image/jpeg"
                     }
                 ],
                 "responses": {
@@ -1509,12 +1514,6 @@
                                         "type": "string",
                                         "description": "User's phone number",
                                         "example": "+1234567890"
-                                    },
-                                    "profileImageUrl": {
-                                        "type": "string",
-                                        "format": "uri",
-                                        "description": "URL to user's profile image",
-                                        "example": "https://example.com/images/profile.jpg"
                                     }
                                 },
                                 "minProperties": 1

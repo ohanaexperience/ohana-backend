@@ -59,7 +59,7 @@ export const stripeWebhook = middy(async (event: APIGatewayEvent) => {
 
         if (stripeEvent.type === "identity.verification_session.verified") {
             const session = stripeEvent.data.object;
-            const userId = session.metadata.userId;
+            const userId = session.metadata.user_id;
 
             console.log("Identity verification session successful:", session);
 
@@ -73,9 +73,7 @@ export const stripeWebhook = middy(async (event: APIGatewayEvent) => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                message: "User successfully verified.",
-            }),
+            body: JSON.stringify({}),
         };
     } catch (err: any) {
         console.error("Error creating user with email:", err);

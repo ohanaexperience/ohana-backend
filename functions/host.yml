@@ -16,7 +16,6 @@ hostGetProfile:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        USER_POOL_CLIENT_ID: !Ref UserPoolClient
         DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
         DB_NAME: ${self:custom.resourceNames.postgresDB}
         DB_PORT: ${env:POSTGRES_PORT}
@@ -41,7 +40,6 @@ hostUpdateProfile:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        USER_POOL_CLIENT_ID: !Ref UserPoolClient
         DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
         DB_NAME: ${self:custom.resourceNames.postgresDB}
         DB_PORT: ${env:POSTGRES_PORT}
