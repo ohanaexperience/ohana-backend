@@ -1,6 +1,6 @@
 {
-  "id": "476304ed-4aa8-4275-8f57-59ae385f7ec2",
-  "prevId": "119e2851-52a3-4d2c-8cdf-67ad792d7f46",
+  "id": "cac5709b-20f5-44c2-ba3f-1d473354d275",
+  "prevId": "7941bbab-5bea-46a4-9da4-b60abc94c912",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -26,29 +26,159 @@
           "primaryKey": false,
           "notNull": true
         },
+        "tagline": {
+          "name": "tagline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "languages": {
+          "name": "languages",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "experience_type": {
+          "name": "experience_type",
+          "type": "experience_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
         "description": {
           "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "price": {
-          "name": "price",
+        "starting_location_address": {
+          "name": "starting_location_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "starting_location": {
+          "name": "starting_location",
+          "type": "point",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ending_location_address": {
+          "name": "ending_location_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ending_location": {
+          "name": "ending_location",
+          "type": "point",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meeting_instructions": {
+          "name": "meeting_instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meeting_location_image_url": {
+          "name": "meeting_location_image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "price_per_person": {
+          "name": "price_per_person",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "duration": {
-          "name": "duration",
-          "type": "integer",
+        "group_discounts": {
+          "name": "group_discounts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"enabled\":false,\"discountPercentageFor3Plus\":null,\"discountPercentageFor5Plus\":null}'::jsonb"
+        },
+        "early_bird_rate": {
+          "name": "early_bird_rate",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"enabled\":false,\"discountPercentage\":null,\"daysInAdvance\":null}'::jsonb"
+        },
+        "cancellation_policy": {
+          "name": "cancellation_policy",
+          "type": "experience_cancellation_policy",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "max_guests": {
-          "name": "max_guests",
-          "type": "integer",
+        "group_size": {
+          "name": "group_size",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_image_url": {
+          "name": "cover_image_url",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "gallery_image_urls": {
+          "name": "gallery_image_urls",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "included_items": {
+          "name": "included_items",
+          "type": "experience_included_items[]",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "what_to_bring": {
+          "name": "what_to_bring",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "physical_requirements": {
+          "name": "physical_requirements",
+          "type": "experience_physical_requirements",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age_recommendations": {
+          "name": "age_recommendations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "experience_duration": {
+          "name": "experience_duration",
+          "type": "experience_duration",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "availability": {
+          "name": "availability",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -109,13 +239,21 @@
           "name": "bio",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "languages": {
           "name": "languages",
           "type": "text[]",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'{}'"
+        },
+        "socials": {
+          "name": "socials",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
         },
         "is_active": {
           "name": "is_active",
@@ -306,12 +444,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "bio": {
-          "name": "bio",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "profile_image_url": {
           "name": "profile_image_url",
           "type": "text",
@@ -410,6 +542,26 @@
     }
   },
   "enums": {
+    "public.experience_cancellation_policy": {
+      "name": "experience_cancellation_policy",
+      "schema": "public",
+      "values": [
+        "strict",
+        "moderate",
+        "flexible"
+      ]
+    },
+    "public.experience_duration": {
+      "name": "experience_duration",
+      "schema": "public",
+      "values": [
+        "1-2 hours",
+        "2-3 hours",
+        "3-4 hours",
+        "4-5 hours",
+        "5-6 hours"
+      ]
+    },
     "public.experience_status": {
       "name": "experience_status",
       "schema": "public",
@@ -417,6 +569,34 @@
         "draft",
         "published",
         "archived"
+      ]
+    },
+    "public.experience_type": {
+      "name": "experience_type",
+      "schema": "public",
+      "values": [
+        "indoor",
+        "outdoor",
+        "both"
+      ]
+    },
+    "public.experience_included_items": {
+      "name": "experience_included_items",
+      "schema": "public",
+      "values": [
+        "food",
+        "drinks",
+        "transport",
+        "equipment"
+      ]
+    },
+    "public.experience_physical_requirements": {
+      "name": "experience_physical_requirements",
+      "schema": "public",
+      "values": [
+        "low",
+        "medium",
+        "high"
       ]
     },
     "public.host_verification_provider": {

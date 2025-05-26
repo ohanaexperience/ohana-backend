@@ -11,9 +11,9 @@ import { requireBody, zodValidator } from "./middleware";
 import {
     UpdateHostProfileSchema,
     UpdateHostProfileData,
-} from "./constants/validations/schemas";
+} from "./constants/validations";
 import { decodeToken } from "./utils";
-import ERRORS from "./constants/validations/errors";
+import ERRORS from "./constants/errors";
 
 const { DB_ENDPOINT, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
 

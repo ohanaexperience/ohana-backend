@@ -65,6 +65,7 @@ export const stripeWebhook = middy(async (event: APIGatewayEvent) => {
 
             await db.hostVerifications.update(userId, {
                 status: "approved",
+                approvedAt: new Date(),
             });
             await db.hosts.create({
                 id: userId,

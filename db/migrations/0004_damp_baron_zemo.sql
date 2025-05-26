@@ -1,1 +1,0 @@
-ALTER TABLE "hosts" ADD COLUMN "languages" text[] DEFAULT '{}' NOT NULL;

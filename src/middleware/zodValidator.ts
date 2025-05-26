@@ -1,18 +1,31 @@
 import { Request } from "@middy/core";
 import { ZodSchema, ZodError } from "zod";
 
-import ERRORS from "../constants/validations/errors";
+import ERRORS from "../constants/errors";
 
-const parseErrorCode = (errorCode: string) => {
-    for (const category of Object.values(ERRORS)) {
-        for (const errorType of Object.values(category)) {
-            if (errorType.CODE === errorCode) {
-                return errorType.MESSAGE;
+const createErrorLookup = (errors: any): Record<string, string> => {
+    const lookup: Record<string, string> = {};
+
+    const traverse = (obj: any) => {
+        for (const value of Object.values(obj)) {
+            if (value && typeof value === "object") {
+                if ("CODE" in value && "MESSAGE" in value) {
+                    lookup[value.CODE as string] = value.MESSAGE as string;
+                } else {
+                    traverse(value);
+                }
             }
         }
-    }
+    };
 
-    return "Something went wrong.";
+    traverse(errors);
+    return lookup;
+};
+
+const ERROR_LOOKUP = createErrorLookup(ERRORS);
+
+const parseErrorCode = (errorCode: string) => {
+    return ERROR_LOOKUP[errorCode] || "Something went wrong.";
 };
 
 export const zodValidator = (schema: ZodSchema) => {

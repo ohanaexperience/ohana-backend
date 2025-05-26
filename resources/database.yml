@@ -20,7 +20,7 @@ Resources:
             DeletionProtection: false
             DBClusterParameterGroupName: !Ref PostgresParameterGroup
             ServerlessV2ScalingConfiguration:
-                MinCapacity: 0.5
+                MinCapacity: 0
                 MaxCapacity: 8
             VpcSecurityGroupIds:
                 - !Ref DBSecurityGroup

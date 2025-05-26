@@ -1,1 +1,0 @@
-ALTER TABLE "host_verifications" DROP COLUMN "provider_verification_id";

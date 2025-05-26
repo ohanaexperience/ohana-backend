@@ -45,8 +45,8 @@ import {
     RefreshTokensData,
     GoogleSignInSchema,
     GoogleSignInData,
-} from "./constants/validations/schemas";
-import ERRORS from "./constants/validations/errors";
+} from "./constants/validations";
+import ERRORS from "./constants/errors";
 
 const {
     USER_POOL_ID,

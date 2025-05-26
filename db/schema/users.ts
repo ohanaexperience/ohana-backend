@@ -1,10 +1,12 @@
 import { pgTable, pgEnum, uuid, text, timestamp } from "drizzle-orm/pg-core";
 
-export const userAuthProviderEnum = pgEnum("user_auth_provider", [
-    "google",
-    "apple",
-    "email",
-]);
+import { USER_AUTH_PROVIDERS } from "../../src/constants/users";
+
+// Enums
+export const userAuthProviderEnum = pgEnum(
+    "user_auth_provider",
+    USER_AUTH_PROVIDERS
+);
 
 export const usersTable = pgTable("users", {
     id: uuid("id").primaryKey(),

@@ -1,4 +1,5 @@
 service: ohana
+licenseKey: ${env:SERVERLESS_ACCESS_KEY}
 frameworkVersion: "4"
 useDotenv: true
 

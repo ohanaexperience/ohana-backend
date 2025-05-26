@@ -8,26 +8,22 @@ import {
     jsonb,
 } from "drizzle-orm/pg-core";
 
-import Stripe from "stripe";
-
 import { usersTable } from "./users";
+import {
+    HOST_VERIFICATION_PROVIDERS,
+    HOST_VERIFICATION_STATUSES,
+} from "../../src/constants/hostVerifications";
+import { ProviderData } from "../../src/types/hostVerifications";
 
-type StripeIdentityData = {
-    verificationSession: Stripe.Identity.VerificationSession;
-    ephemeralKey: Stripe.EphemeralKey;
-};
-type ProviderData = StripeIdentityData;
-
+// Enums
 export const hostVerificationProviderEnum = pgEnum(
     "host_verification_provider",
-    ["stripe_identity"]
+    HOST_VERIFICATION_PROVIDERS
 );
-
-export const hostVerificationStatusEnum = pgEnum("host_verification_status", [
-    "pending",
-    "approved",
-    "rejected",
-]);
+export const hostVerificationStatusEnum = pgEnum(
+    "host_verification_status",
+    HOST_VERIFICATION_STATUSES
+);
 
 export const hostVerificationsTable = pgTable("host_verifications", {
     id: serial("id").primaryKey(),

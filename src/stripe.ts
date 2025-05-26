@@ -8,7 +8,7 @@ import { APIGatewayEvent } from "aws-lambda";
 
 import DatabaseFactory from "./database/database_factory";
 import { decodeToken } from "./utils/jwt";
-import ERRORS from "./constants/validations/errors";
+import ERRORS from "./constants/errors";
 
 const {
     STRIPE_SECRET_KEY,

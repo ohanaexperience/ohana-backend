@@ -7,6 +7,7 @@ import {
     UsersQueryManager,
     HostVerificationsQueryManager,
     HostsQueryManager,
+    ExperiencesQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -16,6 +17,7 @@ export default class Postgres {
     public users: UsersQueryManager;
     public hostVerifications: HostVerificationsQueryManager;
     public hosts: HostsQueryManager;
+    public experiences: ExperiencesQueryManager;
 
     constructor(config: PostgresConfig) {
         this.pool = new Pool(config);
@@ -27,5 +29,6 @@ export default class Postgres {
             this.instance
         );
         this.hosts = new HostsQueryManager(this.instance);
+        this.experiences = new ExperiencesQueryManager(this.instance);
     }
 }
