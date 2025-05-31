@@ -1,9 +1,6 @@
-import {
-    EXPERIENCE_TITLE_MIN_LENGTH,
-    EXPERIENCE_TITLE_MAX_LENGTH,
-    EXPERIENCE_TAGLINE_MIN_LENGTH,
-    EXPERIENCE_TAGLINE_MAX_LENGTH,
-} from "../experiences";
+import { LANGUAGES } from "@/constants/shared";
+
+import experienceErrors from "@/errors/experiences";
 
 export default {
     EMAIL: {
@@ -91,17 +88,13 @@ export default {
         },
         INVALID_TYPE: {
             CODE: "INVALID_LANGUAGES_TYPE",
-            MESSAGE: "Languages must be a string.",
+            MESSAGE: "Languages must be an array.",
         },
-    },
-    LANGUAGES_ARRAY: {
-        MISSING: {
-            CODE: "MISSING_LANGUAGES_ARRAY",
-            MESSAGE: "Array of languages is required.",
-        },
-        INVALID_TYPE: {
-            CODE: "INVALID_LANGUAGES_ARRAY_TYPE",
-            MESSAGE: "Languages array must be an array.",
+        INVALID_VALUE: {
+            CODE: "INVALID_LANGUAGE_VALUE",
+            MESSAGE: `Invalid language. Must be one of the following: ${LANGUAGES.map(
+                (lang) => lang
+            ).join(", ")}`,
         },
     },
     BIO: {
@@ -259,42 +252,5 @@ export default {
             MESSAGE: "Invalid image type. Only PNG and JPG are allowed.",
         },
     },
-    EXPERIENCE: {
-        TITLE: {
-            MISSING: {
-                CODE: "MISSING_EXPERIENCE_TITLE",
-                MESSAGE: "Experience title is required.",
-            },
-            INVALID_TYPE: {
-                CODE: "INVALID_EXPERIENCE_TITLE_TYPE",
-                MESSAGE: "Experience title must be a string.",
-            },
-            MIN_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_TITLE_MIN_LENGTH",
-                MESSAGE: `Experience title must be at least ${EXPERIENCE_TITLE_MIN_LENGTH} characters.`,
-            },
-            MAX_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_TITLE_MAX_LENGTH",
-                MESSAGE: `Experience title must be less than ${EXPERIENCE_TITLE_MAX_LENGTH} characters.`,
-            },
-        },
-        TAGLINE: {
-            MISSING: {
-                CODE: "MISSING_EXPERIENCE_TAGLINE",
-                MESSAGE: "Experience tagline is required.",
-            },
-            INVALID_TYPE: {
-                CODE: "INVALID_EXPERIENCE_TAGLINE_TYPE",
-                MESSAGE: "Experience tagline must be a string.",
-            },
-            MIN_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_TAGLINE_MIN_LENGTH",
-                MESSAGE: `Experience tagline must be at least ${EXPERIENCE_TAGLINE_MIN_LENGTH} characters.`,
-            },
-            MAX_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_TAGLINE_MAX_LENGTH",
-                MESSAGE: `Experience tagline must be less than ${EXPERIENCE_TAGLINE_MAX_LENGTH} characters.`,
-            },
-        },
-    },
+    ...experienceErrors,
 };

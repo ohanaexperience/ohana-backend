@@ -1,3 +1,4 @@
+# Profile
 hostGetProfile:
     handler: src/host.getProfile
     timeout: 29
@@ -46,13 +47,38 @@ hostUpdateProfile:
         DB_USER: ${env:POSTGRES_USERNAME}
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
+# Experiences
 hostCreateExperience:
-    handler: src/experiences.createExperience
+    handler: src/experiences.hostCreateExperience
     timeout: 29
     events:
         - http:
               path: /v1/host/experience
               method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+
+hostGetExperiences:
+    handler: src/experiences.hostGetExperiences
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences
+              method: GET
               cors: true
               authorizer:
                   type: COGNITO_USER_POOLS

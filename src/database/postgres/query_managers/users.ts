@@ -1,7 +1,7 @@
 import { eq, InferInsertModel } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { usersTable } from "../../../../db/schema/users";
+import { usersTable } from "@/db/schema";
 
 export class UsersQueryManager {
     private db: NodePgDatabase;

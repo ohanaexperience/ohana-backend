@@ -1,9 +1,9 @@
-hostGetProfile:
-    handler: src/host.getProfile
+getCategories:
+    handler: src/categories.getCategories
     timeout: 29
     events:
         - http:
-              path: /v1/host/profile
+              path: /v1/host/categories
               method: GET
               cors: true
               authorizer:

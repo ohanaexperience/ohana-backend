@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { APIGatewayEvent } from "aws-lambda";
 
-import ERRORS from "../errors";
+import ERRORS from "@/errors";
 import {
     emailSchema,
     passwordSchema,
     confirmationCodeSchema,
     phoneNumberSchema,
-} from "./base";
+} from "@/validations/shared";
 
 export const PhoneRegisterSchema = phoneNumberSchema;
 

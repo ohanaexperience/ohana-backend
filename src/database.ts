@@ -3,6 +3,8 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { sql } from "drizzle-orm";
 
 import DatabaseFactory from "./database/database_factory";
+import { seedCategories } from "./seed";
+import { experiencesTable } from "@/db/schema";
 
 const { DB_ENDPOINT, DB_NAME, DB_PORT, DB_USER, DB_PASSWORD } = process.env;
 
@@ -90,23 +92,67 @@ export async function clearDatabase() {
     }
 }
 
+const getTableColumns = async (tableName: string) => {
+    const columnsQuery = `
+                SELECT 
+                    column_name,
+                    data_type,
+                    is_nullable,
+                    column_default,
+                    character_maximum_length,
+                    numeric_precision,
+                    numeric_scale
+                FROM information_schema.columns 
+                WHERE table_name = '${tableName}'
+                AND table_schema = 'public'
+                ORDER BY ordinal_position;
+            `;
+    return await db.instance.execute(columnsQuery);
+};
+
 export async function test() {
     try {
-        const users = await db.users.getAll();
-        const hostVerifications = await db.hostVerifications.getAll();
-        const hosts = await db.hosts.getAll();
+        // const users = await db.users.getAll();
+        // const hostVerifications = await db.hostVerifications.getAll();
+        // const hosts = await db.hosts.getAll();
         const experiences = await db.experiences.getAll();
+        const availability = await db.experiences.getAllAvailability();
+        // const categories = await db.categories.getAll();
+        // const subCategories = await db.subCategories.getAll();
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                users,
-                hostVerifications,
-                hosts,
                 experiences,
+                availability,
             }),
         };
+
+        // await db.experiences.delete(1);
+
+        // const experiences = await db.experiences.getAll();
+
+        // return {
+        //     statusCode: 200,
+        //     body: JSON.stringify({ experiences }),
+        // };
     } catch (err) {
         console.error("Error clearing database:", err);
+    }
+}
+
+export async function seedDatabase() {
+    try {
+        console.log("🌱 Starting database seeding...");
+
+        await seedCategories(db);
+
+        console.log("🎉 All seeding completed!");
+        return {
+            statusCode: 200,
+            body: JSON.stringify({}),
+        };
+    } catch (err) {
+        console.error("Seeding failed:", err);
     }
 }

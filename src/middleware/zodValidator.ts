@@ -1,7 +1,7 @@
 import { Request } from "@middy/core";
 import { ZodSchema, ZodError } from "zod";
 
-import ERRORS from "../constants/errors";
+import ERRORS from "@/errors";
 
 const createErrorLookup = (errors: any): Record<string, string> => {
     const lookup: Record<string, string> = {};

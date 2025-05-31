@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import ERRORS from "../errors";
+import ERRORS from "@/errors";
 
 export const emailSchema = z
     .string({

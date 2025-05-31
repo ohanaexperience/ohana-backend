@@ -19,8 +19,8 @@ import {
     UserUpdateProfileData,
     UserGetProfileData,
     UserGetProfileSchema,
-} from "./constants/validations";
-import ERRORS from "./constants/errors";
+} from "@/validations";
+import ERRORS from "@/errors";
 
 const {
     DB_ENDPOINT,

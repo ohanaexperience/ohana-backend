@@ -8,12 +8,9 @@ import { APIGatewayEvent } from "aws-lambda";
 import DatabaseFactory from "./database/database_factory";
 
 import { requireBody, zodValidator } from "./middleware";
-import {
-    UpdateHostProfileSchema,
-    UpdateHostProfileData,
-} from "./constants/validations";
+import { UpdateHostProfileSchema, UpdateHostProfileData } from "@/validations";
 import { decodeToken } from "./utils";
-import ERRORS from "./constants/errors";
+import ERRORS from "@/errors";
 
 const { DB_ENDPOINT, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
 

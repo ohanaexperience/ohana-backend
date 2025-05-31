@@ -1,7 +1,7 @@
 import { eq, InferInsertModel } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { hostVerificationsTable } from "../../../../db/schema/hostVerifications";
+import { hostVerificationsTable } from "@/db/schema";
 
 export class HostVerificationsQueryManager {
     private db: NodePgDatabase;

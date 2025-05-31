@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { APIGatewayEvent } from "aws-lambda";
 
-import ERRORS from "../errors";
+import ERRORS from "@/errors";
 
 export const CreateVerificationSessionSchema = z.object({
     userId: z

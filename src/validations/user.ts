@@ -6,7 +6,7 @@ import {
     lastNameSchema,
     phoneNumberSchema,
     imageUrlSchema,
-} from "./base";
+} from "./shared";
 
 export const UserGetProfileSchema = z.object({});
 export const UserUpdateProfileSchema = z
