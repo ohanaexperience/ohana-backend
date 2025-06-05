@@ -1578,6 +1578,557 @@
                     }
                 }
             }
+        },
+        "/v1/host/experiences": {
+            "post": {
+                "tags": ["Host"],
+                "summary": "Create Experience",
+                "description": "Creates a new experience for the authenticated host. All fields must meet the specified validation requirements.",
+                "operationId": "hostCreateExperience",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Experience creation data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "tagline",
+                                    "category",
+                                    "languages",
+                                    "experienceType",
+                                    "description",
+                                    "startingLocation",
+                                    "endingLocation",
+                                    "meetingLocation",
+                                    "pricePerPerson",
+                                    "cancellationPolicy",
+                                    "groupSize",
+                                    "coverImageUrl",
+                                    "physicalRequirements",
+                                    "ageRecommendations",
+                                    "accessibilityInfo",
+                                    "durationHours",
+                                    "timezone",
+                                    "availability"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "minLength": 15,
+                                        "maxLength": 80,
+                                        "description": "Experience title",
+                                        "example": "Authentic Thai Cooking Class in Bangkok"
+                                    },
+                                    "tagline": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 100,
+                                        "description": "Short experience tagline",
+                                        "example": "Learn to cook traditional Thai dishes with a local chef"
+                                    },
+                                    "category": {
+                                        "type": "object",
+                                        "required": ["mainId", "subId"],
+                                        "properties": {
+                                            "mainId": {
+                                                "type": "integer",
+                                                "description": "Main category ID",
+                                                "example": 1
+                                            },
+                                            "subId": {
+                                                "type": "integer",
+                                                "description": "Sub category ID",
+                                                "example": 5
+                                            }
+                                        }
+                                    },
+                                    "languages": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "Languages spoken during the experience",
+                                        "example": ["English", "Thai"]
+                                    },
+                                    "experienceType": {
+                                        "type": "string",
+                                        "enum": ["indoor", "outdoor", "both"],
+                                        "description": "Type of experience location",
+                                        "example": "indoor"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "Detailed experience description",
+                                        "example": "Join me for an authentic Thai cooking experience where you'll learn to prepare traditional dishes using fresh local ingredients."
+                                    },
+                                    "startingLocation": {
+                                        "type": "object",
+                                        "required": [
+                                            "address",
+                                            "latitude",
+                                            "longitude"
+                                        ],
+                                        "properties": {
+                                            "address": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 500,
+                                                "description": "Starting location address",
+                                                "example": "123 Khao San Road, Bangkok, Thailand"
+                                            },
+                                            "latitude": {
+                                                "type": "number",
+                                                "description": "Starting location latitude",
+                                                "example": 13.7563
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "description": "Starting location longitude",
+                                                "example": 100.5018
+                                            }
+                                        }
+                                    },
+                                    "endingLocation": {
+                                        "type": "object",
+                                        "required": [
+                                            "address",
+                                            "latitude",
+                                            "longitude"
+                                        ],
+                                        "properties": {
+                                            "address": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 500,
+                                                "description": "Ending location address",
+                                                "example": "123 Khao San Road, Bangkok, Thailand"
+                                            },
+                                            "latitude": {
+                                                "type": "number",
+                                                "description": "Ending location latitude",
+                                                "example": 13.7563
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "description": "Ending location longitude",
+                                                "example": 100.5018
+                                            }
+                                        }
+                                    },
+                                    "meetingLocation": {
+                                        "type": "object",
+                                        "required": ["instructions"],
+                                        "properties": {
+                                            "instructions": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 1000,
+                                                "description": "Meeting location instructions",
+                                                "example": "Meet at the front entrance of the building. Look for the red door."
+                                            },
+                                            "imageUrl": {
+                                                "type": "string",
+                                                "format": "uri",
+                                                "description": "Optional image URL for meeting location",
+                                                "example": "https://example.com/meeting-point.jpg"
+                                            }
+                                        }
+                                    },
+                                    "pricePerPerson": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "description": "Price per person in cents",
+                                        "example": 2500
+                                    },
+                                    "groupDiscounts": {
+                                        "type": "object",
+                                        "properties": {
+                                            "discountPercentageFor3Plus": {
+                                                "type": "number",
+                                                "enum": [5, 10, 15, 20, 25],
+                                                "description": "Discount percentage for 3+ people",
+                                                "example": 10
+                                            },
+                                            "discountPercentageFor5Plus": {
+                                                "type": "number",
+                                                "enum": [10, 15, 20, 25, 30],
+                                                "description": "Discount percentage for 5+ people",
+                                                "example": 15
+                                            }
+                                        }
+                                    },
+                                    "earlyBirdRate": {
+                                        "type": "object",
+                                        "properties": {
+                                            "discountPercentage": {
+                                                "type": "number",
+                                                "enum": [5, 10, 15, 20, 25],
+                                                "description": "Early bird discount percentage",
+                                                "example": 10
+                                            },
+                                            "daysInAdvance": {
+                                                "type": "number",
+                                                "enum": [
+                                                    14, 15, 16, 17, 18, 19, 20,
+                                                    21, 22, 23, 24, 25, 26, 27,
+                                                    28, 29, 30
+                                                ],
+                                                "description": "Days in advance for early bird rate",
+                                                "example": 14
+                                            }
+                                        }
+                                    },
+                                    "cancellationPolicy": {
+                                        "type": "string",
+                                        "enum": [
+                                            "strict",
+                                            "moderate",
+                                            "flexible"
+                                        ],
+                                        "description": "Cancellation policy",
+                                        "example": "moderate"
+                                    },
+                                    "groupSize": {
+                                        "type": "object",
+                                        "required": ["minGuests", "maxGuests"],
+                                        "properties": {
+                                            "minGuests": {
+                                                "type": "integer",
+                                                "minimum": 1,
+                                                "description": "Minimum number of guests",
+                                                "example": 2
+                                            },
+                                            "maxGuests": {
+                                                "type": "integer",
+                                                "maximum": 10,
+                                                "description": "Maximum number of guests",
+                                                "example": 6
+                                            },
+                                            "autoCancelEnabled": {
+                                                "type": "boolean",
+                                                "description": "Whether to auto-cancel if minimum not met",
+                                                "default": false,
+                                                "example": false
+                                            }
+                                        }
+                                    },
+                                    "coverImageUrl": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "Cover image URL for the experience",
+                                        "example": "https://example.com/cover-image.jpg"
+                                    },
+                                    "galleryImageUrls": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uri"
+                                        },
+                                        "description": "Optional gallery image URLs",
+                                        "example": [
+                                            "https://example.com/gallery1.jpg",
+                                            "https://example.com/gallery2.jpg"
+                                        ]
+                                    },
+                                    "includedItems": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "food",
+                                                "drinks",
+                                                "transport",
+                                                "equipment"
+                                            ]
+                                        },
+                                        "description": "Items included in the experience",
+                                        "example": ["food", "drinks"]
+                                    },
+                                    "whatToBring": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "What participants should bring",
+                                        "example": "Please bring comfortable clothes and closed-toe shoes."
+                                    },
+                                    "physicalRequirements": {
+                                        "type": "string",
+                                        "enum": ["low", "medium", "high"],
+                                        "description": "Physical requirement level",
+                                        "example": "low"
+                                    },
+                                    "ageRecommendations": {
+                                        "type": "string",
+                                        "enum": [
+                                            "18-25",
+                                            "26-35",
+                                            "36-45",
+                                            "46-55",
+                                            "56-65",
+                                            "66+"
+                                        ],
+                                        "description": "Recommended age group",
+                                        "example": "18-25"
+                                    },
+                                    "accessibilityInfo": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "Accessibility information",
+                                        "example": "The venue is wheelchair accessible with ramps and accessible restrooms."
+                                    },
+                                    "durationHours": {
+                                        "type": "number",
+                                        "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                        "description": "Duration in hours",
+                                        "example": 3
+                                    },
+                                    "timezone": {
+                                        "type": "string",
+                                        "description": "IANA timezone identifier",
+                                        "example": "Asia/Bangkok"
+                                    },
+                                    "availability": {
+                                        "type": "object",
+                                        "required": [
+                                            "startDate",
+                                            "daysOfWeek",
+                                            "timeSlots"
+                                        ],
+                                        "properties": {
+                                            "startDate": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Availability start date",
+                                                "example": "2024-06-01"
+                                            },
+                                            "endDate": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Optional availability end date",
+                                                "example": "2024-12-31"
+                                            },
+                                            "daysOfWeek": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 6
+                                                },
+                                                "minItems": 1,
+                                                "description": "Days of week (0=Sunday, 6=Saturday)",
+                                                "example": [1, 2, 3, 4, 5]
+                                            },
+                                            "timeSlots": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                                },
+                                                "minItems": 1,
+                                                "description": "Available time slots in HH:MM format",
+                                                "example": [
+                                                    "10:00",
+                                                    "14:00",
+                                                    "18:00"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Experience created successfully."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Host Not Found": {
+                                        "value": {
+                                            "error": "HOST_NOT_FOUND",
+                                            "message": "Host does not exist."
+                                        }
+                                    },
+                                    "Missing Title": {
+                                        "value": {
+                                            "error": "MISSING_EXPERIENCE_TITLE",
+                                            "message": "Experience title is required."
+                                        }
+                                    },
+                                    "Invalid Title Length": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_TITLE_MIN_LENGTH",
+                                            "message": "Experience title must be at least 15 characters."
+                                        }
+                                    },
+                                    "Main Category Not Found": {
+                                        "value": {
+                                            "error": "Main category not found",
+                                            "message": "Main category not found"
+                                        }
+                                    },
+                                    "Sub Category Mismatch": {
+                                        "value": {
+                                            "error": "Sub category not found or doesn't belong to category.",
+                                            "message": "Sub category not found or doesn't belong to category."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/host/categories": {
+            "get": {
+                "tags": ["Host"],
+                "summary": "Get All Categories",
+                "description": "Retrieves all categories with their subcategories for authenticated hosts",
+                "operationId": "getCategories",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "description": "Category unique identifier",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "description": "Category name",
+                                                "example": "Adventure & Outdoor"
+                                            },
+                                            "slug": {
+                                                "type": "string",
+                                                "description": "Category URL slug",
+                                                "example": "adventure-outdoor"
+                                            },
+                                            "subCategories": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "description": "Subcategory unique identifier",
+                                                            "example": 1
+                                                        },
+                                                        "categoryId": {
+                                                            "type": "integer",
+                                                            "description": "Parent category ID",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "Subcategory name",
+                                                            "example": "Hiking & Trekking"
+                                                        },
+                                                        "slug": {
+                                                            "type": "string",
+                                                            "description": "Subcategory URL slug",
+                                                            "example": "hiking-trekking"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Host Not Found": {
+                                        "value": {
+                                            "error": "HOST_NOT_FOUND",
+                                            "message": "Host does not exist."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
         }
     },
     "components": {

@@ -1,8 +1,10 @@
 import { LANGUAGES } from "@/constants/shared";
 
+import baseErrors from "@/errors/base";
 import experienceErrors from "@/errors/experiences";
 
 export default {
+    ...baseErrors,
     EMAIL: {
         MISSING: {
             CODE: "MISSING_EMAIL",
@@ -240,16 +242,6 @@ export default {
         NOT_VERIFIED: {
             CODE: "HOST_NOT_VERIFIED",
             MESSAGE: "Host is not verified.",
-        },
-    },
-    MIME_TYPE: {
-        MISSING: {
-            CODE: "MISSING_MIME_TYPE",
-            MESSAGE: "MIME type is required.",
-        },
-        INVALID_IMAGE_TYPE: {
-            CODE: "INVALID_IMAGE_TYPE",
-            MESSAGE: "Invalid image type. Only PNG and JPG are allowed.",
         },
     },
     ...experienceErrors,

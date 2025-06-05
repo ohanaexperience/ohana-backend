@@ -6,10 +6,10 @@ import {
     lastNameSchema,
     phoneNumberSchema,
     imageUrlSchema,
-} from "./shared";
+} from "@/validations/shared";
+import ERRORS from "@/errors";
 
-export const UserGetProfileSchema = z.object({});
-export const UserUpdateProfileSchema = z
+export const UpdateUserProfileSchema = z
     .object({
         firstName: firstNameSchema.optional(),
         lastName: lastNameSchema.optional(),
@@ -25,10 +25,28 @@ export const UserUpdateProfileSchema = z
             path: ["_errors"],
         }
     );
+export const GetProfileImageUploadUrlSchema = z.object({
+    mimeType: z
+        .string({
+            required_error: ERRORS.MIME_TYPE.MISSING.CODE,
+            invalid_type_error: ERRORS.MIME_TYPE.INVALID_TYPE.CODE,
+        })
+        .refine(
+            (mimeType) => {
+                return mimeType.includes("/") && mimeType.startsWith("image/");
+            },
+            {
+                message: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.CODE,
+            }
+        ),
+});
 
-export type UserGetProfileData = Omit<APIGatewayEvent, "body"> & {
-    body: z.infer<typeof UserGetProfileSchema>;
+export type UpdateUserProfileData = Omit<APIGatewayEvent, "body"> & {
+    body: z.infer<typeof UpdateUserProfileSchema>;
 };
-export type UserUpdateProfileData = Omit<APIGatewayEvent, "body"> & {
-    body: z.infer<typeof UserUpdateProfileSchema>;
+export type GetProfileImageUploadUrlData = Omit<
+    APIGatewayEvent,
+    "queryStringParameters"
+> & {
+    queryStringParameters: z.infer<typeof GetProfileImageUploadUrlSchema>;
 };

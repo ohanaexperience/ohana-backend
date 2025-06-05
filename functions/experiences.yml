@@ -1,9 +1,9 @@
-getCategories:
-    handler: src/categories.getCategories
+getExperiences:
+    handler: src/experiences.getExperiences
     timeout: 29
     events:
         - http:
-              path: /v1/host/categories
+              path: /v1/experiences
               method: GET
               cors: true
               authorizer:

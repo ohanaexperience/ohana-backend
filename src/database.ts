@@ -120,12 +120,15 @@ export async function test() {
         // const categories = await db.categories.getAll();
         // const subCategories = await db.subCategories.getAll();
 
+        const result = await db.instance.execute(
+            sql`SELECT PostGIS_Version();`
+        );
+
+        console.log(result);
+
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                experiences,
-                availability,
-            }),
+            body: JSON.stringify(result),
         };
 
         // await db.experiences.delete(1);

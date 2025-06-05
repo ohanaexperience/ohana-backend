@@ -28,15 +28,42 @@ const parseErrorCode = (errorCode: string) => {
     return ERROR_LOOKUP[errorCode] || "Something went wrong.";
 };
 
-export const zodValidator = (schema: ZodSchema) => {
+interface ZodValidatorOptions {
+    body?: ZodSchema;
+    queryStringParameters?: ZodSchema;
+}
+
+export const zodValidator = (options: ZodValidatorOptions) => {
     const before = async (request: Request) => {
         try {
-            const result = schema.parse(request.event.body);
+            if (!options.body && !options.queryStringParameters) {
+                throw new Error("No schema provided");
+            }
 
-            request.event = {
-                ...request.event,
-                body: result,
-            };
+            if (options.body && options.queryStringParameters) {
+                throw new Error("Only one schema can be provided");
+            }
+
+            if (options.body) {
+                const validatedBody = options.body.parse(request.event.body);
+
+                request.event = {
+                    ...request.event,
+                    body: validatedBody,
+                };
+            }
+
+            if (options.queryStringParameters) {
+                const validatedQueryStringParameters =
+                    options.queryStringParameters.parse(
+                        request.event.queryStringParameters
+                    );
+
+                request.event = {
+                    ...request.event,
+                    queryStringParameters: validatedQueryStringParameters,
+                };
+            }
         } catch (error) {
             if (error instanceof ZodError) {
                 console.log("error", error);

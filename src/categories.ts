@@ -21,7 +21,7 @@ const db = DatabaseFactory.create({
     },
 });
 
-export const getCategories = middy(async (event: APIGatewayEvent) => {
+export const hostGetCategories = middy(async (event: APIGatewayEvent) => {
     const { authorization } = event.headers;
 
     console.log("event", event);

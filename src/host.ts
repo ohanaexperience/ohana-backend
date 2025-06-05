@@ -107,6 +107,13 @@ export const updateProfile = middy(async (event: UpdateHostProfileData) => {
 
     console.log("event", event);
 
+    if (!authorization) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: "Unauthorized" }),
+        };
+    }
+
     try {
         const { sub } = decodeToken(authorization);
 
@@ -166,7 +173,8 @@ export const updateProfile = middy(async (event: UpdateHostProfileData) => {
         };
     }
 })
+    .use(httpHeaderNormalizer())
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(UpdateHostProfileSchema))
+    .use(zodValidator({ body: UpdateHostProfileSchema }))
     .use(cors());

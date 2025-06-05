@@ -98,7 +98,7 @@ functions:
     - ${file(functions/host.yml)}
     - ${file(functions/webhooks.yml)}
     - ${file(functions/triggers.yml)}
-    - ${file(functions/categories.yml)}
+    - ${file(functions/experiences.yml)}
 
 resources:
     - ${file(resources/auth.yml)}

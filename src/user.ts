@@ -6,19 +6,23 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 import dayjs from "dayjs";
 import { extension } from "mime-types";
 
+import { APIGatewayEvent } from "aws-lambda";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { APIGatewayEvent } from "aws-lambda";
 
 import DatabaseFactory from "./database/database_factory";
 
 import { decodeToken } from "./utils/jwt";
-import { requireBody, zodValidator } from "./middleware";
 import {
-    UserUpdateProfileSchema,
-    UserUpdateProfileData,
-    UserGetProfileData,
-    UserGetProfileSchema,
+    requireBody,
+    requireQueryStringParameters,
+    zodValidator,
+} from "./middleware";
+import {
+    UpdateUserProfileSchema,
+    UpdateUserProfileData,
+    GetProfileImageUploadUrlSchema,
+    GetProfileImageUploadUrlData,
 } from "@/validations";
 import ERRORS from "@/errors";
 
@@ -45,8 +49,15 @@ const s3Client = new S3Client({
     region: "us-east-1",
 });
 
-export const getProfile = middy(async (event: UserGetProfileData) => {
+export const getProfile = middy(async (event: APIGatewayEvent) => {
     const { authorization } = event.headers;
+
+    if (!authorization) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: "Unauthorized" }),
+        };
+    }
 
     try {
         const { sub } = decodeToken(authorization);
@@ -102,11 +113,18 @@ export const getProfile = middy(async (event: UserGetProfileData) => {
     .use(httpHeaderNormalizer())
     .use(cors());
 
-export const updateProfile = middy(async (event: UserUpdateProfileData) => {
+export const updateProfile = middy(async (event: UpdateUserProfileData) => {
     const { authorization } = event.headers;
     const { firstName, lastName, phoneNumber, profileImageUrl } = event.body;
 
     console.log("event", event);
+
+    if (!authorization) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: "Unauthorized" }),
+        };
+    }
 
     try {
         const { sub } = decodeToken(authorization);
@@ -165,11 +183,11 @@ export const updateProfile = middy(async (event: UserUpdateProfileData) => {
     .use(httpHeaderNormalizer())
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(UserUpdateProfileSchema))
+    .use(zodValidator({ body: UpdateUserProfileSchema }))
     .use(cors());
 
 export const getProfileImageUploadUrl = middy(
-    async (event: APIGatewayEvent) => {
+    async (event: GetProfileImageUploadUrlData) => {
         const { authorization } = event.headers;
 
         if (!authorization) {
@@ -180,37 +198,10 @@ export const getProfileImageUploadUrl = middy(
                 }),
             };
         }
-        if (!event.queryStringParameters) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: "Bad request",
-                }),
-            };
-        }
 
-        const { mimeType } = event.queryStringParameters;
         console.log("event", event);
 
-        if (!mimeType) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: ERRORS.MIME_TYPE.MISSING.CODE,
-                    message: ERRORS.MIME_TYPE.MISSING.MESSAGE,
-                }),
-            };
-        }
-
-        if (!mimeType.includes("/") || !mimeType.startsWith("image/")) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.CODE,
-                    message: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.MESSAGE,
-                }),
-            };
-        }
+        const { mimeType } = event.queryStringParameters;
 
         try {
             const fileExtension = extension(mimeType);
@@ -259,4 +250,8 @@ export const getProfileImageUploadUrl = middy(
     }
 )
     .use(httpHeaderNormalizer())
+    .use(requireQueryStringParameters())
+    .use(
+        zodValidator({ queryStringParameters: GetProfileImageUploadUrlSchema })
+    )
     .use(cors());

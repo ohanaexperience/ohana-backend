@@ -33,9 +33,86 @@ import {
     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
     EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
+    EXPERIENCE_STATUS,
 } from "@/constants/experiences";
 import { CATEGORIES, SUB_CATEGORIES } from "@/constants/categories";
 import { LANGUAGES, IANA_TIMEZONES } from "@/constants/shared";
+
+export const ExperienceSearchSchema = z
+    .object({
+        // Text searches
+        title: z.string().optional(),
+        tagline: z.string().optional(),
+        description: z.string().optional(),
+        startingLocationAddress: z.string().optional(),
+        endingLocationAddress: z.string().optional(),
+        whatToBring: z.string().optional(),
+
+        // Exact matches
+        hostId: z.string().uuid().optional(),
+        categoryId: z.coerce.number().int().positive().optional(),
+        subCategoryId: z.coerce.number().int().positive().optional(),
+        experienceType: z
+            .enum(EXPERIENCE_TYPE as [string, ...string[]])
+            .optional(),
+        cancellationPolicy: z
+            .enum(EXPERIENCE_CANCELLATION_POLICY as [string, ...string[]])
+            .optional(),
+        physicalRequirements: z
+            .enum(EXPERIENCE_PHYSICAL_REQUIREMENTS as [string, ...string[]])
+            .optional(),
+        ageRange: z
+            .enum(EXPERIENCE_AGE_RECOMMENDATIONS as [string, ...string[]])
+            .optional(),
+        status: z.enum(EXPERIENCE_STATUS as [string, ...string[]]).optional(),
+        isPublic: z.coerce.boolean().optional(),
+
+        // Range queries
+        minPrice: z.coerce.number().int().positive().optional(),
+        maxPrice: z.coerce.number().int().positive().optional(),
+        minGuests: z.coerce.number().int().positive().optional(),
+        maxGuests: z.coerce.number().int().positive().optional(),
+        minDurationHours: z.coerce.number().int().positive().optional(),
+        maxDurationHours: z.coerce.number().int().positive().optional(),
+
+        // Location queries
+        latitude: z.coerce.number().optional(),
+        longitude: z.coerce.number().optional(),
+        radiusKm: z.coerce.number().int().positive().optional(),
+    })
+    .refine(
+        (data) => {
+            if (
+                data.minPrice &&
+                data.maxPrice &&
+                data.minPrice > data.maxPrice
+            ) {
+                return false;
+            }
+
+            if (
+                data.minGuests &&
+                data.maxGuests &&
+                data.minGuests > data.maxGuests
+            ) {
+                return false;
+            }
+
+            if (
+                data.minDurationHours &&
+                data.maxDurationHours &&
+                data.minDurationHours > data.maxDurationHours
+            ) {
+                return false;
+            }
+
+            return true;
+        },
+        {
+            message:
+                "Invalid range: minimum value cannot be greater than maximum value",
+        }
+    );
 
 export const CreateExperienceSchema = z.object({
     title: z
@@ -64,30 +141,29 @@ export const CreateExperienceSchema = z.object({
             EXPERIENCE_TAGLINE_MAX_LENGTH,
             ERRORS.EXPERIENCE.TAGLINE.MAX_LENGTH.CODE
         ),
-    category: z
-        .object(
-            {
-                mainId: z.number().int().positive(),
-                subId: z.number().int().positive(),
-            },
-            {
-                required_error: ERRORS.EXPERIENCE.CATEGORY.MISSING.CODE,
-                invalid_type_error:
-                    ERRORS.EXPERIENCE.CATEGORY.INVALID_TYPE.CODE,
-            }
-        )
-        .refine(
-            (data) => {
-                const subCategory = SUB_CATEGORIES.find(
-                    (sub) => sub.slug === data.sub
-                );
-                return subCategory?.categorySlug === data.main;
-            },
-            {
-                message: ERRORS.EXPERIENCE.CATEGORY.MISMATCH.CODE,
-                path: ["sub"],
-            }
-        ),
+    category: z.object(
+        {
+            mainId: z.number().int().positive(),
+            subId: z.number().int().positive(),
+        },
+        {
+            required_error: ERRORS.EXPERIENCE.CATEGORY.MISSING.CODE,
+            invalid_type_error: ERRORS.EXPERIENCE.CATEGORY.INVALID_TYPE.CODE,
+        }
+    ),
+    // Move this to endpoint to check
+    // .refine(
+    //     (data) => {
+    //         const subCategory = SUB_CATEGORIES.find(
+    //             (sub) => sub.slug === data.sub
+    //         );
+    //         return subCategory?.categorySlug === data.main;
+    //     },
+    //     {
+    //         message: ERRORS.EXPERIENCE.CATEGORY.MISMATCH.CODE,
+    //         path: ["sub"],
+    //     }
+    // ),
     languages: z.array(
         z.enum(LANGUAGES as [string, ...string[]], {
             errorMap: (issue, ctx) => {
@@ -743,6 +819,17 @@ export const CreateExperienceSchema = z.object({
     ),
 });
 
+export type ExperienceSearchData = Omit<
+    APIGatewayEvent,
+    "queryStringParameters"
+> & {
+    queryStringParameters: z.infer<typeof ExperienceSearchSchema> | null;
+};
+export const UpdateExperienceSchema = CreateExperienceSchema.partial();
+
 export type CreateExperienceData = Omit<APIGatewayEvent, "body"> & {
     body: z.infer<typeof CreateExperienceSchema>;
+};
+export type UpdateExperienceData = Omit<APIGatewayEvent, "body"> & {
+    body: z.infer<typeof UpdateExperienceSchema>;
 };

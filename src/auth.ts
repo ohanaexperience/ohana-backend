@@ -137,7 +137,7 @@ export const phoneRegister = middy(async (event: PhoneRegisterData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(PhoneRegisterSchema))
+    .use(zodValidator({ body: PhoneRegisterSchema }))
     .use(cors());
 
 export const emailRegister = middy(async (event: EmailRegisterData) => {
@@ -187,7 +187,7 @@ export const emailRegister = middy(async (event: EmailRegisterData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(EmailRegisterSchema))
+    .use(zodValidator({ body: EmailRegisterSchema }))
     .use(cors());
 
 export const emailResendCode = middy(async (event: EmailResendCodeData) => {
@@ -246,7 +246,7 @@ export const emailResendCode = middy(async (event: EmailResendCodeData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(EmailResendCodeSchema))
+    .use(zodValidator({ body: EmailResendCodeSchema }))
     .use(cors());
 
 export const emailConfirmCode = middy(async (event: EmailConfirmCodeData) => {
@@ -308,7 +308,7 @@ export const emailConfirmCode = middy(async (event: EmailConfirmCodeData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(EmailConfirmCodeSchema))
+    .use(zodValidator({ body: EmailConfirmCodeSchema }))
     .use(cors());
 
 export const forgotPassword = middy(async (event: EmailForgotPasswordData) => {
@@ -355,7 +355,7 @@ export const forgotPassword = middy(async (event: EmailForgotPasswordData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(EmailForgotPasswordSchema))
+    .use(zodValidator({ body: EmailForgotPasswordSchema }))
     .use(cors());
 
 export const confirmForgotPassword = middy(
@@ -407,7 +407,7 @@ export const confirmForgotPassword = middy(
 )
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(ConfirmForgotPasswordSchema))
+    .use(zodValidator({ body: ConfirmForgotPasswordSchema }))
     .use(cors());
 
 export const emailLogin = middy(async (event: EmailLoginData) => {
@@ -468,7 +468,7 @@ export const emailLogin = middy(async (event: EmailLoginData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(EmailLoginSchema))
+    .use(zodValidator({ body: EmailLoginSchema }))
     .use(cors());
 
 export const refreshTokens = middy(async (event: RefreshTokensData) => {
@@ -527,7 +527,7 @@ export const refreshTokens = middy(async (event: RefreshTokensData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(RefreshTokensSchema))
+    .use(zodValidator({ body: RefreshTokensSchema }))
     .use(cors());
 
 async function verifyGoogleToken(token: string) {
@@ -710,5 +710,5 @@ export const googleSignIn = middy(async (event: GoogleSignInData) => {
 })
     .use(httpJsonBodyParser())
     .use(requireBody())
-    .use(zodValidator(GoogleSignInSchema))
+    .use(zodValidator({ body: GoogleSignInSchema }))
     .use(cors());
