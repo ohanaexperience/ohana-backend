@@ -1,5 +1,5 @@
 getExperiences:
-    handler: src/experiences.getExperiences
+    handler: src/experiences/lambda/get.handler
     timeout: 29
     events:
         - http:

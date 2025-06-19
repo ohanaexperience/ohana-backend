@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { PostgresConfig } from "../database_factory";
+import { PostgresConfig } from "../";
 
 import {
     UsersQueryManager,
@@ -10,6 +10,8 @@ import {
     ExperiencesQueryManager,
     CategoriesQueryManager,
     SubCategoriesQueryManager,
+    TimeSlotsQueryManager,
+    AvailabilityQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -23,6 +25,8 @@ export default class Postgres {
     private _experiences?: ExperiencesQueryManager;
     private _categories?: CategoriesQueryManager;
     private _subCategories?: SubCategoriesQueryManager;
+    private _timeSlots?: TimeSlotsQueryManager;
+    private _availability?: AvailabilityQueryManager;
 
     constructor(config: PostgresConfig) {
         this.pool = new Pool(config);
@@ -73,6 +77,21 @@ export default class Postgres {
         }
         return this._subCategories;
     }
+
+    get timeSlots(): TimeSlotsQueryManager {
+        if (!this._timeSlots) {
+            this._timeSlots = new TimeSlotsQueryManager(this.instance);
+        }
+        return this._timeSlots;
+    }
+
+    get availability(): AvailabilityQueryManager {
+        if (!this._availability) {
+            this._availability = new AvailabilityQueryManager(this.instance);
+        }
+        return this._availability;
+    }
+
     async close(): Promise<void> {
         await this.pool.end();
     }

@@ -4,7 +4,7 @@ import httpHeaderNormalizer from "@middy/http-header-normalizer";
 
 import { APIGatewayEvent } from "aws-lambda";
 
-import DatabaseFactory from "@/database/database_factory";
+import { DatabaseFactory } from "@/database";
 import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";
 

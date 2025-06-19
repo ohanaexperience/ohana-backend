@@ -1,7 +1,7 @@
 import { eq, InferInsertModel } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { hostsTable, experiencesTable } from "@/db/schema";
+import { hostsTable } from "@/db/schema";
 
 export class HostsQueryManager {
     private db: NodePgDatabase;
@@ -40,13 +40,6 @@ export class HostsQueryManager {
         return await this.db
             .delete(hostsTable)
             .where(eq(hostsTable.id, userId));
-    }
-
-    public async getExperiences(hostId: string) {
-        return await this.db
-            .select()
-            .from(experiencesTable)
-            .where(eq(experiencesTable.hostId, userId));
     }
 }
 

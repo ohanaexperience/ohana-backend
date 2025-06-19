@@ -51,7 +51,7 @@ export const ageRangeEnum = pgEnum(
 );
 
 export const experiencesTable = pgTable("experiences", {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
     hostId: uuid("host_id")
         .references(() => hostsTable.id)
         .notNull(),
@@ -92,14 +92,14 @@ export const experiencesTable = pgTable("experiences", {
     autoCancelEnabled: boolean("auto_cancel_enabled").default(false),
     autoCancelHours: integer("auto_cancel_hours"),
 
-    coverImageUrl: text("cover_image_url").notNull(),
-    galleryImageUrls: text("gallery_image_urls").array().default([]).notNull(),
+    coverImageUrl: text("cover_image_url"),
+    galleryImageUrls: text("gallery_image_urls").array().default([]),
 
     includedItems: includedItemsEnum("included_items")
         .array()
         .default([])
         .notNull(),
-    whatToBring: text("what_to_bring").notNull(),
+    whatToBring: text("what_to_bring"),
     physicalRequirements: physicalRequirementsEnum(
         "physical_requirements"
     ).notNull(),
@@ -117,8 +117,8 @@ export const experiencesTable = pgTable("experiences", {
 });
 
 export const experienceAvailabilityTable = pgTable("experience_availability", {
-    id: serial("id").primaryKey(),
-    experienceId: integer("experience_id")
+    id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
+    experienceId: uuid("experience_id")
         .references(() => experiencesTable.id, { onDelete: "cascade" })
         .notNull(),
 
@@ -135,15 +135,15 @@ export const experienceAvailabilityTable = pgTable("experience_availability", {
 export const experienceTimeSlotsTable = pgTable(
     "experience_time_slots",
     {
-        id: serial("id").primaryKey(),
-        experienceId: integer("experience_id")
+        id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
+        experienceId: uuid("experience_id")
             .references(() => experiencesTable.id, { onDelete: "cascade" })
             .notNull(),
-        availabilityId: integer("availability_id")
+        availabilityId: uuid("availability_id")
             .references(() => experienceAvailabilityTable.id)
             .notNull(),
 
-        slotDatetime: timestamp("slot_datetime", {
+        slotDateTime: timestamp("slot_datetime", {
             withTimezone: true,
         }).notNull(),
         localDate: timestamp("local_date", { mode: "date" }).notNull(),
@@ -157,7 +157,7 @@ export const experienceTimeSlotsTable = pgTable(
     (table) => [
         index("idx_time_slots_experience_datetime").on(
             table.experienceId,
-            table.slotDatetime
+            table.slotDateTime
         ),
         index("idx_time_slots_local_date").on(table.localDate),
         index("idx_time_slots_status").on(table.status),

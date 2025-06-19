@@ -8,8 +8,8 @@ export const requireBody = () => ({
             handler.response = {
                 statusCode: 400,
                 body: JSON.stringify({
-                    error: ERRORS.MISSING_REQUEST_BODY.CODE,
-                    message: ERRORS.MISSING_REQUEST_BODY.MESSAGE,
+                    error: ERRORS.REQUEST_BODY.MISSING.CODE,
+                    message: ERRORS.REQUEST_BODY.MISSING.MESSAGE,
                 }),
             };
 

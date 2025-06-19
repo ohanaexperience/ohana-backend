@@ -10,7 +10,7 @@ import { APIGatewayEvent } from "aws-lambda";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import DatabaseFactory from "./database/database_factory";
+import { DatabaseFactory } from "@/database";
 
 import { decodeToken } from "./utils/jwt";
 import {
@@ -75,18 +75,39 @@ export const getProfile = middy(async (event: APIGatewayEvent) => {
         }
 
         const { id, createdAt, updatedAt, ...publicUserInfo } = user;
-
         const cleanedUserInfo = Object.fromEntries(
             Object.entries(publicUserInfo).filter(
                 ([_, value]) => value !== null
             )
         );
 
-        console.log("User profile retrieved:", cleanedUserInfo);
+        let hostData = null;
+        const hostVerification = await db.hostVerifications.getByUserId(sub);
+
+        if (hostVerification && hostVerification.status === "approved") {
+            const host = await db.hosts.getByUserId(sub);
+
+            if (host) {
+                const { id, createdAt, updatedAt, ...publicHostInfo } = host;
+
+                hostData = Object.fromEntries(
+                    Object.entries(publicHostInfo).filter(
+                        ([_, value]) => value !== null
+                    )
+                );
+            }
+        }
+
+        const profileData = {
+            ...cleanedUserInfo,
+            ...(hostData && { ...hostData, isHost: true }),
+        };
+
+        console.log("User profile retrieved:", profileData);
 
         return {
             statusCode: 200,
-            body: JSON.stringify(cleanedUserInfo),
+            body: JSON.stringify(profileData),
         };
     } catch (err: unknown) {
         console.error("Error getting user profile:", err);

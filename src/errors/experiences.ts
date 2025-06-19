@@ -27,12 +27,35 @@ import {
     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
     EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
+    EXPERIENCE_IMAGE_TYPES,
+    EXPERIENCE_IMAGES_MIN_COUNT,
+    EXPERIENCE_IMAGES_MAX_COUNT,
+    EXPERIENCE_GALLERY_IMAGE_MIN_COUNT,
+    EXPERIENCE_GALLERY_IMAGE_MAX_COUNT,
 } from "@/constants/experiences";
 import { CATEGORIES, SUB_CATEGORIES } from "@/constants/categories";
 import { IANA_TIMEZONES } from "@/constants/shared";
 
 export default {
     EXPERIENCE: {
+        NOT_FOUND: {
+            CODE: "EXPERIENCE_NOT_FOUND",
+            MESSAGE: "Experience not found.",
+        },
+        ID: {
+            MISSING: {
+                CODE: "MISSING_EXPERIENCE_ID",
+                MESSAGE: "Experience ID is required.",
+            },
+            INVALID_TYPE: {
+                CODE: "INVALID_EXPERIENCE_ID_TYPE",
+                MESSAGE: "Experience ID must be a string.",
+            },
+            INVALID_UUID: {
+                CODE: "INVALID_EXPERIENCE_ID_UUID",
+                MESSAGE: "Experience ID must be a valid UUID.",
+            },
+        },
         TITLE: {
             MISSING: {
                 CODE: "MISSING_EXPERIENCE_TITLE",
@@ -432,6 +455,40 @@ export default {
                 MESSAGE: "Auto cancel enabled must be a boolean.",
             },
         },
+        IMAGES: {
+            MISSING: {
+                CODE: "MISSING_EXPERIENCE_IMAGES",
+                MESSAGE: "Experience images are required.",
+            },
+            INVALID_TYPE: {
+                CODE: "INVALID_EXPERIENCE_IMAGES_TYPE",
+                MESSAGE: "Experience images must be an array.",
+            },
+            INVALID: {
+                CODE: "INVALID_EXPERIENCE_IMAGES",
+                MESSAGE: "Invalid cover image URL.",
+            },
+            MIN_COUNT: {
+                CODE: "INVALID_EXPERIENCE_IMAGES_MIN_COUNT",
+                MESSAGE: `At least ${EXPERIENCE_IMAGES_MIN_COUNT} image is required.`,
+            },
+            MAX_COUNT: {
+                CODE: "INVALID_EXPERIENCE_IMAGES_MAX_COUNT",
+                MESSAGE: `At most ${EXPERIENCE_IMAGES_MAX_COUNT} images are allowed.`,
+            },
+        },
+        IMAGE_TYPE: {
+            MISSING: {
+                CODE: "MISSING_EXPERIENCE_IMAGE_TYPE",
+                MESSAGE: "Image type is required.",
+            },
+            INVALID_TYPE: {
+                CODE: "INVALID_EXPERIENCE_IMAGE_TYPE",
+                MESSAGE: `Image type must be one of the following: ${EXPERIENCE_IMAGE_TYPES.map(
+                    (type) => type
+                ).join(", ")}`,
+            },
+        },
         COVER_IMAGE_URL: {
             MISSING: {
                 CODE: "MISSING_EXPERIENCE_COVER_IMAGE_URL",
@@ -691,6 +748,14 @@ export default {
                 CODE: "INVALID_EXPERIENCE_AVAILABILITY_SPECIFIC_TIME_VALUE",
                 MESSAGE: `Invalid specific time. Must be in the format of HH:MM.`,
             },
+        },
+        FORBIDDEN_DELETE: {
+            CODE: "EXPERIENCE_FORBIDDEN_DELETE",
+            MESSAGE: "You do not have permission to delete this experience.",
+        },
+        FORBIDDEN_UPDATE: {
+            CODE: "EXPERIENCE_FORBIDDEN_UPDATE",
+            MESSAGE: "You do not have permission to update this experience.",
         },
     },
 };

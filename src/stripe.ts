@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import stripe from "stripe";
 import { APIGatewayEvent } from "aws-lambda";
 
-import DatabaseFactory from "./database/database_factory";
+import { DatabaseFactory } from "@/database";
 import { decodeToken } from "./utils/jwt";
 import ERRORS from "@/errors";
 

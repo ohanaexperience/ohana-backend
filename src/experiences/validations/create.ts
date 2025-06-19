@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { APIGatewayEvent } from "aws-lambda";
 
-import ERRORS from "@/errors";
-import { imageUrlSchema } from "@/validations/shared";
-
 import {
     EXPERIENCE_TITLE_MIN_LENGTH,
     EXPERIENCE_TITLE_MAX_LENGTH,
@@ -33,97 +30,22 @@ import {
     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
     EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
-    EXPERIENCE_STATUS,
 } from "@/constants/experiences";
-import { CATEGORIES, SUB_CATEGORIES } from "@/constants/categories";
 import { LANGUAGES, IANA_TIMEZONES } from "@/constants/shared";
+import { imageUrlSchema } from "@/validations/shared";
+import ERRORS from "@/errors";
 
-export const ExperienceSearchSchema = z
-    .object({
-        // Text searches
-        title: z.string().optional(),
-        tagline: z.string().optional(),
-        description: z.string().optional(),
-        startingLocationAddress: z.string().optional(),
-        endingLocationAddress: z.string().optional(),
-        whatToBring: z.string().optional(),
-
-        // Exact matches
-        hostId: z.string().uuid().optional(),
-        categoryId: z.coerce.number().int().positive().optional(),
-        subCategoryId: z.coerce.number().int().positive().optional(),
-        experienceType: z
-            .enum(EXPERIENCE_TYPE as [string, ...string[]])
-            .optional(),
-        cancellationPolicy: z
-            .enum(EXPERIENCE_CANCELLATION_POLICY as [string, ...string[]])
-            .optional(),
-        physicalRequirements: z
-            .enum(EXPERIENCE_PHYSICAL_REQUIREMENTS as [string, ...string[]])
-            .optional(),
-        ageRange: z
-            .enum(EXPERIENCE_AGE_RECOMMENDATIONS as [string, ...string[]])
-            .optional(),
-        status: z.enum(EXPERIENCE_STATUS as [string, ...string[]]).optional(),
-        isPublic: z.coerce.boolean().optional(),
-
-        // Range queries
-        minPrice: z.coerce.number().int().positive().optional(),
-        maxPrice: z.coerce.number().int().positive().optional(),
-        minGuests: z.coerce.number().int().positive().optional(),
-        maxGuests: z.coerce.number().int().positive().optional(),
-        minDurationHours: z.coerce.number().int().positive().optional(),
-        maxDurationHours: z.coerce.number().int().positive().optional(),
-
-        // Location queries
-        latitude: z.coerce.number().optional(),
-        longitude: z.coerce.number().optional(),
-        radiusKm: z.coerce.number().int().positive().optional(),
-    })
-    .refine(
-        (data) => {
-            if (
-                data.minPrice &&
-                data.maxPrice &&
-                data.minPrice > data.maxPrice
-            ) {
-                return false;
-            }
-
-            if (
-                data.minGuests &&
-                data.maxGuests &&
-                data.minGuests > data.maxGuests
-            ) {
-                return false;
-            }
-
-            if (
-                data.minDurationHours &&
-                data.maxDurationHours &&
-                data.minDurationHours > data.maxDurationHours
-            ) {
-                return false;
-            }
-
-            return true;
-        },
-        {
-            message:
-                "Invalid range: minimum value cannot be greater than maximum value",
-        }
-    );
-
+// Schemas
 export const CreateExperienceSchema = z.object({
     title: z
         .string({
             required_error: ERRORS.EXPERIENCE.TITLE.MISSING.CODE,
             invalid_type_error: ERRORS.EXPERIENCE.TITLE.INVALID_TYPE.CODE,
         })
-        .min(
-            EXPERIENCE_TITLE_MIN_LENGTH,
-            ERRORS.EXPERIENCE.TITLE.MIN_LENGTH.CODE
-        )
+        // .min(
+        //     EXPERIENCE_TITLE_MIN_LENGTH,
+        //     ERRORS.EXPERIENCE.TITLE.MIN_LENGTH.CODE
+        // )
         .max(
             EXPERIENCE_TITLE_MAX_LENGTH,
             ERRORS.EXPERIENCE.TITLE.MAX_LENGTH.CODE
@@ -133,10 +55,10 @@ export const CreateExperienceSchema = z.object({
             required_error: ERRORS.EXPERIENCE.TAGLINE.MISSING.CODE,
             invalid_type_error: ERRORS.EXPERIENCE.TAGLINE.INVALID_TYPE.CODE,
         })
-        .min(
-            EXPERIENCE_TAGLINE_MIN_LENGTH,
-            ERRORS.EXPERIENCE.TAGLINE.MIN_LENGTH.CODE
-        )
+        // .min(
+        //     EXPERIENCE_TAGLINE_MIN_LENGTH,
+        //     ERRORS.EXPERIENCE.TAGLINE.MIN_LENGTH.CODE
+        // )
         .max(
             EXPERIENCE_TAGLINE_MAX_LENGTH,
             ERRORS.EXPERIENCE.TAGLINE.MAX_LENGTH.CODE
@@ -211,10 +133,10 @@ export const CreateExperienceSchema = z.object({
             required_error: ERRORS.EXPERIENCE.DESCRIPTION.MISSING.CODE,
             invalid_type_error: ERRORS.EXPERIENCE.DESCRIPTION.INVALID_TYPE.CODE,
         })
-        .min(
-            EXPERIENCE_DESCRIPTION_MIN_LENGTH,
-            ERRORS.EXPERIENCE.DESCRIPTION.MIN_LENGTH.CODE
-        )
+        // .min(
+        //     EXPERIENCE_DESCRIPTION_MIN_LENGTH,
+        //     ERRORS.EXPERIENCE.DESCRIPTION.MIN_LENGTH.CODE
+        // )
         .max(
             EXPERIENCE_DESCRIPTION_MAX_LENGTH,
             ERRORS.EXPERIENCE.DESCRIPTION.MAX_LENGTH.CODE
@@ -231,10 +153,10 @@ export const CreateExperienceSchema = z.object({
                         ERRORS.EXPERIENCE.STARTING_LOCATION.ADDRESS.INVALID_TYPE
                             .CODE,
                 })
-                .min(
-                    EXPERIENCE_STARTING_LOCATION_ADDRESS_MIN_LENGTH,
-                    ERRORS.EXPERIENCE.STARTING_LOCATION.ADDRESS.MIN_LENGTH.CODE
-                )
+                // .min(
+                //     EXPERIENCE_STARTING_LOCATION_ADDRESS_MIN_LENGTH,
+                //     ERRORS.EXPERIENCE.STARTING_LOCATION.ADDRESS.MIN_LENGTH.CODE
+                // )
                 .max(
                     EXPERIENCE_STARTING_LOCATION_ADDRESS_MAX_LENGTH,
                     ERRORS.EXPERIENCE.STARTING_LOCATION.ADDRESS.MAX_LENGTH.CODE
@@ -270,10 +192,10 @@ export const CreateExperienceSchema = z.object({
                         ERRORS.EXPERIENCE.ENDING_LOCATION.ADDRESS.INVALID_TYPE
                             .CODE,
                 })
-                .min(
-                    EXPERIENCE_ENDING_LOCATION_ADDRESS_MIN_LENGTH,
-                    ERRORS.EXPERIENCE.ENDING_LOCATION.ADDRESS.MIN_LENGTH.CODE
-                )
+                // .min(
+                //     EXPERIENCE_ENDING_LOCATION_ADDRESS_MIN_LENGTH,
+                //     ERRORS.EXPERIENCE.ENDING_LOCATION.ADDRESS.MIN_LENGTH.CODE
+                // )
                 .max(
                     EXPERIENCE_ENDING_LOCATION_ADDRESS_MAX_LENGTH,
                     ERRORS.EXPERIENCE.ENDING_LOCATION.ADDRESS.MAX_LENGTH.CODE
@@ -310,11 +232,11 @@ export const CreateExperienceSchema = z.object({
                         ERRORS.EXPERIENCE.MEETING_LOCATION.INSTRUCTIONS
                             .INVALID_TYPE.CODE,
                 })
-                .min(
-                    EXPERIENCE_MEETING_INSTRUCTIONS_MIN_LENGTH,
-                    ERRORS.EXPERIENCE.MEETING_LOCATION.INSTRUCTIONS.MIN_LENGTH
-                        .CODE
-                )
+                // .min(
+                //     EXPERIENCE_MEETING_INSTRUCTIONS_MIN_LENGTH,
+                //     ERRORS.EXPERIENCE.MEETING_LOCATION.INSTRUCTIONS.MIN_LENGTH
+                //         .CODE
+                // )
                 .max(
                     EXPERIENCE_MEETING_INSTRUCTIONS_MAX_LENGTH,
                     ERRORS.EXPERIENCE.MEETING_LOCATION.INSTRUCTIONS.MAX_LENGTH
@@ -528,29 +450,29 @@ export const CreateExperienceSchema = z.object({
         }
     ),
 
-    coverImageUrl: z
-        .string({
-            required_error: ERRORS.EXPERIENCE.COVER_IMAGE_URL.MISSING.CODE,
-            invalid_type_error:
-                ERRORS.EXPERIENCE.COVER_IMAGE_URL.INVALID_TYPE.CODE,
-        })
-        .url(ERRORS.EXPERIENCE.COVER_IMAGE_URL.INVALID.CODE),
-    galleryImageUrls: z
-        .array(
-            z
-                .string({
-                    required_error:
-                        ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.MISSING.CODE,
-                    invalid_type_error:
-                        ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.INVALID_TYPE.CODE,
-                })
-                .url(ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.INVALID.CODE),
-            {
-                invalid_type_error:
-                    ERRORS.EXPERIENCE.GALLERY_IMAGE_URLS.INVALID_TYPE.CODE,
-            }
-        )
-        .optional(),
+    // coverImageUrl: z
+    //     .string({
+    //         required_error: ERRORS.EXPERIENCE.COVER_IMAGE_URL.MISSING.CODE,
+    //         invalid_type_error:
+    //             ERRORS.EXPERIENCE.COVER_IMAGE_URL.INVALID_TYPE.CODE,
+    //     })
+    //     .url(ERRORS.EXPERIENCE.COVER_IMAGE_URL.INVALID.CODE),
+    // galleryImageUrls: z
+    //     .array(
+    //         z
+    //             .string({
+    //                 required_error:
+    //                     ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.MISSING.CODE,
+    //                 invalid_type_error:
+    //                     ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.INVALID_TYPE.CODE,
+    //             })
+    //             .url(ERRORS.EXPERIENCE.GALLERY_IMAGE_URL.INVALID.CODE),
+    //         {
+    //             invalid_type_error:
+    //                 ERRORS.EXPERIENCE.GALLERY_IMAGE_URLS.INVALID_TYPE.CODE,
+    //         }
+    //     )
+    //     .optional(),
 
     includedItems: z
         .array(
@@ -594,10 +516,10 @@ export const CreateExperienceSchema = z.object({
             invalid_type_error:
                 ERRORS.EXPERIENCE.WHAT_TO_BRING.INVALID_TYPE.CODE,
         })
-        .min(
-            EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH,
-            ERRORS.EXPERIENCE.WHAT_TO_BRING.MIN_LENGTH.CODE
-        )
+        // .min(
+        //     EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH,
+        //     ERRORS.EXPERIENCE.WHAT_TO_BRING.MIN_LENGTH.CODE
+        // )
         .max(
             EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH,
             ERRORS.EXPERIENCE.WHAT_TO_BRING.MAX_LENGTH.CODE
@@ -674,10 +596,10 @@ export const CreateExperienceSchema = z.object({
             invalid_type_error:
                 ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.INVALID_TYPE.CODE,
         })
-        .min(
-            EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
-            ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MIN_LENGTH.CODE
-        )
+        // .min(
+        //     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
+        //     ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MIN_LENGTH.CODE
+        // )
         .max(
             EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
             ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MAX_LENGTH.CODE
@@ -818,18 +740,18 @@ export const CreateExperienceSchema = z.object({
         }
     ),
 });
+export const CreateExperienceRequestSchema = z.object({
+    authorization: z.string({
+        required_error: ERRORS.AUTHORIZATION.MISSING.CODE,
+        invalid_type_error: ERRORS.AUTHORIZATION.INVALID_TYPE.CODE,
+    }),
+    ...CreateExperienceSchema.shape,
+});
 
-export type ExperienceSearchData = Omit<
-    APIGatewayEvent,
-    "queryStringParameters"
-> & {
-    queryStringParameters: z.infer<typeof ExperienceSearchSchema> | null;
-};
-export const UpdateExperienceSchema = CreateExperienceSchema.partial();
-
+// Types
 export type CreateExperienceData = Omit<APIGatewayEvent, "body"> & {
     body: z.infer<typeof CreateExperienceSchema>;
 };
-export type UpdateExperienceData = Omit<APIGatewayEvent, "body"> & {
-    body: z.infer<typeof UpdateExperienceSchema>;
-};
+export type CreateExperienceRequest = z.infer<
+    typeof CreateExperienceRequestSchema
+>;

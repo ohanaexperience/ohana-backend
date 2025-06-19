@@ -49,11 +49,11 @@ hostUpdateProfile:
 
 # Experiences
 hostCreateExperience:
-    handler: src/experiences.hostCreateExperience
+    handler: src/experiences/lambda/create.handler
     timeout: 29
     events:
         - http:
-              path: /v1/host/experience
+              path: /v1/host/experiences
               method: POST
               cors: true
               authorizer:
@@ -73,12 +73,60 @@ hostCreateExperience:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 hostGetExperiences:
-    handler: src/experiences.hostGetExperiences
+    handler: src/experiences/lambda/host_get.handler
     timeout: 29
     events:
         - http:
               path: /v1/host/experiences
               method: GET
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+
+hostUpdateExperience:
+    handler: src/experiences/lambda/update.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/{experienceId}
+              method: PUT
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+
+hostDeleteExperience:
+    handler: src/experiences/lambda/delete.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/{experienceId}
+              method: DELETE
               cors: true
               authorizer:
                   type: COGNITO_USER_POOLS
@@ -120,3 +168,29 @@ hostGetCategories:
         DB_PORT: ${env:POSTGRES_PORT}
         DB_USER: ${env:POSTGRES_USERNAME}
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+
+# Upload
+getExperienceImageUploadUrls:
+    handler: src/host.getExperienceImageUploadUrls
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/image/upload-url
+              method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}

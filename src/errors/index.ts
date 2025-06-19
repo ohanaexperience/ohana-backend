@@ -2,6 +2,8 @@ import { LANGUAGES } from "@/constants/shared";
 
 import baseErrors from "@/errors/base";
 import experienceErrors from "@/errors/experiences";
+import stripeErrors from "@/errors/stripe";
+import hostErrors from "@/errors/host";
 
 export default {
     ...baseErrors,
@@ -210,39 +212,7 @@ export default {
             MESSAGE: "Verification must be a string.",
         },
     },
-    STRIPE: {
-        VERIFICATION: {
-            SESSION_NOT_FOUND: {
-                CODE: "VERIFICATION_SESSION_NOT_FOUND",
-                MESSAGE: "No verification session found.",
-            },
-            FAILED_TO_CREATE: {
-                CODE: "FAILED_TO_CREATE_VERIFICATION_SESSION",
-                MESSAGE: "Failed to create verification session",
-            },
-            ALREADY_APPROVED: {
-                CODE: "VERIFICATION_ALREADY_APPROVED",
-                MESSAGE: "Verification already approved.",
-            },
-        },
-    },
-    HOST: {
-        MISSING: { CODE: "MISSING_HOST", MESSAGE: "Host is required." },
-        NOT_FOUND: { CODE: "HOST_NOT_FOUND", MESSAGE: "Host does not exist." },
-    },
-    HOST_VERIFICATION: {
-        MISSING: {
-            CODE: "MISSING_HOST_VERIFICATION",
-            MESSAGE: "Host verification is required.",
-        },
-        NOT_FOUND: {
-            CODE: "HOST_VERIFICATION_NOT_FOUND",
-            MESSAGE: "Host verification does not exist.",
-        },
-        NOT_VERIFIED: {
-            CODE: "HOST_NOT_VERIFIED",
-            MESSAGE: "Host is not verified.",
-        },
-    },
+    ...stripeErrors,
+    ...hostErrors,
     ...experienceErrors,
 };

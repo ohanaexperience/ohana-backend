@@ -6,7 +6,7 @@ import stripe from "stripe";
 
 import { APIGatewayEvent } from "aws-lambda";
 
-import DatabaseFactory from "./database/database_factory";
+import { DatabaseFactory } from "@/database";
 
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } = process.env;
 

@@ -2,7 +2,7 @@ import Postgres from "./postgres";
 
 export type PostgresConfig = {
     host: string;
-    port: string;
+    port: number;
     database: string;
     user: string;
     password: string;
@@ -13,7 +13,7 @@ export interface DatabaseConfig {
     postgres: PostgresConfig;
 }
 
-export default class DatabaseFactory {
+export class DatabaseFactory {
     static create(config: DatabaseConfig) {
         if (config.postgres) {
             return new Postgres(config.postgres);

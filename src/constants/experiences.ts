@@ -48,7 +48,7 @@ export const EXPERIENCE_CANCELLATION_POLICY = [
 
 // Group Size
 export const EXPERIENCE_GROUP_SIZE_MIN = 1;
-export const EXPERIENCE_GROUP_SIZE_MAX = 10;
+export const EXPERIENCE_GROUP_SIZE_MAX = 30;
 export const EXPERIENCE_GROUP_SIZE_AUTO_CANCEL_HOURS = 24;
 
 // Included Items
@@ -85,3 +85,15 @@ export const EXPERIENCE_DURATION_HOURS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // Experience Status
 export const EXPERIENCE_STATUS = ["draft", "published", "archived"];
+
+// Experience Gallery Images
+export const EXPERIENCE_GALLERY_IMAGE_MIN_COUNT = 1;
+export const EXPERIENCE_GALLERY_IMAGE_MAX_COUNT = 6;
+
+// Experience Images
+export const EXPERIENCE_IMAGES_MIN_COUNT = 1;
+export const EXPERIENCE_IMAGES_MAX_COUNT =
+    EXPERIENCE_GALLERY_IMAGE_MAX_COUNT + 1;
+
+// Experience Image Types
+export const EXPERIENCE_IMAGE_TYPES = ["cover", "gallery", "meeting-location"];

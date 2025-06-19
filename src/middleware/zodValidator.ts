@@ -29,23 +29,32 @@ const parseErrorCode = (errorCode: string) => {
 };
 
 interface ZodValidatorOptions {
+    headers?: ZodSchema;
     body?: ZodSchema;
     queryStringParameters?: ZodSchema;
+    pathParameters?: ZodSchema;
 }
 
 export const zodValidator = (options: ZodValidatorOptions) => {
     const before = async (request: Request) => {
         try {
-            if (!options.body && !options.queryStringParameters) {
+            const { headers, body, queryStringParameters, pathParameters } = options;
+
+            if (!headers && !body && !queryStringParameters && !pathParameters) {
                 throw new Error("No schema provided");
             }
 
-            if (options.body && options.queryStringParameters) {
-                throw new Error("Only one schema can be provided");
+            if (headers) {
+                const validatedHeaders = headers.parse(request.event.headers);
+
+                request.event = {
+                    ...request.event,
+                    headers: validatedHeaders,
+                };
             }
 
-            if (options.body) {
-                const validatedBody = options.body.parse(request.event.body);
+            if (body) {
+                const validatedBody = body.parse(request.event.body);
 
                 request.event = {
                     ...request.event,
@@ -53,9 +62,9 @@ export const zodValidator = (options: ZodValidatorOptions) => {
                 };
             }
 
-            if (options.queryStringParameters) {
+            if (queryStringParameters) {
                 const validatedQueryStringParameters =
-                    options.queryStringParameters.parse(
+                    queryStringParameters.parse(
                         request.event.queryStringParameters
                     );
 
@@ -63,6 +72,17 @@ export const zodValidator = (options: ZodValidatorOptions) => {
                     ...request.event,
                     queryStringParameters: validatedQueryStringParameters,
                 };
+            }
+
+            if (pathParameters) {
+                const validatedPathParameters = pathParameters.parse(
+                    request.event.pathParameters
+                );
+
+                request.event = {
+                    ...request.event,
+                    pathParameters: validatedPathParameters,
+                }
             }
         } catch (error) {
             if (error instanceof ZodError) {

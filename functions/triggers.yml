@@ -19,3 +19,25 @@ handleProfileImageUpload:
         DB_PORT: ${env:POSTGRES_PORT}
         DB_USER: ${env:POSTGRES_USERNAME}
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+
+handleExperienceImageUpload:
+    handler: src/triggers.handleExperienceImageUpload
+    events:
+        - s3:
+              bucket: ${self:custom.resourceNames.assetsBucket}
+              existing: true
+              event: s3:ObjectCreated:*
+              rules:
+                  - prefix: hosts/
+    vpc:
+        securityGroupIds:
+            - !Ref LambdaSecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        DB_NAME: ${self:custom.resourceNames.postgresDB}
+        DB_PORT: ${env:POSTGRES_PORT}
+        DB_USER: ${env:POSTGRES_USERNAME}
+        DB_PASSWORD: ${env:POSTGRES_PASSWORD}

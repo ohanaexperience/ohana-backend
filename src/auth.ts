@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { OAuth2Client } from "google-auth-library";
 import passwordGenerator from "generate-password";
 
-import DatabaseFactory from "./database/database_factory";
+import { DatabaseFactory } from "@/database";
 
 import {
     CognitoIdentityProviderClient,

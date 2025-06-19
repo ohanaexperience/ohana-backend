@@ -1,13 +1,41 @@
 import { USER_PROFILE_IMAGE_MIME_TYPES } from "@/constants/users";
 
 export default {
-    MISSING_REQUEST_BODY: {
-        CODE: "MISSING_REQUEST_BODY",
-        MESSAGE: "A request body is required.",
+    AUTHORIZATION: {
+        MISSING: {
+            CODE: "MISSING_AUTHORIZATION",
+            MESSAGE: "Authorization is required.",
+        },
+        INVALID_TYPE: {
+            CODE: "INVALID_AUTHORIZATION_TYPE",
+            MESSAGE: "Invalid authorization type. Must be a string.",
+        },
+        UNAUTHORIZED: {
+            CODE: "UNAUTHORIZED",
+            MESSAGE: "Unauthorized.",
+        },
     },
-    MISSING_QUERY_STRING_PARAMETERS: {
-        CODE: "MISSING_QUERY_STRING_PARAMETERS",
-        MESSAGE: "Query string parameters are required.",
+    REQUEST_BODY: {
+        MISSING: {
+            CODE: "MISSING_REQUEST_BODY",
+            MESSAGE: "A request body is required.",
+        },
+        INVALID_TYPE: {
+            CODE: "INVALID_REQUEST_BODY_TYPE",
+            MESSAGE: "Invalid request body type. Must be a JSON object.",
+        },
+    },
+    QUERY_STRING_PARAMETERS: {
+        MISSING: {
+            CODE: "MISSING_QUERY_STRING_PARAMETERS",
+            MESSAGE: "Query string parameters are required.",
+        },
+    },
+    PATH_PARAMETERS: {
+        MISSING: {
+            CODE: "MISSING_PATH_PARAMETERS",
+            MESSAGE: "Path parameters are required.",
+        },
     },
     MIME_TYPE: {
         MISSING: {

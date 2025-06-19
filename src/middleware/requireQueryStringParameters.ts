@@ -8,8 +8,8 @@ export const requireQueryStringParameters = () => ({
             handler.response = {
                 statusCode: 400,
                 body: JSON.stringify({
-                    error: ERRORS.MISSING_QUERY_STRING_PARAMETERS.CODE,
-                    message: ERRORS.MISSING_QUERY_STRING_PARAMETERS.MESSAGE,
+                    error: ERRORS.QUERY_STRING_PARAMETERS.MISSING.CODE,
+                    message: ERRORS.QUERY_STRING_PARAMETERS.MISSING.MESSAGE,
                 }),
             };
 
