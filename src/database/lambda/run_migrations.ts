@@ -24,7 +24,7 @@ const databaseController = new DatabaseController(db);
 export const handler = middy(async (event: APIGatewayEvent) => {
     console.log("event", event);
 
-    await databaseController.runMigrations();
+    return await databaseController.runMigrations();
 })
     .use(httpHeaderNormalizer())
     .use(cors());

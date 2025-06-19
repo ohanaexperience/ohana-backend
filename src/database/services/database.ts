@@ -17,7 +17,7 @@ export class DatabaseService {
             sql`CREATE EXTENSION IF NOT EXISTS postgis;`
         );
 
-        const migrationsFolder = path.join(__dirname, "../db/migrations");
+        const migrationsFolder = path.join(process.cwd(), "db/migrations");
 
         console.log("Running migrations...");
         await migrate(this.db.instance, { migrationsFolder: migrationsFolder });
