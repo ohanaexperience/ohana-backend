@@ -30,6 +30,10 @@ import {
     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
     EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
+    EXPERIENCE_IMAGE_TYPES,
+    EXPERIENCE_IMAGES_MIN_COUNT,
+    EXPERIENCE_IMAGES_MAX_COUNT,
+    EXPERIENCE_GALLERY_IMAGE_MAX_COUNT,
 } from "@/constants/experiences";
 import { LANGUAGES, IANA_TIMEZONES } from "@/constants/shared";
 import { imageUrlSchema } from "@/validations/shared";
@@ -242,7 +246,7 @@ export const CreateExperienceSchema = z.object({
                     ERRORS.EXPERIENCE.MEETING_LOCATION.INSTRUCTIONS.MAX_LENGTH
                         .CODE
                 ),
-            imageUrl: imageUrlSchema.optional(),
+            // imageUrl: imageUrlSchema.optional(),
         },
         {
             required_error: ERRORS.EXPERIENCE.MEETING_LOCATION.MISSING.CODE,
@@ -702,7 +706,8 @@ export const CreateExperienceSchema = z.object({
                     message:
                         ERRORS.EXPERIENCE.AVAILABILITY_DAYS_OF_WEEK
                             .DUPLICATE_VALUES.CODE,
-                }),
+                })
+                .optional(),
             timeSlots: z
                 .array(
                     z
@@ -739,6 +744,83 @@ export const CreateExperienceSchema = z.object({
                 ERRORS.EXPERIENCE.AVAILABILITY.INVALID_TYPE.CODE,
         }
     ),
+    images: z
+        .array(
+            z.object({
+                mimeType: z
+                    .string({
+                        required_error: "MISSING_MIME_TYPE",
+                        invalid_type_error: "INVALID_MIME_TYPE_TYPE",
+                    })
+                    .refine(
+                        (mimeType) => {
+                            return (
+                                mimeType.includes("/") &&
+                                mimeType.startsWith("image/")
+                            );
+                        },
+                        {
+                            message: "INVALID_MIME_TYPE",
+                        }
+                    ),
+                imageType: z.enum(
+                    EXPERIENCE_IMAGE_TYPES as [string, ...string[]],
+                    {
+                        required_error:
+                            ERRORS.EXPERIENCE.IMAGE_TYPE.MISSING.CODE,
+                        invalid_type_error:
+                            ERRORS.EXPERIENCE.IMAGE_TYPE.INVALID_TYPE.CODE,
+                    }
+                ),
+            }),
+            {
+                required_error: ERRORS.EXPERIENCE.IMAGES.MISSING.CODE,
+                invalid_type_error: ERRORS.EXPERIENCE.IMAGES.INVALID_TYPE.CODE,
+            }
+        )
+        .min(
+            EXPERIENCE_IMAGES_MIN_COUNT,
+            ERRORS.EXPERIENCE.IMAGES.MIN_COUNT.CODE
+        )
+        .max(
+            EXPERIENCE_IMAGES_MAX_COUNT,
+            ERRORS.EXPERIENCE.IMAGES.MAX_COUNT.CODE
+        )
+        .refine(
+            (images) => {
+                const galleryImages = images.filter(
+                    (img) => img.imageType === "gallery"
+                );
+                return (
+                    galleryImages.length <= EXPERIENCE_GALLERY_IMAGE_MAX_COUNT
+                );
+            },
+            {
+                message: `At most ${EXPERIENCE_GALLERY_IMAGE_MAX_COUNT} gallery images are allowed.`,
+            }
+        )
+        .refine(
+            (images) => {
+                const coverImages = images.filter(
+                    (img) => img.imageType === "cover"
+                );
+                return coverImages.length <= 1;
+            },
+            {
+                message: "At most 1 cover image is allowed.",
+            }
+        )
+        .refine(
+            (images) => {
+                const meetingLocationImages = images.filter(
+                    (img) => img.imageType === "meeting-location"
+                );
+                return meetingLocationImages.length <= 1;
+            },
+            {
+                message: "At most 1 meeting location image is allowed.",
+            }
+        ),
 });
 export const CreateExperienceRequestSchema = z.object({
     authorization: z.string({

@@ -1,18 +1,11 @@
-publicGetExperiences:
-    handler: src/experiences/lambda/public/getExperiences.handler
+publicGetCategories:
+    handler: src/categories/lambda/public/getCategories.handler
     timeout: 29
-    # reservedConcurrency: 10
     events:
         - http:
-              path: /v1/experiences/public
+              path: /v1/categories/public
               method: GET
               cors: true
-              #   throttle:
-              #       rate: 50
-              #       burst: 100
-              #   caching:
-              #       enabled: true
-              #       ttlInSeconds: 300
     vpc:
         securityGroupIds:
             - !Ref LambdaSecurityGroup
@@ -25,16 +18,13 @@ publicGetExperiences:
         DB_PORT: ${env:POSTGRES_PORT}
         DB_USER: ${env:POSTGRES_USERNAME}
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
-        # CACHE_TTL: 300
-        # MAX_RESULTS_PER_REQUEST: 50
-        # ENABLE_ANALYTICS: true
 
-getExperiences:
-    handler: src/experiences/lambda/user/getExperiences.handler
+getCategories:
+    handler: src/categories/lambda/authenticated/getCategories.handler
     timeout: 29
     events:
         - http:
-              path: /v1/experiences
+              path: /v1/categories
               method: GET
               cors: true
               authorizer:

@@ -1,8 +1,6 @@
 import { CategoryServiceOptions } from "../types";
 
 import Postgres from "@/database/postgres";
-import { decodeToken } from "@/utils";
-import ERRORS from "@/errors";
 
 export class CategoryService {
     private readonly db: Postgres;
@@ -11,19 +9,7 @@ export class CategoryService {
         this.db = database;
     }
 
-    async hostGetCategories(request: { authorization: string }) {
-        const { authorization } = request;
-
-        const { sub } = decodeToken(authorization);
-
-        console.log("sub", sub);
-
-        const host = await this.db.hosts.getByUserId(sub);
-
-        if (!host) {
-            throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
-        }
-
+    async getCategories() {
         const categories = await this.db.categories.getAll();
         const subCategories = await this.db.subCategories.getAll();
         const subCategoriesByParent = new Map();

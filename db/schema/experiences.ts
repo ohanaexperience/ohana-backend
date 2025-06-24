@@ -124,7 +124,7 @@ export const experienceAvailabilityTable = pgTable("experience_availability", {
 
     startDate: timestamp("start_date", { mode: "date" }).notNull(),
     endDate: timestamp("end_date", { mode: "date" }),
-    daysOfWeek: integer("days_of_week").array().notNull(),
+    daysOfWeek: integer("days_of_week").array(),
     timeSlots: text("time_slots").array().notNull(),
     maxCapacity: integer("max_capacity").default(1),
     isActive: boolean("is_active").default(true),

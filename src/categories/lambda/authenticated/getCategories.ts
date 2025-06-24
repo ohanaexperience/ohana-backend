@@ -23,13 +23,9 @@ const db = DatabaseFactory.create({
 const categoryController = new CategoryController({ database: db });
 
 export const handler = middy(async (event: APIGatewayEvent) => {
-    const { authorization } = event.headers;
-
     console.log("event", event);
 
-    return await categoryController.hostGetCategories({
-        authorization: authorization!,
-    });
+    return await categoryController.getCategories();
 })
     .use(httpHeaderNormalizer())
     .use(cors());

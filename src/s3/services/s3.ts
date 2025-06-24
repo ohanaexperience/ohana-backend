@@ -1,20 +1,17 @@
 import dayjs from "dayjs";
-import { v4 as uuidv4 } from "uuid";
 import { extension } from "mime-types";
 
 import { S3Event } from "aws-lambda";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-import {
-    GetProfileImageUploadUrlRequest,
-    GetExperienceImageUploadUrlsRequest,
-} from "../validations";
-import { S3ServiceOptions } from "../types";
+import { GetProfileImageUploadUrlRequest } from "../validations";
+import { S3ServiceOptions, ImageObject } from "../types";
 
 import Postgres from "@/database/postgres";
 import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";
+import { EXPERIENCE_IMAGE_TYPES } from "@/constants/experiences";
 
 export class S3Service {
     private readonly db: Postgres;
@@ -32,7 +29,6 @@ export class S3Service {
         this.config = config;
     }
 
-    // Generate upload urls
     async getProfileImageUploadUrl(request: GetProfileImageUploadUrlRequest) {
         const { authorization, mimeType } = request;
 
@@ -59,81 +55,30 @@ export class S3Service {
         };
     }
 
-    async hostGetExperienceImageUploadUrls(
-        request: GetExperienceImageUploadUrlsRequest
-    ) {
-        const { authorization, experienceId, images } = request;
+    async getExperienceImageUploadUrls(opts: {
+        authorization: string;
+        experienceId: string;
+        images: ImageObject[];
+    }) {
+        const { authorization, experienceId, images } = opts;
 
-        const { sub } = decodeToken(authorization);
+        const { sub: userId } = decodeToken(authorization);
 
-        const experience = await this.db.experiences.getById(experienceId);
-
-        if (!experience) {
-            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
-        }
-
-        const coverImages = images.filter((img) => img.imageType === "cover");
-        const galleryImages = images.filter(
-            (img) => img.imageType === "gallery"
-        );
-        const meetingLocationImages = images.filter(
-            (img) => img.imageType === "meeting-location"
-        );
-
-        const coverUploadResults = await Promise.allSettled(
-            coverImages.map((image) =>
+        const uploadUrls = await Promise.all(
+            images.map((image) =>
                 this.generateUploadUrl({
                     image,
                     experienceId,
-                    userId: sub,
-                    imageType: "cover",
+                    userId,
+                    imageType: image.imageType,
                 })
             )
         );
 
-        const galleryUploadResults = await Promise.allSettled(
-            galleryImages.map((image) =>
-                this.generateUploadUrl({
-                    image,
-                    experienceId,
-                    userId: sub,
-                    imageType: "gallery",
-                })
-            )
-        );
-
-        const meetingLocationUploadResults = await Promise.allSettled(
-            meetingLocationImages.map((image) =>
-                this.generateUploadUrl({
-                    image,
-                    experienceId,
-                    userId: sub,
-                    imageType: "meeting-location",
-                })
-            )
-        );
-
-        // Extract successful uploads
-        const coverUploadUrl =
-            coverUploadResults.map(
-                (result) => (result as PromiseFulfilledResult<any>).value
-            )[0] || null;
-
-        const galleryUploadUrls = galleryUploadResults.map(
-            (result) => (result as PromiseFulfilledResult<any>).value
-        );
-
-        const meetingLocationUploadUrls = meetingLocationUploadResults.map(
-            (result) => (result as PromiseFulfilledResult<any>).value
-        );
-
-        return {
-            coverUploadUrl,
-            ...(galleryUploadUrls.length > 0 && { galleryUploadUrls }),
-            ...(meetingLocationUploadUrls.length > 0 && {
-                meetingLocationUploadUrls,
-            }),
-        };
+        return images.map((image, index) => ({
+            ...image,
+            uploadUrl: uploadUrls[index],
+        }));
     }
 
     private generateKeyPrefix(
@@ -157,13 +102,13 @@ export class S3Service {
         userId,
         imageType,
     }: {
-        image: { mimeType: string };
+        image: ImageObject;
         experienceId: string;
         userId: string;
         imageType: string;
     }) {
         const fileExtension = extension(image.mimeType);
-        const fileName = `${uuidv4()}.${fileExtension}`;
+        const fileName = `${image.id}.${fileExtension}`;
         const keyPrefix = this.generateKeyPrefix(
             userId,
             experienceId,
@@ -176,17 +121,16 @@ export class S3Service {
             Key: key,
             ContentType: image.mimeType,
             Metadata: {
+                imageId: image.id,
                 userId,
                 imageType,
                 uploadedAt: dayjs().toISOString(),
             },
         });
 
-        const uploadUrl = await getSignedUrl(this.s3Client, command, {
+        return await getSignedUrl(this.s3Client, command, {
             expiresIn: 900,
         });
-
-        return uploadUrl;
     }
 
     // Triggers
@@ -208,34 +152,45 @@ export class S3Service {
 
         const { imageType, experienceId, imageUrl } = parsedEvent;
 
-        if (imageType === "cover") {
-            await this.db.experiences.update(experienceId, {
-                coverImageUrl: imageUrl,
-                updatedAt: new Date(),
-            });
-        } else if (imageType === "gallery") {
-            const experience = await this.db.experiences.getById(experienceId);
+        const experience = await this.db.experiences.getById(experienceId);
 
-            if (!experience) {
-                throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
-            }
+        if (!experience) {
+            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
+        }
 
-            const galleryImageUrls = experience.galleryImageUrls || [];
+        switch (imageType) {
+            case "cover":
+                await this.db.experiences.update(experienceId, {
+                    coverImageUrl: imageUrl,
+                    updatedAt: new Date(),
+                });
+                break;
+            case "gallery":
+                const galleryImageUrls = experience.galleryImageUrls || [];
 
-            await this.db.experiences.update(experienceId, {
-                galleryImageUrls: [...galleryImageUrls, imageUrl],
-            });
-        } else if (imageType === "meeting-location") {
-            const experience = await this.db.experiences.getById(experienceId);
-
-            await this.db.experiences.update(experienceId, {
-                meetingLocation: { ...experience.meetingLocation!, imageUrl },
-                updatedAt: new Date(),
-            });
+                await this.db.experiences.update(experienceId, {
+                    galleryImageUrls: [...galleryImageUrls, imageUrl],
+                });
+                break;
+            case "meeting-location":
+                await this.db.experiences.update(experienceId, {
+                    meetingLocation: {
+                        ...experience.meetingLocation!,
+                        imageUrl,
+                    },
+                    updatedAt: new Date(),
+                });
+                break;
         }
     }
 
-    private parseS3Event(request: S3Event) {
+    private parseS3Event(request: S3Event): {
+        type: "profile" | "experience";
+        userId: string;
+        experienceId: string;
+        imageType: string;
+        imageUrl: string;
+    } {
         const record = request.Records[0];
         const { awsRegion: region } = record;
         const { name: bucket } = record.s3.bucket;
@@ -246,49 +201,75 @@ export class S3Service {
         const imageUrl = `https://${assetsDomain}/${key}`;
 
         const keyParts = key.split("/");
-
-        // Base params common to both types
         const baseParams = { region, bucket, key, imageUrl, assetsDomain };
 
-        const isProfilePattern =
+        const uploadType = this.determineUploadType(keyParts);
+
+        switch (uploadType) {
+            case "profile":
+                return this.parseProfileImageEvent(keyParts, baseParams);
+            case "experience":
+                return this.parseExperienceImageEvent(keyParts, baseParams);
+            default:
+                throw new Error(`Unsupported S3 key pattern: ${key}`);
+        }
+    }
+
+    private determineUploadType(keyParts: string[]) {
+        if (this.isProfileImagePattern(keyParts)) {
+            return "profile";
+        }
+
+        if (this.isExperienceImagePattern(keyParts)) {
+            return "experience";
+        }
+
+        return null;
+    }
+
+    private isProfileImagePattern(keyParts: string[]): boolean {
+        return (
+            keyParts.length >= 4 &&
             keyParts[0] === "users" &&
             keyParts[2] === "profile" &&
-            keyParts[3] === "images";
-        if (isProfilePattern) {
-            return {
-                ...baseParams,
-                type: "profile" as const,
-                userId: keyParts[1],
-            };
-        }
+            keyParts[3] === "images"
+        );
+    }
 
-        const isExperiencePattern =
+    private isExperienceImagePattern(keyParts: string[]): boolean {
+        return (
+            keyParts.length >= 6 &&
             keyParts[0] === "hosts" &&
             keyParts[2] === "experiences" &&
-            keyParts[4] === "images";
-        if (isExperiencePattern) {
-            const imageType = keyParts[5];
+            keyParts[4] === "images"
+        );
+    }
 
-            if (
-                imageType !== "cover" &&
-                imageType !== "gallery" &&
-                imageType !== "meeting-location"
-            ) {
-                throw new Error(ERRORS.EXPERIENCE.IMAGES.INVALID_TYPE.CODE);
-            }
+    private parseProfileImageEvent(keyParts: string[], baseParams: any) {
+        const userId = keyParts[1];
 
-            return {
-                ...baseParams,
-                type: "experience" as const,
-                userId: keyParts[1],
-                experienceId: keyParts[3],
-                imageType: imageType as
-                    | "cover"
-                    | "gallery"
-                    | "meeting-location",
-            };
+        return {
+            ...baseParams,
+            type: "profile",
+            userId,
+        };
+    }
+
+    private parseExperienceImageEvent(keyParts: string[], baseParams: any) {
+        const userId = keyParts[1];
+        const experienceId = keyParts[3];
+        const imageType = keyParts[5];
+
+        if (!EXPERIENCE_IMAGE_TYPES.includes(imageType)) {
+            throw new Error(ERRORS.EXPERIENCE.IMAGES.INVALID_TYPE.CODE);
         }
 
-        throw new Error(`Unsupported S3 key pattern: ${key}`);
+        return {
+            ...baseParams,
+            type: "experience",
+            userId,
+            experienceId,
+            imageType,
+        };
     }
 }

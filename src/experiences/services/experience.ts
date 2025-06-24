@@ -1,26 +1,41 @@
 import dayjs from "dayjs";
+import { v4 as uuidv4 } from "uuid";
 
 import {
     CreateExperienceRequest,
     DeleteExperienceRequest,
-    ExperienceSearchRequest,
+    PublicExperienceSearchRequest,
+    UserExperienceSearchRequest,
     UpdateExperienceRequest,
 } from "../validations";
 import { ExperienceServiceOptions } from "../types";
 
 import Postgres from "@/database/postgres";
+import { S3Service } from "@/s3/services/s3";
 import { decodeToken, generateTimeSlotsFromAvailability } from "@/utils";
 import ERRORS from "@/errors";
 
 export class ExperienceService {
     private readonly db: Postgres;
+    private readonly s3Service?: S3Service;
 
-    constructor({ database }: ExperienceServiceOptions) {
+    constructor({ database, s3Service }: ExperienceServiceOptions) {
         this.db = database;
+
+        if (s3Service) {
+            this.s3Service = s3Service;
+        }
+    }
+
+    // Public User
+    async publicGetExperiences(request: PublicExperienceSearchRequest) {
+        const { ...queryParams } = request;
+
+        return await this.db.experiences.searchExperiences(queryParams);
     }
 
     // Authenticated User
-    async getExperiences(request: ExperienceSearchRequest) {
+    async userGetExperiences(request: UserExperienceSearchRequest) {
         const { authorization, ...queryParams } = request;
 
         const { sub } = decodeToken(authorization);
@@ -72,7 +87,12 @@ export class ExperienceService {
             durationHours,
             timezone,
             availability,
+            images,
         } = request;
+
+        if (!this.s3Service) {
+            throw new Error("S3 service is required.");
+        }
 
         const { sub } = decodeToken(authorization);
 
@@ -122,7 +142,6 @@ export class ExperienceService {
             endingLocation: [endingLocation.longitude, endingLocation.latitude],
             meetingLocation: {
                 instructions: meetingLocation.instructions,
-                imageUrl: meetingLocation.imageUrl!,
             },
             pricePerPerson,
             ...(groupDiscounts && {
@@ -141,8 +160,6 @@ export class ExperienceService {
             minGuests: groupSize.minGuests,
             maxGuests: groupSize.maxGuests,
             autoCancelEnabled: groupSize.autoCancelEnabled,
-            // coverImageUrl,
-            // ...(galleryImageUrls && { galleryImageUrls }),
             includedItems,
             ...(whatToBring && { whatToBring }),
             physicalRequirements,
@@ -156,7 +173,9 @@ export class ExperienceService {
 
         const createdAvailability = await this.db.availability.create({
             startDate: new Date(availability.startDate),
-            daysOfWeek: availability.daysOfWeek,
+            ...(availability.daysOfWeek && {
+                daysOfWeek: availability.daysOfWeek,
+            }),
             timeSlots: availability.timeSlots,
             experienceId: createdExperience.id,
             maxCapacity: groupSize.maxGuests,
@@ -172,10 +191,14 @@ export class ExperienceService {
                 availabilityId: createdAvailability.id,
                 availability: {
                     startDate: dayjs().tz(timezone).toDate(),
-                    endDate: availability.endDate
-                        ? dayjs(availability.endDate).tz(timezone).toDate()
-                        : undefined,
-                    daysOfWeek: availability.daysOfWeek,
+                    ...(availability.endDate && {
+                        endDate: dayjs(availability.endDate)
+                            .tz(timezone)
+                            .toDate(),
+                    }),
+                    ...(availability.daysOfWeek && {
+                        daysOfWeek: availability.daysOfWeek,
+                    }),
                     timeSlots: availability.timeSlots,
                     maxCapacity: groupSize.maxGuests,
                 },
@@ -184,7 +207,17 @@ export class ExperienceService {
             1
         );
 
-        return createdExperience;
+        const imagesWithIds = images.map((image) => ({
+            ...image,
+            id: uuidv4(),
+        }));
+        const uploadUrls = await this.s3Service.getExperienceImageUploadUrls({
+            authorization,
+            experienceId: createdExperience.id,
+            images: imagesWithIds,
+        });
+
+        return { createdExperience, uploadUrls };
     }
 
     async hostUpdateExperience(request: UpdateExperienceRequest) {

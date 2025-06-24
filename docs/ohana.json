@@ -34,6 +34,10 @@
         {
             "name": "Reservations",
             "description": "Reservation endpoints"
+        },
+        {
+            "name": "Categories",
+            "description": "Category endpoints"
         }
     ],
     "paths": {
@@ -3088,11 +3092,11 @@
                 }
             }
         },
-        "/v1/host/categories": {
+        "/v1/categories": {
             "get": {
-                "tags": ["Host"],
+                "tags": ["Categories"],
                 "summary": "Get All Categories",
-                "description": "Retrieves all categories with their subcategories for authenticated hosts",
+                "description": "Retrieves all categories with their subcategories for authenticated users.",
                 "operationId": "getCategories",
                 "parameters": [
                     {
@@ -3172,20 +3176,101 @@
                                             "type": "string"
                                         }
                                     }
-                                },
-                                "examples": {
-                                    "Host Not Found": {
-                                        "value": {
-                                            "error": "HOST_NOT_FOUND",
-                                            "message": "Host does not exist."
-                                        }
-                                    }
                                 }
                             }
                         }
                     },
                     "401": {
                         "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/categories/public": {
+            "get": {
+                "tags": ["Categories"],
+                "summary": "Public Get All Categories",
+                "description": "Retrieves all categories with their subcategories for public users.",
+                "operationId": "publicGetCategories",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "description": "Category unique identifier",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "description": "Category name",
+                                                "example": "Adventure & Outdoor"
+                                            },
+                                            "slug": {
+                                                "type": "string",
+                                                "description": "Category URL slug",
+                                                "example": "adventure-outdoor"
+                                            },
+                                            "subCategories": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "description": "Subcategory unique identifier",
+                                                            "example": 1
+                                                        },
+                                                        "categoryId": {
+                                                            "type": "integer",
+                                                            "description": "Parent category ID",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": "Subcategory name",
+                                                            "example": "Hiking & Trekking"
+                                                        },
+                                                        "slug": {
+                                                            "type": "string",
+                                                            "description": "Subcategory URL slug",
+                                                            "example": "hiking-trekking"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "$ref": "#/components/responses/InternalServerError"

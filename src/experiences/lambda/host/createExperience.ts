@@ -7,6 +7,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
+import { S3Client } from "@aws-sdk/client-s3";
+
 import {
     CreateExperienceData,
     CreateExperienceSchema,
@@ -14,12 +16,20 @@ import {
 import { ExperienceController } from "../../controllers/experience";
 
 import { DatabaseFactory } from "@/database";
+import { S3Service } from "@/s3/services/s3";
 import { requireBody, zodValidator } from "@/middleware";
 
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-const { DB_ENDPOINT, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
+const {
+    DB_ENDPOINT,
+    DB_PORT,
+    DB_NAME,
+    DB_USER,
+    DB_PASSWORD,
+    ASSETS_BUCKET_NAME,
+} = process.env;
 
 const db = DatabaseFactory.create({
     postgres: {
@@ -31,7 +41,18 @@ const db = DatabaseFactory.create({
         ssl: false,
     },
 });
-const experienceController = new ExperienceController({ database: db });
+const s3Client = new S3Client({
+    region: "us-east-1",
+});
+const s3Service = new S3Service({
+    database: db,
+    s3Client,
+    bucketName: ASSETS_BUCKET_NAME!,
+});
+const experienceController = new ExperienceController({
+    database: db,
+    s3Service,
+});
 
 export const handler = middy(async (event: CreateExperienceData) => {
     const { authorization } = event.headers;

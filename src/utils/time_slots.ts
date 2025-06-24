@@ -10,7 +10,7 @@ export async function generateTimeSlotsFromAvailability(
         availability: {
             startDate: Date;
             endDate?: Date;
-            daysOfWeek: number[];
+            daysOfWeek?: number[];
             timeSlots: string[];
             maxCapacity: number;
         };
@@ -23,14 +23,23 @@ export async function generateTimeSlotsFromAvailability(
     const timeSlotsToCreate = [];
 
     let current = dayjs(availability.startDate).tz(timezone);
-    const end = generateMonthsAhead
-        ? current.add(generateMonthsAhead, "month")
-        : dayjs(availability.endDate).tz(timezone);
+
+    const end = availability.daysOfWeek
+        ? generateMonthsAhead
+            ? current.add(generateMonthsAhead, "month")
+            : dayjs(availability.endDate).tz(timezone)
+        : current;
 
     while (current.isBefore(end) || current.isSame(end, "day")) {
         const dayOfWeek = current.day();
 
-        if (availability.daysOfWeek.includes(dayOfWeek)) {
+        // For one-time experiences, create slots for the startDate regardless of day of week
+        // For recurring experiences, check if current day is in daysOfWeek array
+        const shouldCreateSlot =
+            !availability.daysOfWeek ||
+            availability.daysOfWeek.includes(dayOfWeek);
+
+        if (shouldCreateSlot) {
             for (const timeSlot of availability.timeSlots) {
                 const [hours, minutes] = timeSlot.split(":").map(Number);
 

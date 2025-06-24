@@ -2,7 +2,8 @@ import { ExperienceService } from "../services/experience";
 import {
     CreateExperienceRequest,
     DeleteExperienceRequest,
-    ExperienceSearchRequest,
+    PublicExperienceSearchRequest,
+    UserExperienceSearchRequest,
     UpdateExperienceRequest,
 } from "../validations";
 import { ExperienceServiceOptions } from "../types";
@@ -16,9 +17,12 @@ export class ExperienceController {
         this.experienceService = new ExperienceService(opts);
     }
 
-    async getExperiences(request: ExperienceSearchRequest) {
+    // Public User
+    async publicGetExperiences(request: PublicExperienceSearchRequest) {
         try {
-            const result = await this.experienceService.getExperiences(request);
+            const result = await this.experienceService.publicGetExperiences(
+                request
+            );
 
             return {
                 statusCode: 200,
@@ -29,6 +33,23 @@ export class ExperienceController {
         }
     }
 
+    // Authenticated User
+    async userGetExperiences(request: UserExperienceSearchRequest) {
+        try {
+            const result = await this.experienceService.userGetExperiences(
+                request
+            );
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
+    // Host
     async hostGetExperiences(request: { authorization: string }) {
         try {
             const result = await this.experienceService.hostGetExperiences(
@@ -161,6 +182,8 @@ export class ExperienceController {
                 };
 
             default:
+                console.log("error", error);
+
                 return {
                     statusCode: 500,
                     body: JSON.stringify({

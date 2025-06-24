@@ -10,3 +10,9 @@ export interface S3ServiceOptions {
     bucketName: string;
     assetsDomain?: string;
 }
+
+export type ImageObject = {
+    id: string;
+    mimeType: string;
+    imageType: string;
+};

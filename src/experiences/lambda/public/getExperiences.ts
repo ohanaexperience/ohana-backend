@@ -8,8 +8,8 @@ import utc from "dayjs/plugin/utc";
 
 import { ExperienceController } from "../../controllers/experience";
 import {
-    UserExperienceSearchData,
-    UserExperienceSearchSchema,
+    PublicExperienceSearchData,
+    PublicExperienceSearchSchema,
 } from "../../validations";
 
 import { DatabaseFactory } from "@/database";
@@ -32,16 +32,13 @@ const db = DatabaseFactory.create({
 });
 const experienceController = new ExperienceController({ database: db });
 
-export const handler = middy(async (event: UserExperienceSearchData) => {
-    const { authorization } = event.headers;
-
+export const handler = middy(async (event: PublicExperienceSearchData) => {
     console.log("event", event);
 
-    return await experienceController.userGetExperiences({
-        authorization: authorization!,
+    return await experienceController.publicGetExperiences({
         ...event.queryStringParameters,
     });
 })
     .use(httpHeaderNormalizer())
-    .use(zodValidator({ queryStringParameters: UserExperienceSearchSchema }))
+    .use(zodValidator({ queryStringParameters: PublicExperienceSearchSchema }))
     .use(cors());

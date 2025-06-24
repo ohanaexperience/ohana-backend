@@ -1,8 +1,6 @@
 import { CategoryService } from "../services/category";
 import { CategoryServiceOptions } from "../types";
 
-import ERRORS from "@/errors";
-
 export class CategoryController {
     private readonly categoryService: CategoryService;
 
@@ -10,11 +8,9 @@ export class CategoryController {
         this.categoryService = new CategoryService(opts);
     }
 
-    async hostGetCategories(request: { authorization: string }) {
+    async getCategories() {
         try {
-            const result = await this.categoryService.hostGetCategories(
-                request
-            );
+            const result = await this.categoryService.getCategories();
 
             return {
                 statusCode: 200,
@@ -27,15 +23,6 @@ export class CategoryController {
 
     private handleError(error: any) {
         switch (error.message) {
-            case ERRORS.HOST.NOT_FOUND.CODE:
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({
-                        error: ERRORS.HOST.NOT_FOUND.CODE,
-                        message: ERRORS.HOST.NOT_FOUND.MESSAGE,
-                    }),
-                };
-
             default:
                 return {
                     statusCode: 500,

@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { APIGatewayEvent } from "aws-lambda";
 
-import ERRORS from "@/errors";
 import {
     EXPERIENCE_TYPE,
     EXPERIENCE_CANCELLATION_POLICY,
@@ -12,7 +11,7 @@ import {
 } from "@/constants/experiences";
 
 // Schemas
-export const UserExperienceSearchBaseSchema = z.object({
+export const PublicExperienceSearchBaseSchema = z.object({
     // Text searches
     title: z.string().optional(),
     tagline: z.string().optional(),
@@ -36,7 +35,6 @@ export const UserExperienceSearchBaseSchema = z.object({
         .enum(EXPERIENCE_AGE_RECOMMENDATIONS as [string, ...string[]])
         .optional(),
     status: z.enum(EXPERIENCE_STATUS as [string, ...string[]]).optional(),
-    isPublic: z.coerce.boolean().optional(),
 
     // Range queries
     minPrice: z.coerce.number().int().positive().optional(),
@@ -51,50 +49,51 @@ export const UserExperienceSearchBaseSchema = z.object({
     longitude: z.coerce.number().optional(),
     radiusKm: z.coerce.number().int().positive().optional(),
 });
-export const UserExperienceSearchSchema = UserExperienceSearchBaseSchema.refine(
-    (data) => {
-        if (data.minPrice && data.maxPrice && data.minPrice > data.maxPrice) {
-            return false;
-        }
+export const PublicExperienceSearchSchema =
+    PublicExperienceSearchBaseSchema.refine(
+        (data) => {
+            if (
+                data.minPrice &&
+                data.maxPrice &&
+                data.minPrice > data.maxPrice
+            ) {
+                return false;
+            }
 
-        if (
-            data.minGuests &&
-            data.maxGuests &&
-            data.minGuests > data.maxGuests
-        ) {
-            return false;
-        }
+            if (
+                data.minGuests &&
+                data.maxGuests &&
+                data.minGuests > data.maxGuests
+            ) {
+                return false;
+            }
 
-        if (
-            data.minDurationHours &&
-            data.maxDurationHours &&
-            data.minDurationHours > data.maxDurationHours
-        ) {
-            return false;
-        }
+            if (
+                data.minDurationHours &&
+                data.maxDurationHours &&
+                data.minDurationHours > data.maxDurationHours
+            ) {
+                return false;
+            }
 
-        return true;
-    },
-    {
-        message:
-            "Invalid range: minimum value cannot be greater than maximum value",
-    }
-);
-export const UserExperienceSearchRequestSchema = z.object({
-    authorization: z.string({
-        required_error: ERRORS.AUTHORIZATION.MISSING.CODE,
-        invalid_type_error: ERRORS.AUTHORIZATION.INVALID_TYPE.CODE,
-    }),
-    ...UserExperienceSearchBaseSchema.shape,
+            return true;
+        },
+        {
+            message:
+                "Invalid range: minimum value cannot be greater than maximum value",
+        }
+    );
+export const PublicExperienceSearchRequestSchema = z.object({
+    ...PublicExperienceSearchBaseSchema.shape,
 });
 
 // Types
-export type UserExperienceSearchData = Omit<
+export type PublicExperienceSearchData = Omit<
     APIGatewayEvent,
     "queryStringParameters"
 > & {
-    queryStringParameters: z.infer<typeof UserExperienceSearchSchema> | null;
+    queryStringParameters: z.infer<typeof PublicExperienceSearchSchema> | null;
 };
-export type UserExperienceSearchRequest = z.infer<
-    typeof UserExperienceSearchRequestSchema
+export type PublicExperienceSearchRequest = z.infer<
+    typeof PublicExperienceSearchRequestSchema
 >;

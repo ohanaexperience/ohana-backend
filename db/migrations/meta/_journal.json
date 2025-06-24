@@ -120,6 +120,13 @@
       "when": 1750690520081,
       "tag": "0016_sturdy_phalanx",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1750780118763,
+      "tag": "0017_military_stranger",
+      "breakpoints": true
     }
   ]
 }

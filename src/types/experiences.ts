@@ -5,5 +5,5 @@ export type TimeSlot = {
 
 export type ExperienceMeetingLocation = {
     instructions: string;
-    imageUrl: string;
+    imageUrl?: string;
 };

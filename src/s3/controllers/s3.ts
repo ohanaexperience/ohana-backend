@@ -31,22 +31,6 @@ export class S3Controller {
         }
     }
 
-    async hostGetExperienceImageUploadUrls(
-        request: GetExperienceImageUploadUrlsRequest
-    ) {
-        try {
-            const result =
-                await this.s3Service.hostGetExperienceImageUploadUrls(request);
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify(result),
-            };
-        } catch (err: unknown) {
-            return this.handleError(err);
-        }
-    }
-
     async handleProfileImageUpload(request: S3Event) {
         try {
             const result = await this.s3Service.handleProfileImageUpload(
