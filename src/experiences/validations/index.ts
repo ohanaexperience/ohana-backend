@@ -1,4 +1,7 @@
-export * from "./create";
-export * from "./delete";
-export * from "./get";
-export * from "./update";
+// Host
+export * from "./host/createExperience";
+export * from "./host/deleteExperience";
+export * from "./host/updateExperience";
+
+// User
+export * from "./user/getExperiences";

@@ -1,5 +1,5 @@
 userGetProfile:
-    handler: src/user.getProfile
+    handler: src/user/lambda/getProfile.handler
     timeout: 29
     events:
         - http:
@@ -23,7 +23,7 @@ userGetProfile:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 userUpdateProfile:
-    handler: src/user.updateProfile
+    handler: src/user/lambda/updateProfile.handler
     timeout: 29
     events:
         - http:
@@ -47,7 +47,7 @@ userUpdateProfile:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 userGetProfileImageUploadUrl:
-    handler: src/user.getProfileImageUploadUrl
+    handler: src/s3/lambda/user/getProfileImageUploadUrl.handler
     timeout: 29
     events:
         - http:

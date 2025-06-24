@@ -1,5 +1,5 @@
-stripeWebhook:
-    handler: src/webhooks.stripeWebhook
+handleStripeWebhook:
+    handler: src/webhooks/lambda/stripeWebhook.handler
     timeout: 29
     events:
         - http:

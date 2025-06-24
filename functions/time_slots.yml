@@ -1,5 +1,5 @@
 getTimeSlots:
-    handler: src/time_slots.getTimeSlots
+    handler: src/time_slots/lambda/getTimeSlots.handler
     timeout: 29
     events:
         - http:

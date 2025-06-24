@@ -5,14 +5,15 @@ import {
     ExperienceSearchRequest,
     UpdateExperienceRequest,
 } from "../validations";
-import Postgres from "@/database/postgres";
+import { ExperienceServiceOptions } from "../types";
+
 import ERRORS from "@/errors";
 
 export class ExperienceController {
     private readonly experienceService: ExperienceService;
 
-    constructor(database: Postgres) {
-        this.experienceService = new ExperienceService(database);
+    constructor(opts: ExperienceServiceOptions) {
+        this.experienceService = new ExperienceService(opts);
     }
 
     async getExperiences(request: ExperienceSearchRequest) {
@@ -43,9 +44,9 @@ export class ExperienceController {
         }
     }
 
-    async createExperience(request: CreateExperienceRequest) {
+    async hostCreateExperience(request: CreateExperienceRequest) {
         try {
-            const result = await this.experienceService.createExperience(
+            const result = await this.experienceService.hostCreateExperience(
                 request
             );
 
@@ -58,9 +59,9 @@ export class ExperienceController {
         }
     }
 
-    async updateExperience(request: UpdateExperienceRequest) {
+    async hostUpdateExperience(request: UpdateExperienceRequest) {
         try {
-            const result = await this.experienceService.updateExperience(
+            const result = await this.experienceService.hostUpdateExperience(
                 request
             );
 
@@ -73,9 +74,9 @@ export class ExperienceController {
         }
     }
 
-    async deleteExperience(request: DeleteExperienceRequest) {
+    async hostDeleteExperience(request: DeleteExperienceRequest) {
         try {
-            const result = await this.experienceService.deleteExperience(
+            const result = await this.experienceService.hostDeleteExperience(
                 request
             );
 
@@ -95,7 +96,7 @@ export class ExperienceController {
                     statusCode: 400,
                     body: JSON.stringify({
                         error: ERRORS.HOST.NOT_FOUND.CODE,
-                        message: ERRORS.HOST.NOT_FOUND.CODE,
+                        message: ERRORS.HOST.NOT_FOUND.MESSAGE,
                     }),
                 };
 

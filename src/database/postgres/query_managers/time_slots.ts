@@ -12,6 +12,15 @@ export class TimeSlotsQueryManager {
         this.db = database;
     }
 
+    public async getById(timeSlotId: string) {
+        const results = await this.db
+            .select()
+            .from(experienceTimeSlotsTable)
+            .where(eq(experienceTimeSlotsTable.id, timeSlotId));
+
+        return results[0] || null;
+    }
+
     public async createTimeSlots(timeSlotsData: InsertTimeSlot[]) {
         return await this.db
             .insert(experienceTimeSlotsTable)
@@ -52,6 +61,19 @@ export class TimeSlotsQueryManager {
             .orderBy(experienceTimeSlotsTable.slotDateTime);
 
         return results;
+    }
+
+    public async updateBookedCount(timeSlotId: string, newBookedCount: number) {
+        const results = await this.db
+            .update(experienceTimeSlotsTable)
+            .set({
+                bookedCount: newBookedCount,
+                updatedAt: new Date(),
+            })
+            .where(eq(experienceTimeSlotsTable.id, timeSlotId))
+            .returning();
+
+        return results[0] || null;
     }
 
     public async getAll() {

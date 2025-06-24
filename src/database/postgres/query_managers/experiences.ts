@@ -196,4 +196,6 @@ export class ExperiencesQueryManager {
 
 // Experience
 export type InsertExperience = InferInsertModel<typeof experiencesTable>;
-export type UpdateExperience = Partial<Omit<InsertExperience, "id">>;
+export type UpdateExperience = Partial<
+    Omit<InsertExperience, "id" | "createdAt" | "updatedAt">
+>;

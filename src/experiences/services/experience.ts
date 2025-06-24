@@ -1,22 +1,25 @@
 import dayjs from "dayjs";
 
-import Postgres from "@/database/postgres";
-import { decodeToken, generateTimeSlotsFromAvailability } from "@/utils";
 import {
     CreateExperienceRequest,
     DeleteExperienceRequest,
     ExperienceSearchRequest,
     UpdateExperienceRequest,
 } from "../validations";
+import { ExperienceServiceOptions } from "../types";
+
+import Postgres from "@/database/postgres";
+import { decodeToken, generateTimeSlotsFromAvailability } from "@/utils";
 import ERRORS from "@/errors";
 
 export class ExperienceService {
     private readonly db: Postgres;
 
-    constructor(database: Postgres) {
+    constructor({ database }: ExperienceServiceOptions) {
         this.db = database;
     }
 
+    // Authenticated User
     async getExperiences(request: ExperienceSearchRequest) {
         const { authorization, ...queryParams } = request;
 
@@ -24,15 +27,10 @@ export class ExperienceService {
 
         console.log("sub", sub);
 
-        const host = await this.db.hosts.getByUserId(sub);
-
-        if (!host) {
-            throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
-        }
-
         return await this.db.experiences.searchExperiences(queryParams);
     }
 
+    // Host
     async hostGetExperiences(request: { authorization: string }) {
         const { authorization } = request;
 
@@ -49,7 +47,7 @@ export class ExperienceService {
         return await this.db.experiences.getAllByHostId(host.id);
     }
 
-    async createExperience(request: CreateExperienceRequest) {
+    async hostCreateExperience(request: CreateExperienceRequest) {
         const {
             authorization,
             title,
@@ -189,7 +187,7 @@ export class ExperienceService {
         return createdExperience;
     }
 
-    async updateExperience(request: UpdateExperienceRequest) {
+    async hostUpdateExperience(request: UpdateExperienceRequest) {
         const { authorization, experienceId, ...experienceData } = request;
 
         const { sub } = decodeToken(authorization);
@@ -212,10 +210,31 @@ export class ExperienceService {
             throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_UPDATE.CODE);
         }
 
-        return await this.db.experiences.update(experienceId, experienceData);
+        const { startingLocation, endingLocation, ...restData } =
+            experienceData;
+
+        const updateData = {
+            ...restData,
+            ...(startingLocation && {
+                startingLocationAddress: startingLocation.address,
+                startingLocation: [
+                    startingLocation.longitude,
+                    startingLocation.latitude,
+                ],
+            }),
+            ...(endingLocation && {
+                endingLocationAddress: endingLocation.address,
+                endingLocation: [
+                    endingLocation.longitude,
+                    endingLocation.latitude,
+                ],
+            }),
+        };
+
+        return await this.db.experiences.update(experienceId, updateData);
     }
 
-    async deleteExperience(request: DeleteExperienceRequest) {
+    async hostDeleteExperience(request: DeleteExperienceRequest) {
         const { authorization, experienceId } = request;
 
         const { sub } = decodeToken(authorization);

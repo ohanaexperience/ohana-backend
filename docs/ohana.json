@@ -30,6 +30,10 @@
         {
             "name": "Host",
             "description": "Host endpoints"
+        },
+        {
+            "name": "Reservations",
+            "description": "Reservation endpoints"
         }
     ],
     "paths": {
@@ -2371,6 +2375,536 @@
                 }
             }
         },
+        "/v1/host/experiences/{experienceId}": {
+            "put": {
+                "tags": ["Host"],
+                "summary": "Update Experience",
+                "description": "Updates an existing experience for the authenticated host. All fields are optional - only provided fields will be updated. The host can only update their own experiences.",
+                "operationId": "hostUpdateExperience",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "path",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Experience update data (all fields are optional)",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "minLength": 15,
+                                        "maxLength": 80,
+                                        "description": "Experience title",
+                                        "example": "Authentic Thai Cooking Class in Bangkok"
+                                    },
+                                    "tagline": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 100,
+                                        "description": "Short experience tagline",
+                                        "example": "Learn to cook traditional Thai dishes with a local chef"
+                                    },
+                                    "category": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mainId": {
+                                                "type": "integer",
+                                                "description": "Main category ID",
+                                                "example": 1
+                                            },
+                                            "subId": {
+                                                "type": "integer",
+                                                "description": "Sub category ID",
+                                                "example": 5
+                                            }
+                                        }
+                                    },
+                                    "languages": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "Languages spoken during the experience",
+                                        "example": ["English", "Thai"]
+                                    },
+                                    "experienceType": {
+                                        "type": "string",
+                                        "enum": ["indoor", "outdoor", "both"],
+                                        "description": "Type of experience location",
+                                        "example": "indoor"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "Detailed experience description",
+                                        "example": "Join me for an authentic Thai cooking experience where you'll learn to prepare traditional dishes using fresh local ingredients."
+                                    },
+                                    "startingLocation": {
+                                        "type": "object",
+                                        "properties": {
+                                            "address": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 500,
+                                                "description": "Starting location address",
+                                                "example": "123 Khao San Road, Bangkok, Thailand"
+                                            },
+                                            "latitude": {
+                                                "type": "number",
+                                                "description": "Starting location latitude",
+                                                "example": 13.7563
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "description": "Starting location longitude",
+                                                "example": 100.5018
+                                            }
+                                        }
+                                    },
+                                    "endingLocation": {
+                                        "type": "object",
+                                        "properties": {
+                                            "address": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 500,
+                                                "description": "Ending location address",
+                                                "example": "123 Khao San Road, Bangkok, Thailand"
+                                            },
+                                            "latitude": {
+                                                "type": "number",
+                                                "description": "Ending location latitude",
+                                                "example": 13.7563
+                                            },
+                                            "longitude": {
+                                                "type": "number",
+                                                "description": "Ending location longitude",
+                                                "example": 100.5018
+                                            }
+                                        }
+                                    },
+                                    "meetingLocation": {
+                                        "type": "object",
+                                        "properties": {
+                                            "instructions": {
+                                                "type": "string",
+                                                "minLength": 10,
+                                                "maxLength": 1000,
+                                                "description": "Meeting location instructions",
+                                                "example": "Meet at the front entrance of the building. Look for the red door."
+                                            },
+                                            "imageUrl": {
+                                                "type": "string",
+                                                "format": "uri",
+                                                "description": "Optional image URL for meeting location",
+                                                "example": "https://example.com/meeting-point.jpg"
+                                            }
+                                        }
+                                    },
+                                    "pricePerPerson": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "description": "Price per person in cents",
+                                        "example": 2500
+                                    },
+                                    "groupDiscounts": {
+                                        "type": "object",
+                                        "properties": {
+                                            "discountPercentageFor3Plus": {
+                                                "type": "number",
+                                                "enum": [5, 10, 15, 20, 25],
+                                                "description": "Discount percentage for 3+ people",
+                                                "example": 10
+                                            },
+                                            "discountPercentageFor5Plus": {
+                                                "type": "number",
+                                                "enum": [10, 15, 20, 25, 30],
+                                                "description": "Discount percentage for 5+ people",
+                                                "example": 15
+                                            }
+                                        }
+                                    },
+                                    "earlyBirdRate": {
+                                        "type": "object",
+                                        "properties": {
+                                            "discountPercentage": {
+                                                "type": "number",
+                                                "enum": [5, 10, 15, 20, 25],
+                                                "description": "Early bird discount percentage",
+                                                "example": 10
+                                            },
+                                            "daysInAdvance": {
+                                                "type": "number",
+                                                "enum": [
+                                                    14, 15, 16, 17, 18, 19, 20,
+                                                    21, 22, 23, 24, 25, 26, 27,
+                                                    28, 29, 30
+                                                ],
+                                                "description": "Days in advance for early bird rate",
+                                                "example": 14
+                                            }
+                                        }
+                                    },
+                                    "cancellationPolicy": {
+                                        "type": "string",
+                                        "enum": [
+                                            "strict",
+                                            "moderate",
+                                            "flexible"
+                                        ],
+                                        "description": "Cancellation policy",
+                                        "example": "moderate"
+                                    },
+                                    "groupSize": {
+                                        "type": "object",
+                                        "properties": {
+                                            "minGuests": {
+                                                "type": "integer",
+                                                "minimum": 1,
+                                                "description": "Minimum number of guests",
+                                                "example": 2
+                                            },
+                                            "maxGuests": {
+                                                "type": "integer",
+                                                "maximum": 30,
+                                                "description": "Maximum number of guests",
+                                                "example": 6
+                                            },
+                                            "autoCancelEnabled": {
+                                                "type": "boolean",
+                                                "description": "Whether to auto-cancel if minimum not met",
+                                                "default": false,
+                                                "example": false
+                                            }
+                                        }
+                                    },
+                                    "includedItems": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "food",
+                                                "drinks",
+                                                "transport",
+                                                "equipment"
+                                            ]
+                                        },
+                                        "description": "Items included in the experience",
+                                        "example": ["food", "drinks"]
+                                    },
+                                    "whatToBring": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "What participants should bring",
+                                        "example": "Please bring comfortable clothes and closed-toe shoes."
+                                    },
+                                    "physicalRequirements": {
+                                        "type": "string",
+                                        "enum": ["low", "medium", "high"],
+                                        "description": "Physical requirement level",
+                                        "example": "low"
+                                    },
+                                    "ageRecommendations": {
+                                        "type": "string",
+                                        "enum": [
+                                            "18-25",
+                                            "26-35",
+                                            "36-45",
+                                            "46-55",
+                                            "56-65",
+                                            "66+"
+                                        ],
+                                        "description": "Recommended age group",
+                                        "example": "18-25"
+                                    },
+                                    "accessibilityInfo": {
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "maxLength": 1000,
+                                        "description": "Accessibility information",
+                                        "example": "The venue is wheelchair accessible with ramps and accessible restrooms."
+                                    },
+                                    "durationHours": {
+                                        "type": "number",
+                                        "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                        "description": "Duration in hours",
+                                        "example": 3
+                                    },
+                                    "timezone": {
+                                        "type": "string",
+                                        "description": "IANA timezone identifier",
+                                        "example": "Asia/Bangkok"
+                                    },
+                                    "coverImageUrl": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "description": "Cover image URL for the experience",
+                                        "example": "https://example.com/cover-image.jpg"
+                                    },
+                                    "galleryImageUrls": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uri"
+                                        },
+                                        "description": "Gallery image URLs",
+                                        "example": [
+                                            "https://example.com/gallery1.jpg",
+                                            "https://example.com/gallery2.jpg"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Experience"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Host Not Found": {
+                                        "value": {
+                                            "error": "HOST_NOT_FOUND",
+                                            "message": "Host does not exist."
+                                        }
+                                    },
+                                    "Experience Not Found": {
+                                        "value": {
+                                            "error": "EXPERIENCE_NOT_FOUND",
+                                            "message": "Experience does not exist."
+                                        }
+                                    },
+                                    "Missing Experience ID": {
+                                        "value": {
+                                            "error": "MISSING_EXPERIENCE_ID",
+                                            "message": "Experience ID is required."
+                                        }
+                                    },
+                                    "Invalid Experience ID": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_ID_UUID",
+                                            "message": "Experience ID must be a valid UUID."
+                                        }
+                                    },
+                                    "Invalid Title Length": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_TITLE_MIN_LENGTH",
+                                            "message": "Experience title must be at least 15 characters."
+                                        }
+                                    },
+                                    "Invalid Language": {
+                                        "value": {
+                                            "error": "INVALID_LANGUAGE_VALUE",
+                                            "message": "Invalid language value."
+                                        }
+                                    },
+                                    "Main Category Not Found": {
+                                        "value": {
+                                            "error": "Main category not found",
+                                            "message": "Main category not found"
+                                        }
+                                    },
+                                    "Sub Category Mismatch": {
+                                        "value": {
+                                            "error": "Sub category not found or doesn't belong to category.",
+                                            "message": "Sub category not found or doesn't belong to category."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Forbidden Update": {
+                                        "value": {
+                                            "error": "EXPERIENCE_FORBIDDEN_UPDATE",
+                                            "message": "You are not authorized to update this experience."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Host"],
+                "summary": "Delete Experience",
+                "description": "Deletes an existing experience for the authenticated host. The host can only delete their own experiences. This action is irreversible.",
+                "operationId": "hostDeleteExperience",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "path",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Experience successfully deleted."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Host Not Found": {
+                                        "value": {
+                                            "error": "HOST_NOT_FOUND",
+                                            "message": "Host does not exist."
+                                        }
+                                    },
+                                    "Experience Not Found": {
+                                        "value": {
+                                            "error": "EXPERIENCE_NOT_FOUND",
+                                            "message": "Experience does not exist."
+                                        }
+                                    },
+                                    "Missing Experience ID": {
+                                        "value": {
+                                            "error": "MISSING_EXPERIENCE_ID",
+                                            "message": "Experience ID is required."
+                                        }
+                                    },
+                                    "Invalid Experience ID": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_ID_UUID",
+                                            "message": "Experience ID must be a valid UUID."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Forbidden Delete": {
+                                        "value": {
+                                            "error": "EXPERIENCE_FORBIDDEN_DELETE",
+                                            "message": "You are not authorized to delete this experience."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
         "/v1/host/experiences/image/upload-url": {
             "post": {
                 "tags": ["Host"],
@@ -2946,6 +3480,481 @@
                                         "value": {
                                             "error": "VALIDATION_ERROR",
                                             "message": "Invalid range: minimum value cannot be greater than maximum value"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/experiences/time-slots": {
+            "get": {
+                "tags": ["Experiences"],
+                "summary": "Get Experience Time Slots",
+                "description": "Retrieves available time slots for a specific experience within an optional date range. Returns all upcoming time slots if no date range is specified.",
+                "operationId": "getTimeSlots",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "query",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    {
+                        "in": "query",
+                        "name": "startDate",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "Start date for time slot search (YYYY-MM-DD format)",
+                        "example": "2024-06-01"
+                    },
+                    {
+                        "in": "query",
+                        "name": "endDate",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "description": "End date for time slot search (YYYY-MM-DD format)",
+                        "example": "2024-06-30"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "format": "uuid",
+                                                "description": "Time slot unique identifier",
+                                                "example": "456e7890-e89b-12d3-a456-426614174001"
+                                            },
+                                            "experienceId": {
+                                                "type": "string",
+                                                "format": "uuid",
+                                                "description": "Experience unique identifier",
+                                                "example": "123e4567-e89b-12d3-a456-426614174000"
+                                            },
+                                            "date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "description": "Date of the time slot",
+                                                "example": "2024-06-15"
+                                            },
+                                            "startTime": {
+                                                "type": "string",
+                                                "description": "Start time in HH:MM format",
+                                                "example": "10:00"
+                                            },
+                                            "endTime": {
+                                                "type": "string",
+                                                "description": "End time in HH:MM format",
+                                                "example": "13:00"
+                                            },
+                                            "maxCapacity": {
+                                                "type": "integer",
+                                                "description": "Maximum number of guests for this time slot",
+                                                "example": 8
+                                            },
+                                            "availableCapacity": {
+                                                "type": "integer",
+                                                "description": "Remaining available capacity",
+                                                "example": 5
+                                            },
+                                            "isAvailable": {
+                                                "type": "boolean",
+                                                "description": "Whether the time slot is available for booking",
+                                                "example": true
+                                            },
+                                            "timezone": {
+                                                "type": "string",
+                                                "description": "IANA timezone identifier",
+                                                "example": "Asia/Bangkok"
+                                            },
+                                            "createdAt": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "description": "Timestamp when time slot was created",
+                                                "example": "2024-01-01T00:00:00Z"
+                                            },
+                                            "updatedAt": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "description": "Timestamp when time slot was last updated",
+                                                "example": "2024-01-01T00:00:00Z"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Experience ID": {
+                                        "value": {
+                                            "error": "MISSING_EXPERIENCE_ID",
+                                            "message": "Experience ID is required."
+                                        }
+                                    },
+                                    "Invalid Experience ID": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_ID_UUID",
+                                            "message": "Experience ID must be a valid UUID."
+                                        }
+                                    },
+                                    "Experience Not Found": {
+                                        "value": {
+                                            "error": "EXPERIENCE_NOT_FOUND",
+                                            "message": "Experience does not exist."
+                                        }
+                                    },
+                                    "Invalid Date Range": {
+                                        "value": {
+                                            "error": "INVALID_TIME_SLOT_DATE_RANGE",
+                                            "message": "Invalid date range: start date cannot be after end date."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/reservations": {
+            "post": {
+                "tags": ["Reservations"],
+                "summary": "Create Reservation",
+                "description": "Creates a new reservation for an experience. Automatically calculates and applies group discounts and early bird discounts based on the experience settings. The total price is calculated after applying all applicable discounts.",
+                "operationId": "createReservation",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Reservation creation data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "experienceId",
+                                    "timeSlotId",
+                                    "numberOfGuests"
+                                ],
+                                "properties": {
+                                    "experienceId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "description": "Experience unique identifier",
+                                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                                    },
+                                    "timeSlotId": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "description": "Time slot unique identifier",
+                                        "example": "456e7890-e89b-12d3-a456-426614174001"
+                                    },
+                                    "numberOfGuests": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 30,
+                                        "description": "Number of guests for the reservation",
+                                        "example": 4
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "reservation": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "description": "Reservation unique identifier",
+                                                    "example": "789e0123-e89b-12d3-a456-426614174002"
+                                                },
+                                                "userId": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "description": "User unique identifier",
+                                                    "example": "123e4567-e89b-12d3-a456-426614174003"
+                                                },
+                                                "experienceId": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "description": "Experience unique identifier",
+                                                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                                                },
+                                                "timeSlotId": {
+                                                    "type": "string",
+                                                    "format": "uuid",
+                                                    "description": "Time slot unique identifier",
+                                                    "example": "456e7890-e89b-12d3-a456-426614174001"
+                                                },
+                                                "numberOfGuests": {
+                                                    "type": "integer",
+                                                    "description": "Number of guests",
+                                                    "example": 4
+                                                },
+                                                "totalPrice": {
+                                                    "type": "integer",
+                                                    "description": "Final price after discounts in cents",
+                                                    "example": 9000
+                                                },
+                                                "originalPrice": {
+                                                    "type": "integer",
+                                                    "description": "Original price before discounts in cents",
+                                                    "example": 10000
+                                                },
+                                                "discountApplied": {
+                                                    "type": "integer",
+                                                    "description": "Total discount amount in cents",
+                                                    "example": 1000
+                                                },
+                                                "discountType": {
+                                                    "type": "string",
+                                                    "description": "Type of discount applied (group_3_plus, group_5_plus, early_bird, or combination)",
+                                                    "nullable": true,
+                                                    "example": "group_3_plus,early_bird"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "pending",
+                                                        "confirmed",
+                                                        "cancelled",
+                                                        "completed",
+                                                        "refunded"
+                                                    ],
+                                                    "description": "Reservation status",
+                                                    "example": "confirmed"
+                                                },
+                                                "reservationReference": {
+                                                    "type": "string",
+                                                    "description": "Unique reservation reference code",
+                                                    "example": "ABC123DEF456"
+                                                },
+                                                "guestName": {
+                                                    "type": "string",
+                                                    "description": "Guest name",
+                                                    "example": "John Doe"
+                                                },
+                                                "guestEmail": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "description": "Guest email",
+                                                    "example": "john.doe@example.com"
+                                                },
+                                                "paymentStatus": {
+                                                    "type": "string",
+                                                    "description": "Payment status",
+                                                    "example": "success"
+                                                },
+                                                "createdAt": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "description": "Timestamp when reservation was created",
+                                                    "example": "2024-01-01T12:00:00Z"
+                                                },
+                                                "updatedAt": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "description": "Timestamp when reservation was last updated",
+                                                    "example": "2024-01-01T12:00:00Z"
+                                                }
+                                            }
+                                        },
+                                        "appliedDiscounts": {
+                                            "type": "object",
+                                            "properties": {
+                                                "groupDiscount": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "amount": {
+                                                            "type": "integer",
+                                                            "description": "Group discount amount in cents",
+                                                            "example": 500
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "nullable": true,
+                                                            "description": "Type of group discount applied",
+                                                            "example": "group_3_plus"
+                                                        }
+                                                    }
+                                                },
+                                                "earlyBirdDiscount": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "amount": {
+                                                            "type": "integer",
+                                                            "description": "Early bird discount amount in cents",
+                                                            "example": 500
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "nullable": true,
+                                                            "description": "Type of early bird discount applied",
+                                                            "example": "early_bird"
+                                                        }
+                                                    }
+                                                },
+                                                "totalDiscount": {
+                                                    "type": "integer",
+                                                    "description": "Total combined discount amount in cents",
+                                                    "example": 1000
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Missing Experience ID": {
+                                        "value": {
+                                            "error": "MISSING_EXPERIENCE_ID",
+                                            "message": "Experience ID is required."
+                                        }
+                                    },
+                                    "Invalid Experience ID": {
+                                        "value": {
+                                            "error": "INVALID_EXPERIENCE_ID_UUID",
+                                            "message": "Experience ID must be a valid UUID."
+                                        }
+                                    },
+                                    "Missing Time Slot ID": {
+                                        "value": {
+                                            "error": "MISSING_TIME_SLOT_ID",
+                                            "message": "Time slot ID is required."
+                                        }
+                                    },
+                                    "Invalid Time Slot ID": {
+                                        "value": {
+                                            "error": "INVALID_TIME_SLOT_ID_UUID",
+                                            "message": "Time slot ID must be a valid UUID."
+                                        }
+                                    },
+                                    "Missing Number of Guests": {
+                                        "value": {
+                                            "error": "RESERVATION_NUMBER_OF_GUESTS_MISSING",
+                                            "message": "Number of guests is required."
+                                        }
+                                    },
+                                    "Invalid Number of Guests Type": {
+                                        "value": {
+                                            "error": "RESERVATION_NUMBER_OF_GUESTS_INVALID_TYPE",
+                                            "message": "Number of guests must be a number."
+                                        }
+                                    },
+                                    "Number of Guests Min": {
+                                        "value": {
+                                            "error": "RESERVATION_NUMBER_OF_GUESTS_MIN_VALUE",
+                                            "message": "Number of guests must be greater than 1."
+                                        }
+                                    },
+                                    "Number of Guests Max": {
+                                        "value": {
+                                            "error": "RESERVATION_NUMBER_OF_GUESTS_MAX_VALUE",
+                                            "message": "Number of guests must be less than 30."
+                                        }
+                                    },
+                                    "Experience Not Found": {
+                                        "value": {
+                                            "error": "EXPERIENCE_NOT_FOUND",
+                                            "message": "Experience does not exist."
+                                        }
+                                    },
+                                    "Time Slot Not Found": {
+                                        "value": {
+                                            "error": "TIME_SLOT_NOT_FOUND",
+                                            "message": "Time slot does not exist."
+                                        }
+                                    },
+                                    "Time Slot Not Available": {
+                                        "value": {
+                                            "error": "TIME_SLOT_NOT_AVAILABLE",
+                                            "message": "Time slot is not available."
+                                        }
+                                    },
+                                    "Not Enough Capacity": {
+                                        "value": {
+                                            "error": "TIME_SLOT_NOT_ENOUGH_CAPACITY",
+                                            "message": "Not enough capacity in this time slot."
                                         }
                                     }
                                 }

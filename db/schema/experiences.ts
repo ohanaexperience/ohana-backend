@@ -149,7 +149,7 @@ export const experienceTimeSlotsTable = pgTable(
         localDate: timestamp("local_date", { mode: "date" }).notNull(),
         localTime: text("local_time").notNull(),
         maxCapacity: integer("max_capacity").notNull(),
-        bookedCount: integer("booked_count").default(0),
+        bookedCount: integer("booked_count").notNull().default(0),
         status: text("status").default("available"),
         createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
         updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

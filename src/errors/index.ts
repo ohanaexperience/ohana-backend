@@ -1,9 +1,11 @@
-import { LANGUAGES } from "@/constants/shared";
+import baseErrors from "./base";
+import experienceErrors from "./experiences";
+import stripeErrors from "./stripe";
+import hostErrors from "./host";
+import timeSlotsErrors from "./timeSlots";
+import reservationsErrors from "./reservations";
 
-import baseErrors from "@/errors/base";
-import experienceErrors from "@/errors/experiences";
-import stripeErrors from "@/errors/stripe";
-import hostErrors from "@/errors/host";
+import { LANGUAGES } from "@/constants/shared";
 
 export default {
     ...baseErrors,
@@ -215,4 +217,6 @@ export default {
     ...stripeErrors,
     ...hostErrors,
     ...experienceErrors,
+    ...timeSlotsErrors,
+    ...reservationsErrors,
 };

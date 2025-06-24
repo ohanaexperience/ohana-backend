@@ -12,6 +12,7 @@ import {
     SubCategoriesQueryManager,
     TimeSlotsQueryManager,
     AvailabilityQueryManager,
+    ReservationsQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -27,6 +28,7 @@ export default class Postgres {
     private _subCategories?: SubCategoriesQueryManager;
     private _timeSlots?: TimeSlotsQueryManager;
     private _availability?: AvailabilityQueryManager;
+    private _reservations?: ReservationsQueryManager;
 
     constructor(config: PostgresConfig) {
         this.pool = new Pool(config);
@@ -90,6 +92,13 @@ export default class Postgres {
             this._availability = new AvailabilityQueryManager(this.instance);
         }
         return this._availability;
+    }
+
+    get reservations(): ReservationsQueryManager {
+        if (!this._reservations) {
+            this._reservations = new ReservationsQueryManager(this.instance);
+        }
+        return this._reservations;
     }
 
     async close(): Promise<void> {

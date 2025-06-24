@@ -1,5 +1,5 @@
 runMigrations:
-    handler: src/database/lambda/run_migrations.handler
+    handler: src/database/lambda/runMigrations.handler
     timeout: 900
     package:
         patterns:
@@ -20,7 +20,7 @@ runMigrations:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 clearDatabase:
-    handler: src/database/lambda/clear.handler
+    handler: src/database/lambda/clearDatabase.handler
     timeout: 900
     url:
         cors: true
@@ -38,7 +38,7 @@ clearDatabase:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 testDatabase:
-    handler: src/database/lambda/test.handler
+    handler: src/database/lambda/testDatabase.handler
     timeout: 900
     url:
         cors: true
@@ -56,7 +56,7 @@ testDatabase:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 seedDatabase:
-    handler: src/database/lambda/seed.handler
+    handler: src/database/lambda/seedDatabase.handler
     timeout: 900
     url:
         cors: true

@@ -1,5 +1,5 @@
 handleProfileImageUpload:
-    handler: src/triggers.handleProfileImageUpload
+    handler: src/s3/lambda/user/handleProfileImageUpload.handler
     events:
         - s3:
               bucket: ${self:custom.resourceNames.assetsBucket}
@@ -21,7 +21,7 @@ handleProfileImageUpload:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 handleExperienceImageUpload:
-    handler: src/triggers.handleExperienceImageUpload
+    handler: src/s3/lambda/experiences/handleExperienceImageUpload.handler
     events:
         - s3:
               bucket: ${self:custom.resourceNames.assetsBucket}

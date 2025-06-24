@@ -2,13 +2,15 @@ import path from "path";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { sql } from "drizzle-orm";
 
+import { DatabaseServiceOptions } from "../types";
+
 import Postgres from "@/database/postgres";
 import { seedCategories } from "@/seed";
 
 export class DatabaseService {
     private readonly db: Postgres;
 
-    constructor(database: Postgres) {
+    constructor({ database }: DatabaseServiceOptions) {
         this.db = database;
     }
 

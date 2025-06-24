@@ -1,11 +1,11 @@
 import { DatabaseService } from "../services/database";
-import Postgres from "@/database/postgres";
+import { DatabaseServiceOptions } from "../types";
 
 export class DatabaseController {
     private readonly databaseService: DatabaseService;
 
-    constructor(database: Postgres) {
-        this.databaseService = new DatabaseService(database);
+    constructor(opts: DatabaseServiceOptions) {
+        this.databaseService = new DatabaseService(opts);
     }
 
     async runMigrations() {

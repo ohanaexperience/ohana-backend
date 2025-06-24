@@ -98,6 +98,7 @@ functions:
     - ${file(functions/triggers.yml)}
     - ${file(functions/experiences.yml)}
     - ${file(functions/time_slots.yml)}
+    - ${file(functions/reservations.yml)}
 
 resources:
     - ${file(resources/auth.yml)}

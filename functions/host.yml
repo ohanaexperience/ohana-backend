@@ -49,7 +49,7 @@ hostUpdateProfile:
 
 # Experiences
 hostCreateExperience:
-    handler: src/experiences/lambda/create.handler
+    handler: src/experiences/lambda/host/createExperience.handler
     timeout: 29
     events:
         - http:
@@ -73,7 +73,7 @@ hostCreateExperience:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 hostGetExperiences:
-    handler: src/experiences/lambda/host_get.handler
+    handler: src/experiences/lambda/host/getExperiences.handler
     timeout: 29
     events:
         - http:
@@ -97,7 +97,7 @@ hostGetExperiences:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 hostUpdateExperience:
-    handler: src/experiences/lambda/update.handler
+    handler: src/experiences/lambda/host/updateExperience.handler
     timeout: 29
     events:
         - http:
@@ -121,7 +121,7 @@ hostUpdateExperience:
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
 
 hostDeleteExperience:
-    handler: src/experiences/lambda/delete.handler
+    handler: src/experiences/lambda/host/deleteExperience.handler
     timeout: 29
     events:
         - http:
@@ -146,7 +146,7 @@ hostDeleteExperience:
 
 # Categories
 hostGetCategories:
-    handler: src/categories.hostGetCategories
+    handler: src/categories/lambda/host/getCategories.handler
     timeout: 29
     events:
         - http:
@@ -171,7 +171,7 @@ hostGetCategories:
 
 # Upload
 getExperienceImageUploadUrls:
-    handler: src/host.getExperienceImageUploadUrls
+    handler: src/s3/lambda/experiences/getImageUploadUrls.handler
     timeout: 29
     events:
         - http:
