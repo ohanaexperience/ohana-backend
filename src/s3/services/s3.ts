@@ -2,7 +2,12 @@ import dayjs from "dayjs";
 import { extension } from "mime-types";
 
 import { S3Event } from "aws-lambda";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+    S3Client,
+    PutObjectCommand,
+    DeleteObjectCommand,
+    ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { GetProfileImageUploadUrlRequest } from "../validations";
@@ -81,6 +86,59 @@ export class S3Service {
         }));
     }
 
+    async deleteExperienceImages(experienceId: string) {
+        try {
+            // Get the experience to find the host ID
+            const experience = await this.db.experiences.getById(experienceId);
+            if (!experience) {
+                console.log(`[S3Service] Experience not found: ${experienceId}`);
+                return; // Experience doesn't exist, nothing to delete
+            }
+
+            // Get host information to construct the S3 prefix
+            // Note: In the hosts table, the host.id is the userId (references usersTable.id)
+            const userId = experience.hostId;
+            const prefix = `hosts/${userId}/experiences/${experienceId}/images/`;
+
+            console.log(`[S3Service] Deleting images for experience ${experienceId} with prefix: ${prefix}`);
+
+            // List all objects with the experience prefix
+            const listCommand = new ListObjectsV2Command({
+                Bucket: this.config.bucketName,
+                Prefix: prefix,
+            });
+
+            const listResponse = await this.s3Client.send(listCommand);
+            
+            if (!listResponse.Contents || listResponse.Contents.length === 0) {
+                console.log(`[S3Service] No images found for experience ${experienceId}`);
+                return;
+            }
+
+            console.log(`[S3Service] Found ${listResponse.Contents.length} images to delete`);
+
+            // Delete all objects
+            const deletePromises = listResponse.Contents.map((object) => {
+                if (object.Key) {
+                    console.log(`[S3Service] Deleting: ${object.Key}`);
+                    const deleteCommand = new DeleteObjectCommand({
+                        Bucket: this.config.bucketName,
+                        Key: object.Key,
+                    });
+                    return this.s3Client.send(deleteCommand);
+                }
+                return Promise.resolve();
+            });
+
+            await Promise.all(deletePromises);
+            console.log(`[S3Service] Successfully deleted ${deletePromises.length} images for experience ${experienceId}`);
+
+        } catch (error) {
+            console.error(`[S3Service] Error deleting images for experience ${experienceId}:`, error);
+            throw error;
+        }
+    }
+
     private generateKeyPrefix(
         userId: string,
         experienceId: string,
@@ -150,7 +208,9 @@ export class S3Service {
             throw new Error(ERRORS.EXPERIENCE.IMAGES.INVALID_TYPE.CODE);
         }
 
-        const { imageType, experienceId, imageUrl } = parsedEvent;
+        const { imageType, experienceId, imageUrl, key } = parsedEvent;
+
+        const { imageId, mimeType } = this.extractImageMetadata(key);
 
         const experience = await this.db.experiences.getById(experienceId);
 
@@ -158,30 +218,14 @@ export class S3Service {
             throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
         }
 
-        switch (imageType) {
-            case "cover":
-                await this.db.experiences.update(experienceId, {
-                    coverImageUrl: imageUrl,
-                    updatedAt: new Date(),
-                });
-                break;
-            case "gallery":
-                const galleryImageUrls = experience.galleryImageUrls || [];
-
-                await this.db.experiences.update(experienceId, {
-                    galleryImageUrls: [...galleryImageUrls, imageUrl],
-                });
-                break;
-            case "meeting-location":
-                await this.db.experiences.update(experienceId, {
-                    meetingLocation: {
-                        ...experience.meetingLocation!,
-                        imageUrl,
-                    },
-                    updatedAt: new Date(),
-                });
-                break;
-        }
+        await this.updateExperienceImage(
+            experience,
+            imageType,
+            imageId,
+            mimeType,
+            imageUrl,
+            experienceId
+        );
     }
 
     private parseS3Event(request: S3Event): {
@@ -190,6 +234,7 @@ export class S3Service {
         experienceId: string;
         imageType: string;
         imageUrl: string;
+        key: string;
     } {
         const record = request.Records[0];
         const { awsRegion: region } = record;
@@ -271,5 +316,91 @@ export class S3Service {
             experienceId,
             imageType,
         };
+    }
+
+    private extractImageMetadata(key: string): {
+        imageId: string;
+        mimeType: string;
+    } {
+        const fileName = key.split("/").pop();
+        const imageId = fileName?.split(".")[0];
+
+        if (!imageId) {
+            throw new Error("Image ID not found in filename.");
+        }
+
+        const mimeType = this.getMimeTypeFromExtension(fileName);
+
+        return { imageId, mimeType };
+    }
+
+    private getMimeTypeFromExtension(fileName?: string): string {
+        const fileExtension = fileName?.split(".").pop()?.toLowerCase();
+
+        switch (fileExtension) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "webp":
+                return "image/webp";
+            default:
+                return "application/octet-stream";
+        }
+    }
+
+    private async updateExperienceImage(
+        experience: any,
+        imageType: string,
+        imageId: string,
+        mimeType: string,
+        imageUrl: string,
+        experienceId: string
+    ): Promise<void> {
+        const imageObject = {
+            mimeType,
+            id: imageId,
+            url: imageUrl,
+        };
+
+        switch (imageType) {
+            case "cover":
+                await this.db.experiences.update(experienceId, {
+                    coverImage: imageObject,
+                });
+                break;
+            case "gallery":
+                const existingGalleryImages = experience.galleryImages || [];
+                const existingImageIndex = existingGalleryImages.findIndex(
+                    (img: any) => img.id === imageId
+                );
+
+                let updatedGalleryImages;
+                if (existingImageIndex >= 0) {
+                    updatedGalleryImages = [...existingGalleryImages];
+                    updatedGalleryImages[existingImageIndex] = imageObject;
+                } else {
+                    updatedGalleryImages = [
+                        ...existingGalleryImages,
+                        imageObject,
+                    ];
+                }
+
+                await this.db.experiences.update(experienceId, {
+                    galleryImages: updatedGalleryImages,
+                });
+                break;
+            case "meeting-location":
+                await this.db.experiences.update(experienceId, {
+                    meetingLocation: {
+                        ...experience.meetingLocation!,
+                        image: imageObject,
+                    },
+                });
+                break;
+            default:
+                throw new Error(`Unknown image type: ${imageType}`);
+        }
     }
 }

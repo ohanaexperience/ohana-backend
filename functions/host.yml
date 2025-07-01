@@ -144,3 +144,4 @@ hostDeleteExperience:
         DB_PORT: ${env:POSTGRES_PORT}
         DB_USER: ${env:POSTGRES_USERNAME}
         DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}

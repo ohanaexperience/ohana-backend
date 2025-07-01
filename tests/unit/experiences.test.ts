@@ -50,6 +50,7 @@ describe("ExperienceController", () => {
 
         mockS3Service = {
             getExperienceImageUploadUrls: jest.fn(),
+            deleteExperienceImages: jest.fn(),
         };
 
         mockDecodeToken = decodeToken as jest.MockedFunction<typeof decodeToken>;

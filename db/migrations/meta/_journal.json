@@ -127,6 +127,13 @@
       "when": 1750780118763,
       "tag": "0017_military_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1751351525760,
+      "tag": "0018_empty_odin",
+      "breakpoints": true
     }
   ]
 }

@@ -47,10 +47,13 @@ export class S3Controller {
     }
 
     async handleExperienceImageUpload(request: S3Event) {
+        console.log("request", request);
         try {
             const result = await this.s3Service.handleExperienceImageUpload(
                 request
             );
+
+            console.log("result", result);
 
             return {
                 statusCode: 200,

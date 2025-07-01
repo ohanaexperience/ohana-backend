@@ -22,7 +22,7 @@ import {
     EXPERIENCE_CANCELLATION_POLICY,
     EXPERIENCE_AGE_RECOMMENDATIONS,
 } from "@/constants/experiences";
-import { ExperienceMeetingLocation } from "@/types/experiences";
+import { ExperienceMeetingLocation, ImageObject } from "@/types/experiences";
 
 // Enums
 export const experienceStatusEnum = pgEnum(
@@ -92,8 +92,12 @@ export const experiencesTable = pgTable("experiences", {
     autoCancelEnabled: boolean("auto_cancel_enabled").default(false),
     autoCancelHours: integer("auto_cancel_hours"),
 
+    // Deprecated
     coverImageUrl: text("cover_image_url"),
     galleryImageUrls: text("gallery_image_urls").array().default([]),
+
+    coverImage: jsonb("cover_image").$type<ImageObject>(),
+    galleryImages: jsonb("gallery_images").$type<ImageObject[]>(),
 
     includedItems: includedItemsEnum("included_items")
         .array()

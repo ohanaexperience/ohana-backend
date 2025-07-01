@@ -290,6 +290,10 @@ export class ExperienceService {
             throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE);
         }
 
+        if (this.s3Service) {
+            await this.s3Service.deleteExperienceImages(experienceId);
+        }
+
         await this.db.experiences.delete(experienceId);
 
         return {

@@ -5,5 +5,11 @@ export type TimeSlot = {
 
 export type ExperienceMeetingLocation = {
     instructions: string;
-    imageUrl?: string;
+    image: ImageObject;
+};
+
+export type ImageObject = {
+    mimeType: string;
+    id: string;
+    url: string;
 };
