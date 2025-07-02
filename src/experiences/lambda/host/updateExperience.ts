@@ -14,23 +14,14 @@ import {
 import { ExperienceController } from "../../controllers/experience";
 
 import { DatabaseFactory } from "@/database";
+import { createDatabaseConfig } from "@/database/proxy-config";
 import { requireBody, zodValidator } from "@/middleware";
 
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-const { DB_ENDPOINT, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
-
-const db = DatabaseFactory.create({
-    postgres: {
-        host: DB_ENDPOINT!,
-        port: parseInt(DB_PORT!),
-        database: DB_NAME!,
-        user: DB_USER!,
-        password: DB_PASSWORD!,
-        ssl: false,
-    },
-});
+const dbConfig = createDatabaseConfig();
+const db = DatabaseFactory.create({ postgres: dbConfig });
 const experienceController = new ExperienceController({ database: db });
 
 export const handler = middy(async (event: UpdateExperienceData) => {

@@ -37,6 +37,21 @@ export const imageUrlSchema = z
     })
     .url(ERRORS.IMAGE_URL.INVALID.CODE);
 
+export const imageObjectSchema = z.object({
+    id: z.string({
+        required_error: "Image ID is required",
+        invalid_type_error: "Image ID must be a string",
+    }),
+    mimeType: z.string({
+        required_error: "MIME type is required", 
+        invalid_type_error: "MIME type must be a string",
+    }),
+    url: z.string({
+        required_error: "Image URL is required",
+        invalid_type_error: "Image URL must be a string", 
+    }).url("Invalid image URL format"),
+});
+
 export const confirmationCodeSchema = z
     .string({
         required_error: ERRORS.CONFIRMATION_CODE.MISSING.CODE,

@@ -9,16 +9,15 @@ handleProfileImageUpload:
                   - prefix: users/
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 handleExperienceImageUpload:
     handler: src/s3/lambda/experiences/handleExperienceImageUpload.handler
@@ -31,13 +30,12 @@ handleExperienceImageUpload:
                   - prefix: hosts/
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true

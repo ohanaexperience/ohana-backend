@@ -6,7 +6,7 @@ import {
     firstNameSchema,
     lastNameSchema,
     phoneNumberSchema,
-    imageUrlSchema,
+    imageObjectSchema,
 } from "@/validations/shared";
 import ERRORS from "@/errors";
 
@@ -15,7 +15,7 @@ export const UpdateUserProfileBaseSchema = z.object({
     firstName: firstNameSchema.optional(),
     lastName: lastNameSchema.optional(),
     phoneNumber: phoneNumberSchema.optional(),
-    profileImageUrl: imageUrlSchema.optional(),
+    profileImage: imageObjectSchema.optional(),
 });
 export const UpdateUserProfileSchema = UpdateUserProfileBaseSchema.refine(
     (data) => {

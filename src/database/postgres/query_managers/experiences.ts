@@ -8,70 +8,77 @@ import {
     sql,
     ilike,
 } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { experiencesTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
+import { experiencesTable } from "@/database/schemas";
 
-export class ExperiencesQueryManager {
-    private db: NodePgDatabase;
-
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
+export class ExperiencesQueryManager extends BaseQueryManager {
 
     public async getAll() {
-        return await this.db.select().from(experiencesTable);
+        return await this.withDatabase(async (db) =>
+            db.select().from(experiencesTable)
+        );
     }
 
     public async getAllByHostId(hostId: string) {
-        return await this.db
-            .select()
-            .from(experiencesTable)
-            .where(eq(experiencesTable.hostId, hostId));
+        return await this.withDatabase(async (db) =>
+            db.select()
+                .from(experiencesTable)
+                .where(eq(experiencesTable.hostId, hostId))
+        );
     }
 
     public async getById(experienceId: string) {
-        const results = await this.db
-            .select()
-            .from(experiencesTable)
-            .where(eq(experiencesTable.id, experienceId));
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(experiencesTable)
+                .where(eq(experiencesTable.id, experienceId));
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async getByUserId(userId: string) {
-        const results = await this.db
-            .select()
-            .from(experiencesTable)
-            .where(eq(experiencesTable.hostId, userId))
-            .limit(1);
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(experiencesTable)
+                .where(eq(experiencesTable.hostId, userId))
+                .limit(1);
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async create(data: InsertExperience) {
-        const results = await this.db
-            .insert(experiencesTable)
-            .values(data)
-            .returning();
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .insert(experiencesTable)
+                .values(data)
+                .returning();
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async update(experienceId: string, data: UpdateExperience) {
-        const results = await this.db
-            .update(experiencesTable)
-            .set(data)
-            .where(eq(experiencesTable.id, experienceId))
-            .returning();
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .update(experiencesTable)
+                .set(data)
+                .where(eq(experiencesTable.id, experienceId))
+                .returning();
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async delete(id: string) {
-        return await this.db
-            .delete(experiencesTable)
-            .where(eq(experiencesTable.id, id));
+        return await this.withDatabase(async (db) =>
+            db.delete(experiencesTable)
+                .where(eq(experiencesTable.id, id))
+        );
     }
 
     public async searchExperiences(filters: Record<string, any>) {
@@ -182,15 +189,18 @@ export class ExperiencesQueryManager {
             filters.radiusKm
         );
 
-        const query = this.db.select().from(experiencesTable);
+        return await this.withDatabase(async (db) => {
+            const query = db.select().from(experiencesTable);
 
-        console.log("conditions", conditions);
+            console.log("conditions", conditions);
 
-        if (conditions.length > 0) {
-            return await query.where(and(...conditions));
-        }
+            if (conditions.length > 0) {
+                return await query.where(and(...conditions));
+            }
 
-        return await query;
+            return await query;
+        });
+
     }
 }
 

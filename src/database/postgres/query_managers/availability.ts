@@ -1,40 +1,37 @@
 import { eq, InferInsertModel } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { experienceAvailabilityTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
+import { experienceAvailabilityTable } from "@/database/schemas";
 
-export class AvailabilityQueryManager {
-    private db: NodePgDatabase;
-
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
+export class AvailabilityQueryManager extends BaseQueryManager {
 
     public async getAll() {
-        const results = await this.db
-            .select()
-            .from(experienceAvailabilityTable);
-
-        return results;
+        return await this.withDatabase(async (db) =>
+            db.select().from(experienceAvailabilityTable)
+        );
     }
 
     public async create(data: InsertAvailability) {
-        const results = await this.db
-            .insert(experienceAvailabilityTable)
-            .values(data)
-            .returning();
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .insert(experienceAvailabilityTable)
+                .values(data)
+                .returning();
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async updateById(availabilityId: string, data: UpdateAvailability) {
-        const results = await this.db
-            .update(experienceAvailabilityTable)
-            .set(data)
-            .where(eq(experienceAvailabilityTable.id, availabilityId))
-            .returning();
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .update(experienceAvailabilityTable)
+                .set(data)
+                .where(eq(experienceAvailabilityTable.id, availabilityId))
+                .returning();
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     // public async delete(availabilityId: string) {

@@ -1166,11 +1166,27 @@
                                             "description": "User's phone number",
                                             "example": "+1234567890"
                                         },
-                                        "profileImageUrl": {
-                                            "type": "string",
-                                            "format": "uri",
-                                            "description": "URL to user's profile image",
-                                            "example": "https://example.com/images/profile.jpg"
+                                        "profileImage": {
+                                            "type": "object",
+                                            "description": "User's profile image object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "Unique identifier for the image",
+                                                    "example": "user123_1672531200"
+                                                },
+                                                "mimeType": {
+                                                    "type": "string",
+                                                    "description": "MIME type of the image",
+                                                    "example": "image/jpeg"
+                                                },
+                                                "url": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "description": "URL to the image",
+                                                    "example": "https://assets.ohana.com/users/123/profile/images/user123_1672531200.jpg"
+                                                }
+                                            }
                                         },
                                         "isHost": {
                                             "type": "boolean",
@@ -1475,11 +1491,27 @@
                                             "description": "Host's active status",
                                             "example": true
                                         },
-                                        "profileImageUrl": {
-                                            "type": "string",
-                                            "format": "uri",
-                                            "description": "URL to user's profile image",
-                                            "example": "https://example.com/images/profile.jpg"
+                                        "profileImage": {
+                                            "type": "object",
+                                            "description": "User's profile image object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "Unique identifier for the image",
+                                                    "example": "user123_1672531200"
+                                                },
+                                                "mimeType": {
+                                                    "type": "string",
+                                                    "description": "MIME type of the image",
+                                                    "example": "image/jpeg"
+                                                },
+                                                "url": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                    "description": "URL to the image",
+                                                    "example": "https://assets.ohana.com/users/123/profile/images/user123_1672531200.jpg"
+                                                }
+                                            }
                                         }
                                     }
                                 }

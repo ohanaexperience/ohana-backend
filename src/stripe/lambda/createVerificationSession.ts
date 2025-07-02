@@ -9,27 +9,15 @@ import stripe from "stripe";
 import { StripeController } from "../controllers/stripe";
 
 import { DatabaseFactory } from "@/database";
+import { createDatabaseConfig } from "@/database/proxy-config";
 
 const {
-    DB_ENDPOINT,
-    DB_PORT,
-    DB_NAME,
-    DB_USER,
-    DB_PASSWORD,
     STRIPE_SECRET_KEY,
 } = process.env;
 
 const stripeClient = new stripe(STRIPE_SECRET_KEY!);
-const db = DatabaseFactory.create({
-    postgres: {
-        host: DB_ENDPOINT!,
-        port: parseInt(DB_PORT!),
-        database: DB_NAME!,
-        user: DB_USER!,
-        password: DB_PASSWORD!,
-        ssl: false,
-    },
-});
+const dbConfig = createDatabaseConfig();
+const db = DatabaseFactory.create({ postgres: dbConfig });
 const stripeController = new StripeController({
     database: db,
     stripeClient,

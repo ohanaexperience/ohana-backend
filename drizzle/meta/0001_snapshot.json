@@ -1,6 +1,6 @@
 {
-  "id": "65562e1f-c20f-4df1-972a-3ea54be68877",
-  "prevId": "2132684e-75a6-48a5-8e79-c57c7acee6bc",
+  "id": "0794cd4f-c9b7-4ad5-8ae0-621e8680ed47",
+  "prevId": "82127fd1-df2f-4b3c-889d-8651ca81c6f3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -540,18 +540,17 @@
           "primaryKey": false,
           "notNull": false
         },
-        "cover_image_url": {
-          "name": "cover_image_url",
-          "type": "text",
+        "cover_image": {
+          "name": "cover_image",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
-        "gallery_image_urls": {
-          "name": "gallery_image_urls",
-          "type": "text[]",
+        "gallery_images": {
+          "name": "gallery_images",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'"
+          "notNull": false
         },
         "included_items": {
           "name": "included_items",
@@ -904,9 +903,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "profile_image_url": {
-          "name": "profile_image_url",
-          "type": "text",
+        "profile_image": {
+          "name": "profile_image",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -941,13 +940,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "phone_number"
-          ]
-        },
-        "users_profile_image_url_unique": {
-          "name": "users_profile_image_url_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "profile_image_url"
           ]
         }
       },

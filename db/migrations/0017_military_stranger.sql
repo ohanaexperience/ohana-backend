@@ -1,1 +1,0 @@
-ALTER TABLE "experience_availability" ALTER COLUMN "days_of_week" DROP NOT NULL;

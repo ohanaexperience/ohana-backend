@@ -1,1 +1,0 @@
-ALTER TABLE "experiences" ALTER COLUMN "what_to_bring" DROP NOT NULL;

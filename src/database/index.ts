@@ -5,8 +5,11 @@ export type PostgresConfig = {
     port: number;
     database: string;
     user: string;
-    password: string;
-    ssl: boolean;
+    password?: string;
+    ssl: boolean | { rejectUnauthorized: boolean };
+    useIamAuth?: boolean;
+    region?: string;
+    useRdsProxy?: boolean;
 };
 
 export interface DatabaseConfig {

@@ -1,31 +1,29 @@
 import { eq, InferInsertModel, SQL, gte, lte, and, sql } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 import dayjs from "dayjs";
 
-import { experienceTimeSlotsTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
+import { experienceTimeSlotsTable } from "@/database/schemas";
 
-export class TimeSlotsQueryManager {
-    private db: NodePgDatabase;
-
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
+export class TimeSlotsQueryManager extends BaseQueryManager {
 
     public async getById(timeSlotId: string) {
-        const results = await this.db
-            .select()
-            .from(experienceTimeSlotsTable)
-            .where(eq(experienceTimeSlotsTable.id, timeSlotId));
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(experienceTimeSlotsTable)
+                .where(eq(experienceTimeSlotsTable.id, timeSlotId));
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async createTimeSlots(timeSlotsData: InsertTimeSlot[]) {
-        return await this.db
-            .insert(experienceTimeSlotsTable)
-            .values(timeSlotsData)
-            .returning();
+        return await this.withDatabase(async (db) =>
+            db.insert(experienceTimeSlotsTable)
+                .values(timeSlotsData)
+                .returning()
+        );
     }
 
     public async getByDateRange(params: {
@@ -54,30 +52,33 @@ export class TimeSlotsQueryManager {
             );
         }
 
-        const results = await this.db
-            .select()
-            .from(experienceTimeSlotsTable)
-            .where(and(...conditions))
-            .orderBy(experienceTimeSlotsTable.slotDateTime);
-
-        return results;
+        return await this.withDatabase(async (db) =>
+            db.select()
+                .from(experienceTimeSlotsTable)
+                .where(and(...conditions))
+                .orderBy(experienceTimeSlotsTable.slotDateTime)
+        );
     }
 
     public async updateBookedCount(timeSlotId: string, newBookedCount: number) {
-        const results = await this.db
-            .update(experienceTimeSlotsTable)
-            .set({
-                bookedCount: newBookedCount,
-                updatedAt: new Date(),
-            })
-            .where(eq(experienceTimeSlotsTable.id, timeSlotId))
-            .returning();
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .update(experienceTimeSlotsTable)
+                .set({
+                    bookedCount: newBookedCount,
+                    updatedAt: new Date(),
+                })
+                .where(eq(experienceTimeSlotsTable.id, timeSlotId))
+                .returning();
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async getAll() {
-        return await this.db.select().from(experienceTimeSlotsTable);
+        return await this.withDatabase(async (db) =>
+            db.select().from(experienceTimeSlotsTable)
+        );
     }
 }
 

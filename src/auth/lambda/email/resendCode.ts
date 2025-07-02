@@ -11,29 +11,17 @@ import { AuthController } from "../../controllers/auth";
 import { EmailResendCodeData, EmailResendCodeSchema } from "../../validations";
 
 import { DatabaseFactory } from "@/database";
+import { createDatabaseConfig } from "@/database/proxy-config";
 import { requireBody, zodValidator } from "@/middleware";
 
 const {
-    DB_ENDPOINT,
-    DB_PORT,
-    DB_NAME,
-    DB_USER,
-    DB_PASSWORD,
     USER_POOL_ID,
     USER_POOL_CLIENT_ID,
     GOOGLE_CLIENT_ID,
 } = process.env;
 
-const db = DatabaseFactory.create({
-    postgres: {
-        host: DB_ENDPOINT!,
-        port: parseInt(DB_PORT!),
-        database: DB_NAME!,
-        user: DB_USER!,
-        password: DB_PASSWORD!,
-        ssl: false,
-    },
-});
+const dbConfig = createDatabaseConfig();
+const db = DatabaseFactory.create({ postgres: dbConfig });
 const cognitoClient = new CognitoIdentityProviderClient({
     region: "us-east-1",
 });

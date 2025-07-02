@@ -6,7 +6,17 @@ authPhoneRegister:
               path: /v1/auth/phone/register
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailRegister:
@@ -17,7 +27,17 @@ authEmailRegister:
               path: /v1/auth/email/register
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authResendEmailCode:
@@ -28,7 +48,17 @@ authResendEmailCode:
               path: /v1/auth/email/resend-code
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmEmailCode:
@@ -41,16 +71,15 @@ authConfirmEmailCode:
               cors: true
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
@@ -62,7 +91,17 @@ authForgotPassword:
               path: /v1/auth/email/forgot-password
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmForgotPassword:
@@ -73,7 +112,17 @@ authConfirmForgotPassword:
               path: /v1/auth/email/change-password
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailLogin:
@@ -84,7 +133,17 @@ authEmailLogin:
               path: /v1/auth/email/login
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
@@ -96,7 +155,17 @@ authRefreshTokens:
               path: /v1/auth/tokens/refresh
               method: POST
               cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authGoogleLogin:
@@ -109,16 +178,15 @@ authGoogleLogin:
               cors: true
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         USER_POOL: ${self:custom.resourceNames.userPool}
         USER_POOL_CLIENT: ${self:custom.resourceNames.userPoolClient}
         USER_POOL_ID: !Ref UserPool

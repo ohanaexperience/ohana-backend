@@ -4,26 +4,14 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { S3Controller } from "../../controllers/s3";
 
 import { DatabaseFactory } from "@/database";
+import { createDatabaseConfig } from "@/database/proxy-config";
 
 const {
-    DB_ENDPOINT,
-    DB_PORT,
-    DB_NAME,
-    DB_USER,
-    DB_PASSWORD,
     ASSETS_BUCKET_NAME,
 } = process.env;
 
-const db = DatabaseFactory.create({
-    postgres: {
-        host: DB_ENDPOINT!,
-        port: parseInt(DB_PORT!),
-        database: DB_NAME!,
-        user: DB_USER!,
-        password: DB_PASSWORD!,
-        ssl: false,
-    },
-});
+const dbConfig = createDatabaseConfig();
+const db = DatabaseFactory.create({ postgres: dbConfig });
 const s3Client = new S3Client({
     region: "us-east-1",
 });

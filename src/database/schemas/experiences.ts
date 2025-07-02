@@ -92,10 +92,6 @@ export const experiencesTable = pgTable("experiences", {
     autoCancelEnabled: boolean("auto_cancel_enabled").default(false),
     autoCancelHours: integer("auto_cancel_hours"),
 
-    // Deprecated
-    coverImageUrl: text("cover_image_url"),
-    galleryImageUrls: text("gallery_image_urls").array().default([]),
-
     coverImage: jsonb("cover_image").$type<ImageObject>(),
     galleryImages: jsonb("gallery_images").$type<ImageObject[]>(),
 

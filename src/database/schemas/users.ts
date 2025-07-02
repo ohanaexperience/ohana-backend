@@ -1,6 +1,7 @@
-import { pgTable, pgEnum, uuid, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, pgEnum, uuid, text, timestamp, jsonb } from "drizzle-orm/pg-core";
 
-import { USER_AUTH_PROVIDERS } from "../../src/constants/users";
+import { USER_AUTH_PROVIDERS } from "@/constants/users";
+import { ImageObject } from "@/types/experiences";
 
 // Enums
 export const userAuthProviderEnum = pgEnum(
@@ -17,7 +18,7 @@ export const usersTable = pgTable("users", {
     phoneNumber: text("phone_number").unique(),
     firstName: text("first_name"),
     lastName: text("last_name"),
-    profileImageUrl: text("profile_image_url").unique(),
+    profileImage: jsonb("profile_image").$type<ImageObject>(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

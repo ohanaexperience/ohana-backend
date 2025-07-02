@@ -1,4 +1,5 @@
 import { DatabaseFactory } from "@/database";
+import { createDatabaseConfig, createDirectConfig } from "@/database/proxy-config";
 import { DatabaseService } from "@/database/services/database";
 
 export interface TestDatabaseConfig {
@@ -15,20 +16,27 @@ export class DatabaseTestHelper {
     private databaseService: DatabaseService;
 
     constructor(config?: Partial<TestDatabaseConfig>) {
-        const defaultConfig: TestDatabaseConfig = {
-            host: process.env.DB_ENDPOINT || "localhost",
-            port: parseInt(process.env.DB_PORT || "5432"),
-            database: process.env.DB_NAME || "test_db",
-            user: process.env.DB_USER || "postgres",
-            password: process.env.DB_PASSWORD || "password",
-            ssl: false,
-        };
+        if (config) {
+            // Use custom config for tests
+            const defaultConfig: TestDatabaseConfig = {
+                host: process.env.DB_ENDPOINT || "localhost",
+                port: parseInt(process.env.DB_PORT || "5432"),
+                database: process.env.DB_NAME || "test_db",
+                user: process.env.DB_USER || "postgres",
+                password: process.env.DB_PASSWORD || "password",
+                ssl: false,
+            };
 
-        const finalConfig = { ...defaultConfig, ...config };
+            const finalConfig = { ...defaultConfig, ...config };
 
-        this.db = DatabaseFactory.create({
-            postgres: finalConfig,
-        });
+            this.db = DatabaseFactory.create({
+                postgres: finalConfig,
+            });
+        } else {
+            // Use the standard database configuration (supports both direct and proxy)
+            const dbConfig = createDatabaseConfig();
+            this.db = DatabaseFactory.create({ postgres: dbConfig });
+        }
 
         this.databaseService = new DatabaseService({
             database: this.db,

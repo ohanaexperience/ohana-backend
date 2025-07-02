@@ -1,26 +1,25 @@
 import { InferInsertModel, eq } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { categoriesTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
+import { categoriesTable } from "@/database/schemas";
 
-export class CategoriesQueryManager {
-    private db: NodePgDatabase;
-
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
+export class CategoriesQueryManager extends BaseQueryManager {
 
     public async getAll() {
-        return await this.db.select().from(categoriesTable);
+        return await this.withDatabase(async (db) =>
+            db.select().from(categoriesTable)
+        );
     }
 
     public async getById(id: number) {
-        const results = await this.db
-            .select()
-            .from(categoriesTable)
-            .where(eq(categoriesTable.id, id));
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(categoriesTable)
+                .where(eq(categoriesTable.id, id));
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 }
 

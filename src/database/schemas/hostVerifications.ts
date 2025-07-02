@@ -12,8 +12,8 @@ import { usersTable } from "./users";
 import {
     HOST_VERIFICATION_PROVIDERS,
     HOST_VERIFICATION_STATUSES,
-} from "../../src/constants/hostVerifications";
-import { ProviderData } from "../../src/types/hostVerifications";
+} from "@/constants/hostVerifications";
+import { ProviderData } from "@/types/hostVerifications";
 
 // Enums
 export const hostVerificationProviderEnum = pgEnum(

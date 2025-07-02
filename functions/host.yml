@@ -12,16 +12,15 @@ hostGetProfile:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 hostUpdateProfile:
     handler: src/host.updateProfile
@@ -36,16 +35,15 @@ hostUpdateProfile:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 # Experiences
 hostCreateExperience:
@@ -61,16 +59,15 @@ hostCreateExperience:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 hostGetExperiences:
@@ -86,16 +83,15 @@ hostGetExperiences:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 hostUpdateExperience:
     handler: src/experiences/lambda/host/updateExperience.handler
@@ -110,16 +106,15 @@ hostUpdateExperience:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 hostDeleteExperience:
     handler: src/experiences/lambda/host/deleteExperience.handler
@@ -134,14 +129,13 @@ hostDeleteExperience:
                   authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
-            - !Ref LambdaSecurityGroup
+            - !Ref ProxySecurityGroup
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        DB_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
-        DB_NAME: ${self:custom.resourceNames.postgresDB}
-        DB_PORT: ${env:POSTGRES_PORT}
-        DB_USER: ${env:POSTGRES_USERNAME}
-        DB_PASSWORD: ${env:POSTGRES_PASSWORD}
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}

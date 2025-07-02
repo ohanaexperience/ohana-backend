@@ -14,7 +14,6 @@ import {
     InitiateAuthCommand,
     AdminCreateUserCommand,
     AdminSetUserPasswordCommand,
-    AdminLinkProviderForUserCommand,
     ConfirmForgotPasswordCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 
@@ -91,18 +90,26 @@ export class AuthService {
     async emailRegister(request: EmailRegisterRequestData) {
         const { email, password } = request;
 
-        const signUpCommand = new SignUpCommand({
-            ClientId: this.config.userPoolClientId,
-            Username: email,
-            Password: password,
-        });
-        const response = await this.cognitoClient.send(signUpCommand);
+        try {
+            const signUpCommand = new SignUpCommand({
+                ClientId: this.config.userPoolClientId,
+                Username: email,
+                Password: password,
+            });
+            const response = await this.cognitoClient.send(signUpCommand);
 
-        console.log("Sign up successful:", response);
+            console.log("Sign up successful:", response);
 
-        return {
-            message: "User successfully created.",
-        };
+            return {
+                message: "User successfully created.",
+            };
+        } catch (error: any) {
+            if (error.__type === "UsernameExistsException") {
+                throw new Error(ERRORS.USER.ALREADY_EXISTS.CODE);
+            }
+
+            throw error;
+        }
     }
 
     async emailResendCode(request: EmailResendCodeRequestData) {
@@ -126,32 +133,51 @@ export class AuthService {
     async emailConfirmCode(request: EmailConfirmCodeRequestData) {
         const { email, confirmationCode } = request;
 
-        const confirmSignUpCommand = new ConfirmSignUpCommand({
-            ClientId: this.config.userPoolClientId,
-            Username: email,
-            ConfirmationCode: confirmationCode,
-        });
-        const response = await this.cognitoClient.send(confirmSignUpCommand);
+        try {
+            const confirmSignUpCommand = new ConfirmSignUpCommand({
+                ClientId: this.config.userPoolClientId,
+                Username: email,
+                ConfirmationCode: confirmationCode,
+            });
+            const response = await this.cognitoClient.send(
+                confirmSignUpCommand
+            );
 
-        const getUserCommand = new AdminGetUserCommand({
-            UserPoolId: this.config.userPoolId,
-            Username: email,
-        });
-        const user = await this.cognitoClient.send(getUserCommand);
+            const getUserCommand = new AdminGetUserCommand({
+                UserPoolId: this.config.userPoolId,
+                Username: email,
+            });
+            const user = await this.cognitoClient.send(getUserCommand);
 
-        const sub = user.UserAttributes?.find(
-            (attr) => attr.Name === "sub"
-        )?.Value;
+            const sub = user.UserAttributes?.find(
+                (attr) => attr.Name === "sub"
+            )?.Value;
 
-        if (sub) {
-            await this.db.users.create({ id: sub, email });
+            if (sub) {
+                await this.db.users.create({ id: sub, email });
+            }
+
+            console.log(
+                "Email confirmation code confirmed successfully:",
+                response
+            );
+
+            return {
+                message: "Verification code confirmed.",
+            };
+        } catch (error: any) {
+            console.error("Error confirming email code:", error);
+
+            if (error.__type === "ExpiredCodeException") {
+                throw new Error(ERRORS.CONFIRMATION_CODE.EXPIRED.CODE);
+            }
+
+            if (error.__type === "CodeMismatchException") {
+                throw new Error(ERRORS.CONFIRMATION_CODE.INVALID.CODE);
+            }
+
+            throw error;
         }
-
-        console.log("Email confirmation code resent successfully:", response);
-
-        return {
-            message: "Verification code confirmed.",
-        };
     }
 
     async emailForgotPassword(request: EmailForgotPasswordRequestData) {
@@ -249,115 +275,203 @@ export class AuthService {
 
     async googleSignIn(request: GoogleSignInRequestData) {
         const { idToken } = request;
+        const startTime = Date.now();
+
+        console.log(`[googleSignIn] Starting Google sign-in process`);
 
         const payload = await this.verifyGoogleToken(idToken);
 
-        console.log("payload", payload);
+        console.log(
+            `[googleSignIn][${Date.now() - startTime}ms] Token verified`
+        );
 
         if (!payload) {
             throw new Error(ERRORS.GOOGLE_ID_TOKEN.INVALID.CODE);
         }
 
         const decodedToken: any = jwtDecode(idToken);
+        const username = `google_${decodedToken.sub}`;
 
-        console.log("decodedToken", decodedToken);
+        console.log(
+            `[googleSignIn][${Date.now() - startTime}ms] Processing user: ${
+                decodedToken.email
+            }`
+        );
 
         // Check if the user already exists in the user pool
-        const userExists = await this.cognitoUserExists(decodedToken.email);
+        const userExists = await this.cognitoUserExists(username);
 
         if (userExists) {
-            const initiateAuthCommand = new AdminInitiateAuthCommand({
-                UserPoolId: this.config.userPoolId,
-                ClientId: this.config.userPoolClientId,
-                AuthFlow: "ADMIN_NO_SRP_AUTH",
-                AuthParameters: {
-                    USERNAME: decodedToken.email,
-                    PASSWORD: "X&NEq##tr7Mf4j3a",
-                },
-            });
-            const { AuthenticationResult } = await this.cognitoClient.send(
-                initiateAuthCommand
+            console.log(
+                `[googleSignIn][${
+                    Date.now() - startTime
+                }ms] User exists, generating new password`
             );
 
-            console.log("AuthenticationResult", AuthenticationResult);
-
-            return {
-                statusCode: 200,
-                body: JSON.stringify(AuthenticationResult),
-            };
-        }
-
-        // Create the user in the user pool
-        const createUserCommand = new AdminCreateUserCommand({
-            UserPoolId: this.config.userPoolId,
-            Username: decodedToken.email,
-            UserAttributes: [
-                {
-                    Name: "email",
-                    Value: decodedToken.email,
-                },
-                {
-                    Name: "email_verified",
-                    Value: "true",
-                },
-            ],
-            MessageAction: "SUPPRESS",
-        });
-        const newUser = await this.cognitoClient.send(createUserCommand);
-        const sub = newUser.User?.Attributes?.find(
-            (attr) => attr.Name === "sub"
-        )?.Value;
-
-        if (sub) {
-            // Create the user in the database
-            await this.db.users.create({
-                id: sub,
-                email: decodedToken.email,
-                authProvider: "google",
+            // Generate a new unique password for existing user authentication
+            const tempPassword = passwordGenerator.generate({
+                length: 32,
+                numbers: true,
+                uppercase: true,
+                symbols: true,
+                lowercase: true,
             });
+
+            await this.setUserPassword(username, tempPassword);
+            const authResult = await this.authenticateUser(
+                username,
+                tempPassword
+            );
+
+            console.log(
+                `[googleSignIn][${
+                    Date.now() - startTime
+                }ms] Existing user authenticated successfully`
+            );
+            return authResult;
         }
 
-        // Set permanent password for user
+        console.log(
+            `[googleSignIn][${Date.now() - startTime}ms] Creating new user`
+        );
+        return await this.createGoogleUser(decodedToken, username, startTime);
+    }
+
+    private async createGoogleUser(
+        decodedToken: any,
+        username: string,
+        startTime: number
+    ) {
+        const tempPassword = passwordGenerator.generate({
+            length: 32,
+            numbers: true,
+            uppercase: true,
+            symbols: true,
+            lowercase: true,
+        });
+
+        try {
+            console.log(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] Creating Cognito user`
+            );
+
+            // Create the user in the user pool
+            const createUserCommand = new AdminCreateUserCommand({
+                UserPoolId: this.config.userPoolId,
+                Username: username,
+                UserAttributes: [
+                    {
+                        Name: "email",
+                        Value: decodedToken.email,
+                    },
+                    {
+                        Name: "email_verified",
+                        Value: "true",
+                    },
+                    {
+                        Name: "custom:auth_method",
+                        Value: "google",
+                    },
+                    {
+                        Name: "custom:google_sub",
+                        Value: decodedToken.sub,
+                    },
+                ],
+                MessageAction: "SUPPRESS",
+                TemporaryPassword: tempPassword,
+            });
+
+            const newUser = await this.cognitoClient.send(createUserCommand);
+            const sub = newUser.User?.Attributes?.find(
+                (attr) => attr.Name === "sub"
+            )?.Value;
+
+            console.log(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] Cognito user created, creating database record`
+            );
+
+            if (sub) {
+                // Create the user in the database
+                await this.db.users.create({
+                    id: sub,
+                    email: decodedToken.email,
+                    authProvider: "google",
+                });
+            }
+
+            console.log(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] Setting permanent password`
+            );
+            await this.setUserPassword(username, tempPassword);
+
+            console.log(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] Authenticating new user`
+            );
+            const authResult = await this.authenticateUser(
+                username,
+                tempPassword
+            );
+
+            console.log(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] User creation and authentication completed successfully`
+            );
+            return authResult;
+        } catch (err: any) {
+            console.error(
+                `[createGoogleUser][${
+                    Date.now() - startTime
+                }ms] Error occurred:`,
+                {
+                    name: err?.name,
+                    message: err?.message,
+                    code: err?.code,
+                }
+            );
+            throw err;
+        }
+    }
+
+    private async setUserPassword(
+        username: string,
+        password: string
+    ): Promise<void> {
         const setPasswordCommand = new AdminSetUserPasswordCommand({
             UserPoolId: this.config.userPoolId,
-            Username: decodedToken.email,
-            Password: "X&NEq##tr7Mf4j3a",
+            Username: username,
+            Password: password,
             Permanent: true,
         });
         await this.cognitoClient.send(setPasswordCommand);
+    }
 
-        // Link the user to the Google provider
-        const linkCommand = new AdminLinkProviderForUserCommand({
-            UserPoolId: this.config.userPoolId,
-            DestinationUser: {
-                ProviderName: "Cognito",
-                ProviderAttributeValue: decodedToken.email,
-            },
-            SourceUser: {
-                ProviderName: "Google",
-                ProviderAttributeName: "Cognito_Subject",
-                ProviderAttributeValue: decodedToken.sub,
-            },
-        });
-        await this.cognitoClient.send(linkCommand);
-
-        // Initiate Auth With Cognito
-        const initiateAuthCommand = new AdminInitiateAuthCommand({
+    private async authenticateUser(username: string, password: string) {
+        const authCommand = new AdminInitiateAuthCommand({
             UserPoolId: this.config.userPoolId,
             ClientId: this.config.userPoolClientId,
-            AuthFlow: "ADMIN_NO_SRP_AUTH",
+            AuthFlow: "ADMIN_USER_PASSWORD_AUTH",
             AuthParameters: {
-                USERNAME: decodedToken.email,
-                PASSWORD: "X&NEq##tr7Mf4j3a",
+                USERNAME: username,
+                PASSWORD: password,
             },
         });
-        const { AuthenticationResult } = await this.cognitoClient.send(
-            initiateAuthCommand
-        );
 
-        console.log("response", AuthenticationResult);
+        const response = await this.cognitoClient.send(authCommand);
 
-        return AuthenticationResult;
+        if (!response.AuthenticationResult) {
+            throw new Error("Cognito authentication failed.");
+        }
+
+        return response.AuthenticationResult;
     }
 
     private async verifyGoogleToken(token: string) {
@@ -381,11 +495,11 @@ export class AuthService {
         }
     }
 
-    private async cognitoUserExists(email: string) {
+    private async cognitoUserExists(username: string) {
         try {
             const getUserCommand = new AdminGetUserCommand({
                 UserPoolId: this.config.userPoolId,
-                Username: email,
+                Username: username,
             });
             await this.cognitoClient.send(getUserCommand);
 

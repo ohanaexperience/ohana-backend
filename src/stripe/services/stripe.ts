@@ -4,7 +4,7 @@ import { InferSelectModel } from "drizzle-orm";
 
 import { StripeServiceOptions } from "../types";
 
-import { hostVerificationsTable } from "@/db/schema";
+import { hostVerificationsTable } from "@/database/schemas";
 import Postgres from "@/database/postgres";
 import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";

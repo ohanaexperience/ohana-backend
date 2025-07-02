@@ -157,7 +157,36 @@ export class AuthController {
                     }),
                 };
 
+            case ERRORS.USER.ALREADY_EXISTS.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.USER.ALREADY_EXISTS.CODE,
+                        message: ERRORS.USER.ALREADY_EXISTS.MESSAGE,
+                    }),
+                };
+
+            case ERRORS.CONFIRMATION_CODE.EXPIRED.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.CONFIRMATION_CODE.EXPIRED.CODE,
+                        message: ERRORS.CONFIRMATION_CODE.EXPIRED.MESSAGE,
+                    }),
+                };
+
+            case ERRORS.CONFIRMATION_CODE.INVALID.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.CONFIRMATION_CODE.INVALID.CODE,
+                        message: ERRORS.CONFIRMATION_CODE.INVALID.MESSAGE,
+                    }),
+                };
+
             default:
+                console.error("Error in AuthController", error);
+
                 return {
                     statusCode: 500,
                     body: JSON.stringify({

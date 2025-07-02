@@ -160,6 +160,14 @@ export default {
             CODE: "INVALID_CONFIRMATION_CODE_MIN_LENGTH",
             MESSAGE: "Confirmation code must be at least 6 characters.",
         },
+        EXPIRED: {
+            CODE: "EXPIRED_CONFIRMATION_CODE",
+            MESSAGE: "Confirmation code has expired. Please request a new code.",
+        },
+        INVALID: {
+            CODE: "INVALID_CONFIRMATION_CODE",
+            MESSAGE: "Invalid confirmation code. Please check the code and try again.",
+        },
     },
     REFRESH_TOKEN: {
         MISSING: {
@@ -192,6 +200,10 @@ export default {
     USER: {
         MISSING: { CODE: "MISSING_USER", MESSAGE: "User is required." },
         NOT_FOUND: { CODE: "USER_NOT_FOUND", MESSAGE: "User does not exist." },
+        ALREADY_EXISTS: {
+            CODE: "USER_ALREADY_EXISTS",
+            MESSAGE: "User already exists.",
+        },
     },
     IMAGE_URL: {
         MISSING: {

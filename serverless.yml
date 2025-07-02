@@ -57,6 +57,11 @@ provider:
                       - rds-data:*
                   Resource: "*"
 
+                - Effect: Allow
+                  Action:
+                      - rds-db:connect
+                  Resource: "*"
+
 package:
     individually: true
 
@@ -106,6 +111,7 @@ functions:
 resources:
     - ${file(resources/auth.yml)}
     - ${file(resources/database.yml)}
-    - ${file(resources/gateway.yml)}
     - ${file(resources/vpc.yml)}
+    - ${file(resources/rds-proxy.yml)}
+    - ${file(resources/gateway.yml)}
     - ${file(resources/storage.yml)}

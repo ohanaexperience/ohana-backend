@@ -1,48 +1,50 @@
 import { eq, InferInsertModel } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { hostVerificationsTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
+import { hostVerificationsTable } from "@/database/schemas";
 
-export class HostVerificationsQueryManager {
-    private db: NodePgDatabase;
-
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
+export class HostVerificationsQueryManager extends BaseQueryManager {
 
     public async getAll() {
-        return await this.db.select().from(hostVerificationsTable);
+        return await this.withDatabase(async (db) =>
+            db.select().from(hostVerificationsTable)
+        );
     }
 
     public async getByUserId(userId: string) {
-        const results = await this.db
-            .select()
-            .from(hostVerificationsTable)
-            .where(eq(hostVerificationsTable.userId, userId))
-            .limit(1);
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(hostVerificationsTable)
+                .where(eq(hostVerificationsTable.userId, userId))
+                .limit(1);
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async create(data: InsertHostVerifications) {
-        return await this.db
-            .insert(hostVerificationsTable)
-            .values(data)
-            .returning();
+        return await this.withDatabase(async (db) =>
+            db.insert(hostVerificationsTable)
+                .values(data)
+                .returning()
+        );
     }
 
     public async update(userId: string, data: UpdateHostVerification) {
-        return await this.db
-            .update(hostVerificationsTable)
-            .set(data)
-            .where(eq(hostVerificationsTable.userId, userId))
-            .returning();
+        return await this.withDatabase(async (db) =>
+            db.update(hostVerificationsTable)
+                .set(data)
+                .where(eq(hostVerificationsTable.userId, userId))
+                .returning()
+        );
     }
 
     public async delete(id: string) {
-        return await this.db
-            .delete(hostVerificationsTable)
-            .where(eq(hostVerificationsTable.userId, id));
+        return await this.withDatabase(async (db) =>
+            db.delete(hostVerificationsTable)
+                .where(eq(hostVerificationsTable.userId, id))
+        );
     }
 }
 

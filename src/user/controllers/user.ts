@@ -50,6 +50,8 @@ export class UserController {
                 };
 
             default:
+                console.error("Error in UserController", error);
+
                 return {
                     statusCode: 500,
                     body: JSON.stringify({

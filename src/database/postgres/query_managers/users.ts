@@ -1,44 +1,47 @@
 import { eq, InferInsertModel } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { usersTable } from "@/db/schema";
+import { BaseQueryManager } from "./base";
 
-export class UsersQueryManager {
-    private db: NodePgDatabase;
+import { usersTable } from "@/database/schemas";
 
-    constructor(database: NodePgDatabase) {
-        this.db = database;
-    }
-
+export class UsersQueryManager extends BaseQueryManager {
     public async getAll() {
-        return await this.db.select().from(usersTable);
+        return await this.withDatabase(async (db) =>
+            db.select().from(usersTable)
+        );
     }
 
     public async getByUserId(userId: string) {
-        const results = await this.db
-            .select()
-            .from(usersTable)
-            .where(eq(usersTable.id, userId));
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(usersTable)
+                .where(eq(usersTable.id, userId));
 
-        return results[0] || null;
+            return results[0] || null;
+        });
     }
 
     public async create(data: InsertUser) {
-        return await this.db.insert(usersTable).values(data).returning();
+        return await this.withDatabase(async (db) => {
+            return await db.insert(usersTable).values(data).returning();
+        });
     }
 
     public async update(userId: string, data: UpdateUser) {
-        return await this.db
-            .update(usersTable)
-            .set(data)
-            .where(eq(usersTable.id, userId))
-            .returning();
+        return await this.withDatabase(async (db) => {
+            return await db
+                .update(usersTable)
+                .set(data)
+                .where(eq(usersTable.id, userId))
+                .returning();
+        });
     }
 
     public async delete(userId: string) {
-        return await this.db
-            .delete(usersTable)
-            .where(eq(usersTable.id, userId));
+        return await this.withDatabase(async (db) => {
+            return await db.delete(usersTable).where(eq(usersTable.id, userId));
+        });
     }
 }
 

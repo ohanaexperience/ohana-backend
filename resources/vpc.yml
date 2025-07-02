@@ -1,55 +1,110 @@
 Resources:
+    # VPC for secure networking
     VPC:
         Type: AWS::EC2::VPC
         Properties:
             CidrBlock: 10.0.0.0/16
-            EnableDnsSupport: true
             EnableDnsHostnames: true
+            EnableDnsSupport: true
             Tags:
                 - Key: Name
-                  Value: ${self:service}-vpc-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-vpc
 
-    # Internet Gateway for public subnets
+    # Internet Gateway
     InternetGateway:
         Type: AWS::EC2::InternetGateway
         Properties:
             Tags:
                 - Key: Name
-                  Value: ${self:service}-igw-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-igw
 
-    AttachInternetGateway:
+    # Attach Internet Gateway to VPC
+    InternetGatewayAttachment:
         Type: AWS::EC2::VPCGatewayAttachment
         Properties:
-            VpcId: !Ref VPC
             InternetGatewayId: !Ref InternetGateway
+            VpcId: !Ref VPC
 
-    # Public Subnet for NAT Gateway
+    # Public Subnets for NAT Gateways
     PublicSubnetA:
         Type: AWS::EC2::Subnet
         Properties:
             VpcId: !Ref VPC
-            CidrBlock: 10.0.0.0/24
             AvailabilityZone: !Select [0, !GetAZs ""]
+            CidrBlock: 10.0.1.0/24
             MapPublicIpOnLaunch: true
             Tags:
                 - Key: Name
-                  Value: ${self:service}-public-subnet-a-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-public-subnet-a
 
-    # NAT Gateway and Elastic IP
-    NatGatewayEIP:
+    PublicSubnetB:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [1, !GetAZs ""]
+            CidrBlock: 10.0.2.0/24
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-public-subnet-b
+
+    # Private Subnets for Database and Lambda
+    PrivateSubnetA:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [0, !GetAZs ""]
+            CidrBlock: 10.0.10.0/24
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-private-subnet-a
+
+    PrivateSubnetB:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [1, !GetAZs ""]
+            CidrBlock: 10.0.11.0/24
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-private-subnet-b
+
+    # NAT Gateways for Lambda internet access
+    NATGatewayAEIP:
         Type: AWS::EC2::EIP
-        DependsOn: AttachInternetGateway
+        DependsOn: InternetGatewayAttachment
         Properties:
             Domain: vpc
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-nat-a-eip
 
-    NatGateway:
+    NATGatewayBEIP:
+        Type: AWS::EC2::EIP
+        DependsOn: InternetGatewayAttachment
+        Properties:
+            Domain: vpc
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-nat-b-eip
+
+    NATGatewayA:
         Type: AWS::EC2::NatGateway
         Properties:
-            AllocationId: !GetAtt NatGatewayEIP.AllocationId
+            AllocationId: !GetAtt NATGatewayAEIP.AllocationId
             SubnetId: !Ref PublicSubnetA
             Tags:
                 - Key: Name
-                  Value: ${self:service}-nat-gateway-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-nat-gateway-a
+
+    NATGatewayB:
+        Type: AWS::EC2::NatGateway
+        Properties:
+            AllocationId: !GetAtt NATGatewayBEIP.AllocationId
+            SubnetId: !Ref PublicSubnetB
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-nat-gateway-b
 
     # Route Tables
     PublicRouteTable:
@@ -58,89 +113,186 @@ Resources:
             VpcId: !Ref VPC
             Tags:
                 - Key: Name
-                  Value: ${self:service}-public-rt-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-public-rt
 
-    PublicRoute:
+    DefaultPublicRoute:
         Type: AWS::EC2::Route
-        DependsOn: AttachInternetGateway
+        DependsOn: InternetGatewayAttachment
         Properties:
             RouteTableId: !Ref PublicRouteTable
             DestinationCidrBlock: 0.0.0.0/0
             GatewayId: !Ref InternetGateway
 
-    PublicSubnetRouteTableAssociation:
+    PublicSubnetARouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
         Properties:
-            SubnetId: !Ref PublicSubnetA
             RouteTableId: !Ref PublicRouteTable
+            SubnetId: !Ref PublicSubnetA
 
-    PrivateRouteTable:
+    PublicSubnetBRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            SubnetId: !Ref PublicSubnetB
+
+    # Private Route Tables
+    PrivateRouteTableA:
         Type: AWS::EC2::RouteTable
         Properties:
             VpcId: !Ref VPC
             Tags:
                 - Key: Name
-                  Value: ${self:service}-private-rt-${self:provider.stage}
+                  Value: ${self:service}-${self:provider.stage}-private-rt-a
 
-    PrivateRoute:
+    PrivateRouteTableB:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-private-rt-b
+
+    DefaultPrivateRouteA:
         Type: AWS::EC2::Route
         Properties:
-            RouteTableId: !Ref PrivateRouteTable
+            RouteTableId: !Ref PrivateRouteTableA
             DestinationCidrBlock: 0.0.0.0/0
-            NatGatewayId: !Ref NatGateway
+            NatGatewayId: !Ref NATGatewayA
 
-    # Private Subnets
-    PrivateSubnetA:
-        Type: AWS::EC2::Subnet
+    DefaultPrivateRouteB:
+        Type: AWS::EC2::Route
         Properties:
-            VpcId: !Ref VPC
-            CidrBlock: 10.0.1.0/24
-            AvailabilityZone: !Select [0, !GetAZs ""]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: ${self:service}-private-subnet-a-${self:provider.stage}
-
-    PrivateSubnetB:
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            CidrBlock: 10.0.2.0/24
-            AvailabilityZone: !Select [1, !GetAZs ""]
-            MapPublicIpOnLaunch: false
-            Tags:
-                - Key: Name
-                  Value: ${self:service}-private-subnet-b-${self:provider.stage}
+            RouteTableId: !Ref PrivateRouteTableB
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NATGatewayB
 
     PrivateSubnetARouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
         Properties:
+            RouteTableId: !Ref PrivateRouteTableA
             SubnetId: !Ref PrivateSubnetA
-            RouteTableId: !Ref PrivateRouteTable
 
     PrivateSubnetBRouteTableAssociation:
         Type: AWS::EC2::SubnetRouteTableAssociation
         Properties:
+            RouteTableId: !Ref PrivateRouteTableB
             SubnetId: !Ref PrivateSubnetB
-            RouteTableId: !Ref PrivateRouteTable
+
+    # VPC Endpoints for AWS services (cost-effective alternative to NAT Gateway)
+    SecretsManagerVPCEndpoint:
+        Type: AWS::EC2::VPCEndpoint
+        Properties:
+            VpcId: !Ref VPC
+            ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+            VpcEndpointType: Interface
+            SubnetIds:
+                - !Ref PublicSubnetA
+                - !Ref PublicSubnetB
+            SecurityGroupIds:
+                - !Ref VPCEndpointSecurityGroup
+            PrivateDnsEnabled: true
+            PolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal: "*"
+                      Action:
+                          - secretsmanager:GetSecretValue
+                          - secretsmanager:DescribeSecret
+                      Resource: "*"
 
     # Security Groups
-    DBSecurityGroup:
+    VPCEndpointSecurityGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
-            GroupDescription: Allow access to the database
+            GroupName: ${self:service}-${self:provider.stage}-vpce-sg
+            GroupDescription: Security group for VPC Endpoints
             VpcId: !Ref VPC
             SecurityGroupIngress:
                 - IpProtocol: tcp
-                  FromPort: ${env:POSTGRES_PORT}
-                  ToPort: ${env:POSTGRES_PORT}
-                  SourceSecurityGroupId: !Ref LambdaSecurityGroup
+                  FromPort: 443
+                  ToPort: 443
+                  CidrIp: 10.0.0.0/16
+                  Description: Allow HTTPS access from VPC
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-vpce-sg
 
-    LambdaSecurityGroup:
+    # Security Group for RDS Proxy
+    ProxySecurityGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
-            GroupDescription: Allow Lambda outbound
+            GroupName: ${self:service}-${self:provider.stage}-proxy-sg
+            GroupDescription: Security group for RDS Proxy
             VpcId: !Ref VPC
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 5432
+                  ToPort: 5432
+                  CidrIp: 10.0.0.0/16
+                  Description: Allow VPC access to RDS Proxy
             SecurityGroupEgress:
-                - IpProtocol: -1
+                - IpProtocol: tcp
+                  FromPort: 443
+                  ToPort: 443
                   CidrIp: 0.0.0.0/0
+                  Description: Allow HTTPS access to internet (for AWS APIs)
+                - IpProtocol: tcp
+                  FromPort: 443
+                  ToPort: 443
+                  CidrIp: 10.0.0.0/16
+                  Description: Allow HTTPS access to VPC endpoints
+                - IpProtocol: tcp
+                  FromPort: 5432
+                  ToPort: 5432
+                  CidrIp: 10.0.0.0/16
+                  Description: Allow access to RDS
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-proxy-sg
+
+    DBSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: ${self:service}-${self:provider.stage}-db-sg
+            GroupDescription: Security group for RDS Database
+            VpcId: !Ref VPC
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 5432
+                  ToPort: 5432
+                  SourceSecurityGroupId: !Ref ProxySecurityGroup
+                  Description: Allow RDS Proxy access
+            Tags:
+                - Key: Name
+                  Value: ${self:service}-${self:provider.stage}-db-sg
+
+Outputs:
+    VPCId:
+        Description: VPC ID
+        Value: !Ref VPC
+        Export:
+            Name: ${self:service}-${self:provider.stage}-vpc-id
+
+    PrivateSubnetAId:
+        Description: Private Subnet A ID
+        Value: !Ref PrivateSubnetA
+        Export:
+            Name: ${self:service}-${self:provider.stage}-private-subnet-a-id
+
+    PrivateSubnetBId:
+        Description: Private Subnet B ID
+        Value: !Ref PrivateSubnetB
+        Export:
+            Name: ${self:service}-${self:provider.stage}-private-subnet-b-id
+
+    DBSecurityGroupId:
+        Description: Database Security Group ID
+        Value: !Ref DBSecurityGroup
+        Export:
+            Name: ${self:service}-${self:provider.stage}-db-sg-id
+
+    ProxySecurityGroupId:
+        Description: Proxy Security Group ID
+        Value: !Ref ProxySecurityGroup
+        Export:
+            Name: ${self:service}-${self:provider.stage}-proxy-sg-id

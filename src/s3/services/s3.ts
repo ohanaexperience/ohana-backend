@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { extension } from "mime-types";
+import { v4 as uuidv4 } from "uuid";
 
 import { S3Event } from "aws-lambda";
 import {
@@ -40,9 +41,8 @@ export class S3Service {
         const fileExtension = extension(mimeType);
 
         const { sub } = decodeToken(authorization);
-        const timeNowUnix = dayjs().unix();
 
-        const fileName = `${sub}_${timeNowUnix}.${fileExtension}`;
+        const fileName = `${uuidv4()}.${fileExtension}`;
         const key = `users/${sub}/profile/images/${fileName}`;
 
         const command = new PutObjectCommand({
@@ -52,7 +52,7 @@ export class S3Service {
         });
 
         const preSignedUrl = await getSignedUrl(this.s3Client, command, {
-            expiresIn: 600,
+            expiresIn: 900,
         });
 
         return {
@@ -91,7 +91,9 @@ export class S3Service {
             // Get the experience to find the host ID
             const experience = await this.db.experiences.getById(experienceId);
             if (!experience) {
-                console.log(`[S3Service] Experience not found: ${experienceId}`);
+                console.log(
+                    `[S3Service] Experience not found: ${experienceId}`
+                );
                 return; // Experience doesn't exist, nothing to delete
             }
 
@@ -100,7 +102,9 @@ export class S3Service {
             const userId = experience.hostId;
             const prefix = `hosts/${userId}/experiences/${experienceId}/images/`;
 
-            console.log(`[S3Service] Deleting images for experience ${experienceId} with prefix: ${prefix}`);
+            console.log(
+                `[S3Service] Deleting images for experience ${experienceId} with prefix: ${prefix}`
+            );
 
             // List all objects with the experience prefix
             const listCommand = new ListObjectsV2Command({
@@ -109,13 +113,17 @@ export class S3Service {
             });
 
             const listResponse = await this.s3Client.send(listCommand);
-            
+
             if (!listResponse.Contents || listResponse.Contents.length === 0) {
-                console.log(`[S3Service] No images found for experience ${experienceId}`);
+                console.log(
+                    `[S3Service] No images found for experience ${experienceId}`
+                );
                 return;
             }
 
-            console.log(`[S3Service] Found ${listResponse.Contents.length} images to delete`);
+            console.log(
+                `[S3Service] Found ${listResponse.Contents.length} images to delete`
+            );
 
             // Delete all objects
             const deletePromises = listResponse.Contents.map((object) => {
@@ -131,10 +139,14 @@ export class S3Service {
             });
 
             await Promise.all(deletePromises);
-            console.log(`[S3Service] Successfully deleted ${deletePromises.length} images for experience ${experienceId}`);
-
+            console.log(
+                `[S3Service] Successfully deleted ${deletePromises.length} images for experience ${experienceId}`
+            );
         } catch (error) {
-            console.error(`[S3Service] Error deleting images for experience ${experienceId}:`, error);
+            console.error(
+                `[S3Service] Error deleting images for experience ${experienceId}:`,
+                error
+            );
             throw error;
         }
     }
@@ -191,12 +203,123 @@ export class S3Service {
         });
     }
 
+    async deleteProfileImage(userId: string, imageUrl: string) {
+        try {
+            console.log(`[S3Service] Attempting to delete profile image for user ${userId}`);
+            console.log(`[S3Service] Image URL: ${imageUrl}`);
+            console.log(`[S3Service] Bucket name: ${this.config.bucketName}`);
+            
+            const key = this.extractS3KeyFromUrl(imageUrl);
+            if (!key) {
+                console.log(
+                    `[S3Service] Invalid image URL format: ${imageUrl}`
+                );
+                return;
+            }
+
+            console.log(`[S3Service] Extracted S3 key: ${key}`);
+
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: this.config.bucketName,
+                Key: key,
+            });
+
+            console.log(`[S3Service] Sending delete command to S3...`);
+            const result = await this.s3Client.send(deleteCommand);
+            console.log(`[S3Service] Delete command result:`, result);
+            console.log(
+                `[S3Service] Successfully deleted profile image: ${key}`
+            );
+        } catch (error) {
+            console.error(
+                `[S3Service] Error deleting profile image for user ${userId}:`,
+                error
+            );
+            throw error;
+        }
+    }
+
+    private extractS3KeyFromUrl(imageUrl: string): string | null {
+        try {
+            console.log(`[S3Service] Extracting S3 key from URL: ${imageUrl}`);
+            
+            const url = new URL(imageUrl);
+            console.log(`[S3Service] Parsed URL hostname: ${url.hostname}`);
+            console.log(`[S3Service] Parsed URL pathname: ${url.pathname}`);
+            
+            let key: string;
+            
+            // Handle different S3 URL formats:
+            // 1. https://bucket-name.s3.region.amazonaws.com/key
+            // 2. https://s3.region.amazonaws.com/bucket-name/key
+            // 3. Custom domain: https://assets.domain.com/key
+            
+            if (url.hostname.includes('.s3.') || url.hostname.includes('s3-')) {
+                // Standard S3 URL format
+                key = url.pathname.startsWith("/") ? url.pathname.substring(1) : url.pathname;
+            } else {
+                // Custom domain - assume the entire pathname is the key
+                key = url.pathname.startsWith("/") ? url.pathname.substring(1) : url.pathname;
+            }
+            
+            console.log(`[S3Service] Extracted key: ${key}`);
+            return key || null;
+        } catch (error) {
+            console.error(
+                `[S3Service] Error parsing image URL: ${imageUrl}`,
+                error
+            );
+            return null;
+        }
+    }
+
     // Triggers
     async handleProfileImageUpload(request: S3Event) {
-        const { userId, imageUrl } = this.parseS3Event(request);
+        const { userId, imageUrl, key } = this.parseS3Event(request);
+
+        const { imageId, mimeType } = this.extractImageMetadata(key);
+
+        // Get existing user data to check for existing profile image
+        console.log(`[S3Service] Fetching existing user data for userId: ${userId}`);
+        const existingUser = await this.db.users.getByUserId(userId);
+        console.log(`[S3Service] Existing user data:`, JSON.stringify(existingUser, null, 2));
+
+        // Delete existing profile image if it exists
+        if (existingUser?.profileImage?.url) {
+            console.log(`[S3Service] Found existing profile image for user ${userId}: ${existingUser.profileImage.url}`);
+            console.log(`[S3Service] Existing image ID: ${existingUser.profileImage.id}`);
+            console.log(`[S3Service] Existing image mimeType: ${existingUser.profileImage.mimeType}`);
+            
+            try {
+                await this.deleteProfileImage(
+                    userId,
+                    existingUser.profileImage.url
+                );
+                console.log(`[S3Service] Successfully initiated deletion of existing profile image`);
+            } catch (error) {
+                console.error(
+                    `[S3Service] Failed to delete existing profile image for user ${userId}:`,
+                    error
+                );
+                // Continue with upload even if deletion fails
+            }
+        } else {
+            console.log(`[S3Service] No existing profile image found for user ${userId}`);
+            if (existingUser) {
+                console.log(`[S3Service] User exists but profileImage is:`, existingUser.profileImage);
+            } else {
+                console.log(`[S3Service] User not found in database`);
+            }
+        }
+
+        const profileImage = {
+            id: imageId,
+            mimeType,
+            url: imageUrl,
+        };
 
         await this.db.users.update(userId, {
-            profileImageUrl: imageUrl,
+            profileImage,
             updatedAt: new Date(),
         });
     }

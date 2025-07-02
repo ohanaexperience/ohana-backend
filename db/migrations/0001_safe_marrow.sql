@@ -1,1 +1,0 @@
-ALTER TABLE "experiences" ALTER COLUMN "group_discounts" SET DEFAULT '{"enabled":false,"discountPercentageFor3Plus":null,"discountPercentageFor5Plus":null}'::jsonb;

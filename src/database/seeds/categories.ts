@@ -1,15 +1,15 @@
 import { CATEGORIES, SUB_CATEGORIES } from "@/constants/categories";
-import { experiencesTable } from "@/db/schema";
+import { categoriesTable, subCategoriesTable } from "@/database/schemas";
 import Postgres from "@/database/postgres";
 
-export async function seedExperiences(db: Postgres) {
+export async function seedCategories(db: Postgres) {
     try {
-        console.log("🌱 Seeding experiences...");
+        console.log("🌱 Seeding categories...");
 
         // Get existing categories
         const existingCategories = await db.instance
             .select()
-            .from(experiencesTable);
+            .from(categoriesTable);
         const existingSlugs = new Set(
             existingCategories.map((cat) => cat.slug)
         );
@@ -21,7 +21,7 @@ export async function seedExperiences(db: Postgres) {
 
         if (newCategories.length > 0) {
             const insertedCategories = await db.instance
-                .insert(experiencesTable)
+                .insert(categoriesTable)
                 .values(newCategories)
                 .returning();
             console.log(
@@ -32,7 +32,7 @@ export async function seedExperiences(db: Postgres) {
         }
 
         // Get all categories for subcategory mapping
-        const allCategories = await db.instance.select().from(experiencesTable);
+        const allCategories = await db.instance.select().from(categoriesTable);
         const categoryMap = new Map(
             allCategories.map((cat) => [cat.slug, cat.id])
         );
@@ -41,20 +41,19 @@ export async function seedExperiences(db: Postgres) {
         const existingSubCategories = await db.instance
             .select()
             .from(subCategoriesTable);
-        0;
 
         const existingSubSlugs = new Set(
             existingSubCategories.map((sub) => sub.slug)
         );
 
         // Filter out subcategories that already exist
-        const newSubCategories = subCategories
-            .filter((subCat) => !existingSubSlugs.has(subCat.slug))
-            .map((subCat) => ({
-                categoryId: categoryMap.get(subCat.categorySlug)!,
-                name: subCat.name,
-                slug: subCat.slug,
-            }));
+        const newSubCategories = SUB_CATEGORIES.filter(
+            (subCat) => !existingSubSlugs.has(subCat.slug)
+        ).map((subCat) => ({
+            categoryId: categoryMap.get(subCat.categorySlug)!,
+            name: subCat.name,
+            slug: subCat.slug,
+        }));
 
         if (newSubCategories.length > 0) {
             const insertedSubCategories = await db.instance
@@ -68,9 +67,9 @@ export async function seedExperiences(db: Postgres) {
             console.log("ℹ️  All subcategories already exist");
         }
 
-        console.log("🎉 Experiences seeding completed successfully!");
+        console.log("🎉 Categories seeding completed successfully!");
     } catch (error) {
-        console.error("❌ Error seeding experiences:", error);
+        console.error("❌ Error seeding categories:", error);
         throw error;
     }
 }

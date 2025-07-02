@@ -1,0 +1,89 @@
+Resources:
+    # RDS Proxy for connection pooling and management
+    PostgresRDSProxy:
+        Type: AWS::RDS::DBProxy
+        Properties:
+            DBProxyName: ${self:service}-${self:provider.stage}-postgres-proxy
+            EngineFamily: POSTGRESQL
+            IdleClientTimeout: 1800
+            RequireTLS: true
+            RoleArn: !GetAtt RDSProxyRole.Arn
+            VpcSubnetIds:
+                - !Ref PrivateSubnetA
+                - !Ref PrivateSubnetB
+            VpcSecurityGroupIds:
+                - !Ref ProxySecurityGroup
+            Auth:
+                - AuthScheme: SECRETS
+                  SecretArn: !Ref DatabaseSecret
+                  IAMAuth: REQUIRED
+            Tags:
+                - Key: Service
+                  Value: ${self:service}
+                - Key: Stage
+                  Value: ${self:provider.stage}
+
+    # # RDS Proxy Target Group
+    PostgresRDSProxyTargetGroup:
+        Type: AWS::RDS::DBProxyTargetGroup
+        Properties:
+            DBProxyName: !Ref PostgresRDSProxy
+            TargetGroupName: default
+            DBClusterIdentifiers:
+                - !Ref PostgresRDSServerlessCluster
+
+    # # IAM Role for RDS Proxy
+    RDSProxyRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: ${self:service}-${self:provider.stage}-rds-proxy-role
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: rds.amazonaws.com
+                      Action: sts:AssumeRole
+            Policies:
+                - PolicyName: RDSProxySecretsPolicy
+                  PolicyDocument:
+                      Version: "2012-10-17"
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - secretsmanager:GetSecretValue
+                                - secretsmanager:DescribeSecret
+                            Resource: !Ref DatabaseSecret
+                          - Effect: Allow
+                            Action:
+                                - kms:Decrypt
+                            Resource:
+                                - !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*"
+                            Condition:
+                                StringEquals:
+                                    "kms:ViaService": !Sub "secretsmanager.${AWS::Region}.amazonaws.com"
+
+    # Database credentials stored in Secrets Manager
+    DatabaseSecret:
+        Type: AWS::SecretsManager::Secret
+        Properties:
+            Name: ${self:service}-${self:provider.stage}-db-credentials
+            Description: Database credentials for RDS Proxy
+            SecretString: '{"username": "${env:POSTGRES_USERNAME}", "password": "${env:POSTGRES_PASSWORD}"}'
+            Tags:
+                - Key: Service
+                  Value: ${self:service}
+                - Key: Stage
+                  Value: ${self:provider.stage}
+Outputs:
+    RDSProxyEndpoint:
+        Description: RDS Proxy endpoint for database connections
+        Value: !GetAtt PostgresRDSProxy.Endpoint
+        Export:
+            Name: ${self:service}-${self:provider.stage}-rds-proxy-endpoint
+
+    RDSProxyArn:
+        Description: RDS Proxy ARN
+        Value: !Ref PostgresRDSProxy
+        Export:
+            Name: ${self:service}-${self:provider.stage}-rds-proxy-arn

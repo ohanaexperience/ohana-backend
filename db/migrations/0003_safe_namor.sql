@@ -1,1 +1,0 @@
-ALTER TABLE "experiences" DROP COLUMN "category";
