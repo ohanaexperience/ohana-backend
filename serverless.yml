@@ -1,11 +1,9 @@
 service: ohana
-licenseKey: ${env:SERVERLESS_ACCESS_KEY}
 frameworkVersion: "4"
 useDotenv: true
 
 provider:
     name: aws
-    profile: ohana-deployer
     stage: ${opt:stage, 'dev'}
     versionFunctions: false
     runtime: nodejs20.x
