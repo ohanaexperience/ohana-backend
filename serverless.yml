@@ -1,9 +1,11 @@
 service: ohana
+licenseKey: ${env:SERVERLESS_ACCESS_KEY}
 frameworkVersion: "4"
 useDotenv: true
 
 provider:
     name: aws
+    profile: ohana-deployer
     stage: ${opt:stage, 'dev'}
     versionFunctions: false
     runtime: nodejs20.x
@@ -11,6 +13,7 @@ provider:
     environment:
         SERVICE: ${self:service}
         NODE_ENV: ${opt:stage, 'dev'}
+        # IMAGES_BASE_URL: https://${self:custom.resourceNames.}
     iam:
         role:
             statements:
@@ -84,16 +87,21 @@ custom:
         identityPool: ${self:service}-identity-pool-${self:provider.stage}
         postgresDB: ${self:service}_postgres_${self:provider.stage}
         secretsManager: ${self:service}-secrets-manager-${self:provider.stage}
-        imagesBucket: ${self:service}-images-bucket-${self:provider.stage}
         cognitoSnsRole: ${self:service}-cognito-sns-role-${self:provider.stage}
+        assetsBucket: ${self:service}-assets-bucket-${self:provider.stage}
 
 functions:
     - ${file(functions/auth.yml)}
     - ${file(functions/database.yml)}
     - ${file(functions/user.yml)}
     - ${file(functions/stripe.yml)}
-    # - ${file(functions/host.yml)}
+    - ${file(functions/host.yml)}
     - ${file(functions/webhooks.yml)}
+    - ${file(functions/triggers.yml)}
+    - ${file(functions/experiences.yml)}
+    - ${file(functions/time_slots.yml)}
+    - ${file(functions/reservations.yml)}
+    - ${file(functions/categories.yml)}
 
 resources:
     - ${file(resources/auth.yml)}
@@ -101,4 +109,3 @@ resources:
     - ${file(resources/gateway.yml)}
     - ${file(resources/vpc.yml)}
     - ${file(resources/storage.yml)}
-    # - ${file(resources/secrets.yml)}

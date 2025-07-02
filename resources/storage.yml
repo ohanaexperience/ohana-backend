@@ -1,8 +1,19 @@
 Resources:
-    ImagesBucket:
+    AssetsBucketPolicy:
+        Type: AWS::S3::BucketPolicy
+        Properties:
+            Bucket: !Ref AssetsBucket
+            PolicyDocument:
+                Statement:
+                    - Action: s3:GetObject
+                      Effect: Allow
+                      Principal: "*"
+                      Resource: !Sub "arn:aws:s3:::${self:custom.resourceNames.assetsBucket}/*"
+
+    AssetsBucket:
         Type: AWS::S3::Bucket
         Properties:
-            BucketName: ${self:custom.resourceNames.imagesBucket}
+            BucketName: ${self:custom.resourceNames.assetsBucket}
             CorsConfiguration:
                 CorsRules:
                     - AllowedHeaders:
@@ -13,3 +24,8 @@ Resources:
                       AllowedOrigins:
                           - "*"
                       MaxAge: 3000
+            PublicAccessBlockConfiguration:
+                BlockPublicAcls: false
+                BlockPublicPolicy: false
+                IgnorePublicAcls: false
+                RestrictPublicBuckets: false

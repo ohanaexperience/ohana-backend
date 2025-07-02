@@ -1,5 +1,5 @@
 authCreateVerificationSession:
-    handler: src/stripe.createVerificationSession
+    handler: src/stripe/lambda/createVerificationSession.handler
     timeout: 29
     events:
         - http:

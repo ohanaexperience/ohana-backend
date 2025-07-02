@@ -1,0 +1,527 @@
+[
+    {
+        "title": "Authentic Thai Cooking Class in Bangkok",
+        "tagline": "Learn to cook traditional Thai dishes with local ingredients",
+        "category": {
+            "mainId": 2,
+            "subId": 7
+        },
+        "languages": ["english", "thai"],
+        "experienceType": "indoor",
+        "description": "Join us for an immersive Thai cooking experience where you'll learn to prepare authentic dishes like Pad Thai, Tom Yum soup, and Green Curry. Our experienced local chef will guide you through traditional cooking techniques using fresh ingredients from local markets.",
+        "startingLocation": {
+            "address": "123 Sukhumvit Road, Watthana, Bangkok 10110, Thailand",
+            "latitude": 13.7563,
+            "longitude": 100.5018
+        },
+        "endingLocation": {
+            "address": "123 Sukhumvit Road, Watthana, Bangkok 10110, Thailand",
+            "latitude": 13.7563,
+            "longitude": 100.5018
+        },
+        "meetingLocation": {
+            "instructions": "Meet at the main entrance of the cooking school. Look for our green banner with the Ohana logo. Please arrive 10 minutes early for check-in.",
+            "imageUrl": "https://example.com/meeting-point.jpg"
+        },
+        "pricePerPerson": 1500,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 10,
+            "discountPercentageFor5Plus": 15
+        },
+        "earlyBirdRate": {
+            "discountPercentage": 15,
+            "daysInAdvance": 21
+        },
+        "cancellationPolicy": "moderate",
+        "groupSize": {
+            "minGuests": 2,
+            "maxGuests": 8,
+            "autoCancelEnabled": true
+        },
+        "coverImageUrl": "https://example.com/thai-cooking-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/gallery1.jpg",
+            "https://example.com/gallery2.jpg",
+            "https://example.com/gallery3.jpg"
+        ],
+        "includedItems": ["food", "drinks", "equipment"],
+        "whatToBring": "Please bring an apron if you have one, though we will provide aprons for all participants. Comfortable closed-toe shoes are recommended.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "18-25",
+        "accessibilityInfo": "The cooking school is wheelchair accessible with ramps and accessible restrooms. Please let us know in advance if you have any specific accessibility needs.",
+        "durationHours": 4,
+        "timezone": "Asia/Bangkok",
+        "availability": {
+            "startDate": "2024-01-15",
+            "endDate": "2024-12-31",
+            "daysOfWeek": [1, 3, 5, 6],
+            "timeSlots": ["10:00", "14:00"]
+        }
+    },
+    {
+        "title": "Mount Takao Hiking Adventure with Scenic Views",
+        "tagline": "Discover Tokyo's natural beauty on this guided mountain hike",
+        "category": {
+            "mainId": 1,
+            "subId": 1
+        },
+        "languages": ["english", "japanese"],
+        "experienceType": "outdoor",
+        "description": "Escape the bustling city and immerse yourself in nature with this guided hike up Mount Takao. Enjoy breathtaking views of Tokyo and Mount Fuji (on clear days), visit the historic Yakuoin Temple, and learn about local flora and fauna from our knowledgeable guide.",
+        "startingLocation": {
+            "address": "Takaosanguchi Station, 2177 Takaomachi, Hachioji, Tokyo 193-0844, Japan",
+            "latitude": 35.6425,
+            "longitude": 139.2714
+        },
+        "endingLocation": {
+            "address": "Mount Takao Summit, Hachioji, Tokyo 193-0844, Japan",
+            "latitude": 35.6255,
+            "longitude": 139.2444
+        },
+        "meetingLocation": {
+            "instructions": "Meet at the ticket gate of Takaosanguchi Station. Look for our guide holding a blue Ohana flag. Please arrive 15 minutes before departure time."
+        },
+        "pricePerPerson": 3500,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 5,
+            "discountPercentageFor5Plus": 10
+        },
+        "cancellationPolicy": "flexible",
+        "groupSize": {
+            "minGuests": 3,
+            "maxGuests": 10,
+            "autoCancelEnabled": false
+        },
+        "coverImageUrl": "https://example.com/mount-takao-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/takao-trail.jpg",
+            "https://example.com/takao-temple.jpg",
+            "https://example.com/takao-view.jpg"
+        ],
+        "includedItems": ["equipment"],
+        "whatToBring": "Comfortable hiking shoes, water bottle, weather-appropriate clothing, and a light snack. Walking poles will be provided if needed.",
+        "physicalRequirements": "medium",
+        "ageRecommendations": "26-35",
+        "accessibilityInfo": "This hike involves steep trails and uneven terrain. Not suitable for wheelchairs or those with mobility issues. Alternative cable car routes available upon request.",
+        "durationHours": 6,
+        "timezone": "Asia/Tokyo",
+        "availability": {
+            "startDate": "2024-03-01",
+            "daysOfWeek": [0, 6],
+            "timeSlots": ["08:00", "13:00"]
+        }
+    },
+    {
+        "title": "Traditional Thai Art and Painting Workshop",
+        "tagline": "Create your own masterpiece using ancient Thai art techniques",
+        "category": {
+            "mainId": 3,
+            "subId": 14
+        },
+        "languages": ["english", "thai"],
+        "experienceType": "indoor",
+        "description": "Discover the beauty of traditional Thai art in this hands-on workshop. Learn about Thai painting techniques, create your own artwork using natural pigments, and understand the cultural significance behind traditional Thai artistic motifs.",
+        "startingLocation": {
+            "address": "456 Charoen Krung Road, Bang Rak, Bangkok 10500, Thailand",
+            "latitude": 13.724,
+            "longitude": 100.5124
+        },
+        "endingLocation": {
+            "address": "456 Charoen Krung Road, Bang Rak, Bangkok 10500, Thailand",
+            "latitude": 13.724,
+            "longitude": 100.5124
+        },
+        "meetingLocation": {
+            "instructions": "Enter through the main art studio entrance on Charoen Krung Road. Take the elevator to the 3rd floor and look for Studio A."
+        },
+        "pricePerPerson": 2200,
+        "cancellationPolicy": "strict",
+        "groupSize": {
+            "minGuests": 1,
+            "maxGuests": 6,
+            "autoCancelEnabled": true
+        },
+        "coverImageUrl": "https://example.com/thai-art-workshop-cover.jpg",
+        "includedItems": ["equipment"],
+        "physicalRequirements": "low",
+        "ageRecommendations": "36-45",
+        "accessibilityInfo": "The art studio is located on the 3rd floor with elevator access. All materials and seating can be adjusted for different accessibility needs.",
+        "durationHours": 3,
+        "timezone": "Asia/Bangkok",
+        "availability": {
+            "startDate": "2024-02-01",
+            "endDate": "2024-11-30",
+            "daysOfWeek": [2, 4, 5],
+            "timeSlots": ["10:30", "15:30"]
+        }
+    },
+    {
+        "title": "Interactive Science Discovery for Families",
+        "tagline": "Fun hands-on science experiments for kids and parents",
+        "category": {
+            "mainId": 8,
+            "subId": 32
+        },
+        "languages": ["english", "japanese"],
+        "experienceType": "indoor",
+        "description": "Engage your family in exciting science experiments and discoveries. Kids will learn about physics, chemistry, and biology through interactive demonstrations and hands-on activities. Perfect for curious minds of all ages!",
+        "startingLocation": {
+            "address": "789 Science Park Avenue, Odaiba, Minato City, Tokyo 135-0091, Japan",
+            "latitude": 35.6197,
+            "longitude": 139.7756
+        },
+        "endingLocation": {
+            "address": "789 Science Park Avenue, Odaiba, Minato City, Tokyo 135-0091, Japan",
+            "latitude": 35.6197,
+            "longitude": 139.7756
+        },
+        "meetingLocation": {
+            "instructions": "Meet at the information desk in the main lobby of the Science Discovery Center. Look for our staff member wearing a lab coat with the Ohana logo."
+        },
+        "pricePerPerson": 1800,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 15,
+            "discountPercentageFor5Plus": 20
+        },
+        "earlyBirdRate": {
+            "discountPercentage": 10,
+            "daysInAdvance": 14
+        },
+        "cancellationPolicy": "moderate",
+        "groupSize": {
+            "minGuests": 2,
+            "maxGuests": 8,
+            "autoCancelEnabled": false
+        },
+        "coverImageUrl": "https://example.com/science-family-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/kids-experiment.jpg",
+            "https://example.com/family-lab.jpg"
+        ],
+        "includedItems": ["equipment"],
+        "whatToBring": "Comfortable clothes that can get a little messy. We provide lab coats and safety equipment for all participants.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "18-25",
+        "accessibilityInfo": "All experiment stations are wheelchair accessible. We can accommodate various learning needs and provide additional support as required.",
+        "durationHours": 2,
+        "timezone": "Asia/Tokyo",
+        "availability": {
+            "startDate": "2024-01-20",
+            "daysOfWeek": [0, 6, 1],
+            "timeSlots": ["10:00", "14:00", "16:00"]
+        }
+    },
+    {
+        "title": "Traditional Thai Massage and Meditation Session",
+        "tagline": "Rejuvenate your body and mind with authentic Thai wellness practices",
+        "category": {
+            "mainId": 4,
+            "subId": 19
+        },
+        "languages": ["english", "thai"],
+        "experienceType": "indoor",
+        "description": "Experience the healing power of traditional Thai massage combined with guided meditation. Our certified therapists will help you release tension and stress while teaching you mindfulness techniques you can practice at home.",
+        "startingLocation": {
+            "address": "88 Wellness Center, Silom Road, Bang Rak, Bangkok 10500, Thailand",
+            "latitude": 13.7307,
+            "longitude": 100.5418
+        },
+        "endingLocation": {
+            "address": "88 Wellness Center, Silom Road, Bang Rak, Bangkok 10500, Thailand",
+            "latitude": 13.7307,
+            "longitude": 100.5418
+        },
+        "meetingLocation": {
+            "instructions": "Enter the wellness center through the main entrance and check in at the reception desk. Please arrive 15 minutes early to complete your wellness consultation form."
+        },
+        "pricePerPerson": 2800,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 10
+        },
+        "cancellationPolicy": "flexible",
+        "groupSize": {
+            "minGuests": 1,
+            "maxGuests": 4,
+            "autoCancelEnabled": false
+        },
+        "coverImageUrl": "https://example.com/thai-massage-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/massage-room.jpg",
+            "https://example.com/meditation-space.jpg"
+        ],
+        "includedItems": ["equipment"],
+        "whatToBring": "Comfortable, loose-fitting clothes for the massage session. Meditation cushions and oils will be provided.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "46-55",
+        "accessibilityInfo": "The wellness center is fully accessible with ramps and accessible treatment rooms. Please inform us of any mobility needs when booking.",
+        "durationHours": 3,
+        "timezone": "Asia/Bangkok",
+        "availability": {
+            "startDate": "2024-01-10",
+            "endDate": "2024-12-20",
+            "daysOfWeek": [1, 2, 3, 4, 5],
+            "timeSlots": ["09:00", "13:00", "17:00"]
+        }
+    },
+    {
+        "title": "Tokyo Karaoke Night and Local Bar Crawl Adventure",
+        "tagline": "Experience Tokyo's vibrant nightlife with locals and fellow travelers",
+        "category": {
+            "mainId": 6,
+            "subId": 25
+        },
+        "languages": ["english", "japanese"],
+        "experienceType": "indoor",
+        "description": "Dive into Tokyo's famous nightlife scene! Start with authentic karaoke in a private booth, then explore hidden local bars in Shibuya and Shinjuku. Our local guide will introduce you to Japanese drinking culture and help you make new friends.",
+        "startingLocation": {
+            "address": "321 Shibuya Center Gai, Shibuya City, Tokyo 150-0043, Japan",
+            "latitude": 35.6598,
+            "longitude": 139.7006
+        },
+        "endingLocation": {
+            "address": "456 Golden Gai, Kabukicho, Shinjuku City, Tokyo 160-0021, Japan",
+            "latitude": 35.6938,
+            "longitude": 139.7034
+        },
+        "meetingLocation": {
+            "instructions": "Meet at the Hachiko statue in front of Shibuya Station. Look for our guide holding a neon pink Ohana sign. We'll start at 7 PM sharp!"
+        },
+        "pricePerPerson": 4500,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 15,
+            "discountPercentageFor5Plus": 25
+        },
+        "cancellationPolicy": "moderate",
+        "groupSize": {
+            "minGuests": 4,
+            "maxGuests": 10,
+            "autoCancelEnabled": true
+        },
+        "coverImageUrl": "https://example.com/tokyo-nightlife-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/karaoke-booth.jpg",
+            "https://example.com/golden-gai.jpg",
+            "https://example.com/group-drinks.jpg"
+        ],
+        "includedItems": ["drinks"],
+        "whatToBring": "Valid ID for age verification, comfortable walking shoes, and cash for additional drinks if desired.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "26-35",
+        "accessibilityInfo": "Some venues may have stairs and narrow spaces. Please contact us in advance if you have mobility concerns so we can plan an accessible route.",
+        "durationHours": 5,
+        "timezone": "Asia/Tokyo",
+        "availability": {
+            "startDate": "2024-02-15",
+            "daysOfWeek": [4, 5, 6],
+            "timeSlots": ["19:00"]
+        }
+    },
+    {
+        "title": "Intensive Thai Language Crash Course for Travelers",
+        "tagline": "Learn essential Thai phrases and cultural etiquette in one day",
+        "category": {
+            "mainId": 7,
+            "subId": 28
+        },
+        "languages": ["english", "thai"],
+        "experienceType": "indoor",
+        "description": "Master the basics of Thai language in this intensive crash course designed specifically for travelers. Learn essential phrases, proper pronunciation, cultural dos and don'ts, and practice real-life conversations with native speakers.",
+        "startingLocation": {
+            "address": "200 Language Learning Center, Phloenchit Road, Pathum Wan, Bangkok 10330, Thailand",
+            "latitude": 13.7439,
+            "longitude": 100.5428
+        },
+        "endingLocation": {
+            "address": "200 Language Learning Center, Phloenchit Road, Pathum Wan, Bangkok 10330, Thailand",
+            "latitude": 13.7439,
+            "longitude": 100.5428
+        },
+        "meetingLocation": {
+            "instructions": "Take the elevator to the 5th floor and check in at the Language Center reception. Classroom B will be clearly marked with welcome signs."
+        },
+        "pricePerPerson": 1200,
+        "earlyBirdRate": {
+            "discountPercentage": 20,
+            "daysInAdvance": 28
+        },
+        "cancellationPolicy": "moderate",
+        "groupSize": {
+            "minGuests": 3,
+            "maxGuests": 8,
+            "autoCancelEnabled": true
+        },
+        "coverImageUrl": "https://example.com/thai-language-cover.jpg",
+        "includedItems": ["equipment"],
+        "whatToBring": "Notebook and pen for taking notes. All learning materials and audio resources will be provided.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "18-25",
+        "accessibilityInfo": "The learning center is wheelchair accessible with elevators and accessible restrooms. Audio assistance available for hearing-impaired participants.",
+        "durationHours": 6,
+        "timezone": "Asia/Bangkok",
+        "availability": {
+            "startDate": "2024-01-08",
+            "endDate": "2024-10-31",
+            "daysOfWeek": [6, 0],
+            "timeSlots": ["09:00", "14:00"]
+        }
+    },
+    {
+        "title": "Hidden Tokyo: Secret Neighborhoods Walking Adventure",
+        "tagline": "Discover Tokyo's best-kept secrets with a local insider guide",
+        "category": {
+            "mainId": 5,
+            "subId": 22
+        },
+        "languages": ["english", "japanese"],
+        "experienceType": "outdoor",
+        "description": "Explore Tokyo like a local! Visit hidden neighborhoods, secret gardens, traditional shops, and local eateries that most tourists never see. Our native Tokyo guide will share fascinating stories and insider knowledge.",
+        "startingLocation": {
+            "address": "JR Kichijoji Station North Exit, Musashino, Tokyo 180-0004, Japan",
+            "latitude": 35.7033,
+            "longitude": 139.5803
+        },
+        "endingLocation": {
+            "address": "Harmonica Yokocho, Kichijoji, Musashino, Tokyo 180-0004, Japan",
+            "latitude": 35.7025,
+            "longitude": 139.5795
+        },
+        "meetingLocation": {
+            "instructions": "Meet outside the north exit of JR Kichijoji Station near the bus stop. Look for our guide with a yellow Ohana umbrella."
+        },
+        "pricePerPerson": 2500,
+        "groupDiscounts": {
+            "discountPercentageFor5Plus": 20
+        },
+        "cancellationPolicy": "flexible",
+        "groupSize": {
+            "minGuests": 2,
+            "maxGuests": 6,
+            "autoCancelEnabled": false
+        },
+        "coverImageUrl": "https://example.com/hidden-tokyo-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/secret-garden.jpg",
+            "https://example.com/local-shop.jpg"
+        ],
+        "whatToBring": "Comfortable walking shoes, weather-appropriate clothing, and a camera to capture the hidden gems we'll discover.",
+        "physicalRequirements": "medium",
+        "ageRecommendations": "56-65",
+        "accessibilityInfo": "This tour involves considerable walking on various terrains including stairs and uneven paths. Not suitable for wheelchairs, but we can modify the route for those with minor mobility issues.",
+        "durationHours": 4,
+        "timezone": "Asia/Tokyo",
+        "availability": {
+            "startDate": "2024-03-01",
+            "daysOfWeek": [1, 3, 5, 0],
+            "timeSlots": ["10:00", "15:00"]
+        }
+    },
+    {
+        "title": "Chao Phraya River Kayaking and Temple Exploration",
+        "tagline": "Paddle through Bangkok's historic waterways and discover riverside temples",
+        "category": {
+            "mainId": 1,
+            "subId": 3
+        },
+        "languages": ["english", "thai"],
+        "experienceType": "outdoor",
+        "description": "Experience Bangkok from a unique perspective! Kayak along the historic Chao Phraya River and its peaceful canals, visit beautiful riverside temples, and learn about the city's rich history from our knowledgeable guide.",
+        "startingLocation": {
+            "address": "Thonburi Kayak Station, 150 Wang Thonglang, Bangkok Yai, Bangkok 10600, Thailand",
+            "latitude": 13.7233,
+            "longitude": 100.4898
+        },
+        "endingLocation": {
+            "address": "Wat Arun Temple Pier, 158 Wang Doem, Wat Arun, Bangkok Yai, Bangkok 10600, Thailand",
+            "latitude": 13.7437,
+            "longitude": 100.4889
+        },
+        "meetingLocation": {
+            "instructions": "Meet at the Thonburi Kayak Station office. Our staff will provide safety briefing and equipment fitting before we start the adventure."
+        },
+        "pricePerPerson": 1800,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 10,
+            "discountPercentageFor5Plus": 15
+        },
+        "cancellationPolicy": "moderate",
+        "groupSize": {
+            "minGuests": 2,
+            "maxGuests": 8,
+            "autoCancelEnabled": true
+        },
+        "coverImageUrl": "https://example.com/bangkok-kayak-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/river-kayak.jpg",
+            "https://example.com/temple-water.jpg",
+            "https://example.com/group-paddle.jpg"
+        ],
+        "includedItems": ["equipment", "transport"],
+        "whatToBring": "Swimwear, sunscreen, hat, quick-dry clothes, and waterproof bag for personal items. Life jackets and paddles provided.",
+        "physicalRequirements": "medium",
+        "ageRecommendations": "26-35",
+        "accessibilityInfo": "Kayaking requires moderate physical ability and balance. Not suitable for non-swimmers or those with severe mobility limitations. Basic swimming ability required.",
+        "durationHours": 5,
+        "timezone": "Asia/Bangkok",
+        "availability": {
+            "startDate": "2024-01-15",
+            "endDate": "2024-11-30",
+            "daysOfWeek": [6, 0, 1],
+            "timeSlots": ["08:00", "13:30"]
+        }
+    },
+    {
+        "title": "Premium Sake Tasting with Traditional Japanese Appetizers",
+        "tagline": "Discover the art of sake brewing and perfect food pairings",
+        "category": {
+            "mainId": 2,
+            "subId": 8
+        },
+        "languages": ["english", "japanese"],
+        "experienceType": "indoor",
+        "description": "Embark on a journey through Japan's sake culture! Taste 8 premium sakes from different regions, learn about brewing techniques, and enjoy carefully selected traditional appetizers that complement each variety. Perfect for sake enthusiasts and curious beginners alike.",
+        "startingLocation": {
+            "address": "Tokyo Sake House, 77 Ginza District, Chuo City, Tokyo 104-0061, Japan",
+            "latitude": 35.6762,
+            "longitude": 139.7671
+        },
+        "endingLocation": {
+            "address": "Tokyo Sake House, 77 Ginza District, Chuo City, Tokyo 104-0061, Japan",
+            "latitude": 35.6762,
+            "longitude": 139.7671
+        },
+        "meetingLocation": {
+            "instructions": "Enter the sake house through the traditional wooden door on the ground floor. Check in with the host at the tasting counter."
+        },
+        "pricePerPerson": 5200,
+        "groupDiscounts": {
+            "discountPercentageFor3Plus": 5
+        },
+        "earlyBirdRate": {
+            "discountPercentage": 10,
+            "daysInAdvance": 15
+        },
+        "cancellationPolicy": "strict",
+        "groupSize": {
+            "minGuests": 2,
+            "maxGuests": 6,
+            "autoCancelEnabled": false
+        },
+        "coverImageUrl": "https://example.com/sake-tasting-cover.jpg",
+        "galleryImageUrls": [
+            "https://example.com/sake-bottles.jpg",
+            "https://example.com/traditional-appetizers.jpg"
+        ],
+        "includedItems": ["food", "drinks"],
+        "whatToBring": "Valid ID for age verification. All tasting equipment and traditional sake cups will be provided.",
+        "physicalRequirements": "low",
+        "ageRecommendations": "36-45",
+        "accessibilityInfo": "The sake house has traditional low seating but can accommodate chair seating upon request. Wheelchair accessible entrance available.",
+        "durationHours": 3,
+        "timezone": "Asia/Tokyo",
+        "availability": {
+            "startDate": "2024-02-01",
+            "daysOfWeek": [2, 4, 5, 6],
+            "timeSlots": ["18:00", "20:30"]
+        }
+    }
+]

@@ -1,15 +1,27 @@
 Resources:
+    PostgresParameterGroup:
+        Type: AWS::RDS::DBClusterParameterGroup
+        Properties:
+            Description: Parameter group for Aurora PostgreSQL 17.4 without SSL verification
+            Family: aurora-postgresql17
+            Parameters:
+                shared_preload_libraries: "pg_stat_statements"
+                log_statement: "all"
+                log_min_duration_statement: 1000
+                rds.force_ssl: 0
+
     PostgresRDSServerlessCluster:
         Type: AWS::RDS::DBCluster
         Properties:
             Engine: aurora-postgresql
-            EngineVersion: 13.9
+            EngineVersion: 17.4
             EngineMode: provisioned
             DatabaseName: ${self:custom.resourceNames.postgresDB}
             Port: 5432
             MasterUsername: ${env:POSTGRES_USERNAME}
             MasterUserPassword: ${env:POSTGRES_PASSWORD}
             DeletionProtection: false
+            DBClusterParameterGroupName: !Ref PostgresParameterGroup
             ServerlessV2ScalingConfiguration:
                 MinCapacity: 0
                 MaxCapacity: 8
@@ -31,21 +43,3 @@ Resources:
             DBClusterIdentifier: !Ref PostgresRDSServerlessCluster
             Engine: aurora-postgresql
             DBInstanceClass: db.serverless
-
-    # PostgresVPC:
-    #     Type: AWS::EC2::VPC
-    #     Properties:
-    #         CidrBlock: 10.0.0.0/16
-    #         EnableDnsHostnames: true
-    #         EnableDnsSupport: true
-
-    # PostgresSecurityGroup:
-    #     Type: AWS::EC2::SecurityGroup
-    #     Properties:
-    #         GroupDescription: Security group for Aurora Serverless PostgreSQL
-    #         VpcId: !Ref PostgresVPC
-    #         SecurityGroupIngress:
-    #             - IpProtocol: tcp
-    #               FromPort: 5432
-    #               ToPort: 5432
-    #               CidrIp: 10.0.0.0/16

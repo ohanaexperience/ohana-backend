@@ -1,29 +1,89 @@
 import { Request } from "@middy/core";
 import { ZodSchema, ZodError } from "zod";
 
-import ERRORS from "../constants/validations/errors";
+import ERRORS from "@/errors";
 
-const parseErrorCode = (errorCode: string) => {
-    for (const category of Object.values(ERRORS)) {
-        for (const errorType of Object.values(category)) {
-            if (errorType.CODE === errorCode) {
-                return errorType.MESSAGE;
+const createErrorLookup = (errors: any): Record<string, string> => {
+    const lookup: Record<string, string> = {};
+
+    const traverse = (obj: any) => {
+        for (const value of Object.values(obj)) {
+            if (value && typeof value === "object") {
+                if ("CODE" in value && "MESSAGE" in value) {
+                    lookup[value.CODE as string] = value.MESSAGE as string;
+                } else {
+                    traverse(value);
+                }
             }
         }
-    }
+    };
 
-    return "Something went wrong.";
+    traverse(errors);
+    return lookup;
 };
 
-export const zodValidator = (schema: ZodSchema) => {
+const ERROR_LOOKUP = createErrorLookup(ERRORS);
+
+const parseErrorCode = (errorCode: string) => {
+    return ERROR_LOOKUP[errorCode] || "Something went wrong.";
+};
+
+interface ZodValidatorOptions {
+    headers?: ZodSchema;
+    body?: ZodSchema;
+    queryStringParameters?: ZodSchema;
+    pathParameters?: ZodSchema;
+}
+
+export const zodValidator = (options: ZodValidatorOptions) => {
     const before = async (request: Request) => {
         try {
-            const result = schema.parse(request.event.body);
+            const { headers, body, queryStringParameters, pathParameters } = options;
 
-            request.event = {
-                ...request.event,
-                body: result,
-            };
+            if (!headers && !body && !queryStringParameters && !pathParameters) {
+                throw new Error("No schema provided");
+            }
+
+            if (headers) {
+                const validatedHeaders = headers.parse(request.event.headers);
+
+                request.event = {
+                    ...request.event,
+                    headers: validatedHeaders,
+                };
+            }
+
+            if (body) {
+                const validatedBody = body.parse(request.event.body);
+
+                request.event = {
+                    ...request.event,
+                    body: validatedBody,
+                };
+            }
+
+            if (queryStringParameters) {
+                const validatedQueryStringParameters =
+                    queryStringParameters.parse(
+                        request.event.queryStringParameters
+                    );
+
+                request.event = {
+                    ...request.event,
+                    queryStringParameters: validatedQueryStringParameters,
+                };
+            }
+
+            if (pathParameters) {
+                const validatedPathParameters = pathParameters.parse(
+                    request.event.pathParameters
+                );
+
+                request.event = {
+                    ...request.event,
+                    pathParameters: validatedPathParameters,
+                }
+            }
         } catch (error) {
             if (error instanceof ZodError) {
                 console.log("error", error);

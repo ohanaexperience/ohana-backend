@@ -1,5 +1,5 @@
 authPhoneRegister:
-    handler: src/auth.phoneRegister
+    handler: src/auth/lambda/phone/register.handler
     timeout: 29
     events:
         - http:
@@ -10,7 +10,7 @@ authPhoneRegister:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailRegister:
-    handler: src/auth.emailRegister
+    handler: src/auth/lambda/email/register.handler
     timeout: 29
     events:
         - http:
@@ -21,7 +21,7 @@ authEmailRegister:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authResendEmailCode:
-    handler: src/auth.emailResendCode
+    handler: src/auth/lambda/email/resendCode.handler
     timeout: 29
     events:
         - http:
@@ -32,7 +32,7 @@ authResendEmailCode:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmEmailCode:
-    handler: src/auth.emailConfirmCode
+    handler: src/auth/lambda/email/confirmCode.handler
     timeout: 29
     events:
         - http:
@@ -55,7 +55,7 @@ authConfirmEmailCode:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authForgotPassword:
-    handler: src/auth.forgotPassword
+    handler: src/auth/lambda/email/forgotPassword.handler
     timeout: 29
     events:
         - http:
@@ -66,7 +66,7 @@ authForgotPassword:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmForgotPassword:
-    handler: src/auth.confirmForgotPassword
+    handler: src/auth/lambda/email/confirmForgotPassword.handler
     timeout: 29
     events:
         - http:
@@ -77,7 +77,7 @@ authConfirmForgotPassword:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailLogin:
-    handler: src/auth.emailLogin
+    handler: src/auth/lambda/email/login.handler
     timeout: 29
     events:
         - http:
@@ -89,7 +89,7 @@ authEmailLogin:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authRefreshTokens:
-    handler: src/auth.refreshTokens
+    handler: src/auth/lambda/tokens/refreshTokens.handler
     timeout: 29
     events:
         - http:
@@ -100,7 +100,7 @@ authRefreshTokens:
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authGoogleLogin:
-    handler: src/auth.googleSignIn
+    handler: src/auth/lambda/google/signIn.handler
     timeout: 29
     events:
         - http:

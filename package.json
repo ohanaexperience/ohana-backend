@@ -4,8 +4,11 @@
     "description": "Ohana API",
     "scripts": {
         "build-docs": "redocly build-docs docs/ohana.json --output docs/dist/index.html",
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "generate": "drizzle-kit generate"
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "generate": "drizzle-kit generate",
+        "deploy-docs": "serverless client deploy"
     },
     "keywords": [],
     "author": "",
@@ -17,11 +20,18 @@
         "@aws-sdk/client-s3": "^3.806.0",
         "@aws-sdk/client-sns": "^3.787.0",
         "@aws-sdk/s3-request-presigner": "^3.806.0",
+        "@redocly/cli": "^1.34.3",
         "@types/aws-lambda": "^8.10.149",
+        "@types/jest": "^29.5.14",
+        "@types/mime-types": "^2.1.4",
         "@types/node": "^22.14.0",
+        "@types/pg": "^8.15.4",
         "drizzle-kit": "^0.31.0",
+        "jest": "^29.7.0",
         "serverless-finch": "^4.0.4",
-        "serverless-plugin-scripts": "^1.0.2"
+        "serverless-plugin-scripts": "^1.0.2",
+        "ts-jest": "^29.3.3",
+        "ts-node": "^10.9.2"
     },
     "dependencies": {
         "@aws-sdk/rds-signer": "^3.797.0",
@@ -29,6 +39,7 @@
         "@middy/http-cors": "^6.1.6",
         "@middy/http-header-normalizer": "^6.2.3",
         "@middy/http-json-body-parser": "^6.2.2",
+        "dayjs": "^1.11.13",
         "drizzle-orm": "^0.43.1",
         "generate-password": "^1.7.1",
         "google-auth-library": "^9.15.1",
@@ -38,6 +49,7 @@
         "postgres": "^3.4.5",
         "stripe": "^18.1.0",
         "twilio": "^5.5.2",
+        "uuid": "^11.1.0",
         "zod": "^3.24.3"
     }
 }

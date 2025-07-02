@@ -1,7 +1,7 @@
 import { eq, InferInsertModel } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { usersTable } from "../../../../db/schema/users";
+import { usersTable } from "@/db/schema";
 
 export class UsersQueryManager {
     private db: NodePgDatabase;
@@ -15,10 +15,12 @@ export class UsersQueryManager {
     }
 
     public async getByUserId(userId: string) {
-        return await this.db
+        const results = await this.db
             .select()
             .from(usersTable)
             .where(eq(usersTable.id, userId));
+
+        return results[0] || null;
     }
 
     public async create(data: InsertUser) {

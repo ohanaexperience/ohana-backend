@@ -5,20 +5,25 @@ import {
     serial,
     timestamp,
     text,
+    jsonb,
 } from "drizzle-orm/pg-core";
 
 import { usersTable } from "./users";
+import {
+    HOST_VERIFICATION_PROVIDERS,
+    HOST_VERIFICATION_STATUSES,
+} from "../../src/constants/hostVerifications";
+import { ProviderData } from "../../src/types/hostVerifications";
 
+// Enums
 export const hostVerificationProviderEnum = pgEnum(
     "host_verification_provider",
-    ["stripe_identity"]
+    HOST_VERIFICATION_PROVIDERS
 );
-
-export const hostVerificationStatusEnum = pgEnum("host_verification_status", [
-    "pending",
-    "approved",
-    "rejected",
-]);
+export const hostVerificationStatusEnum = pgEnum(
+    "host_verification_status",
+    HOST_VERIFICATION_STATUSES
+);
 
 export const hostVerificationsTable = pgTable("host_verifications", {
     id: serial("id").primaryKey(),
@@ -26,34 +31,14 @@ export const hostVerificationsTable = pgTable("host_verifications", {
         .references(() => usersTable.id)
         .notNull()
         .unique(),
+
     provider:
         hostVerificationProviderEnum("provider").default("stripe_identity"),
-    providerVerificationId: text("provider_verification_id"),
-    sessionClientSecret: text("session_client_secret").notNull(),
+    providerData: jsonb("provider_data").$type<ProviderData>(),
+
     status: hostVerificationStatusEnum("status").default("pending"),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
-
-// export const hostVerificationsTable = pgTable(
-//     "host_verifications",
-//     {
-//         id: serial("id").primaryKey(),
-//         userId: uuid("user_id")
-//             .references(() => usersTable.id)
-//             .notNull()
-//             .unique(),
-//         provider: providerEnum("provider").default("stripe_identity"),
-//         providerVerificationId: text("provider_verification_id"),
-//         status: verificationStatusEnum("status").default("pending"),
-//         submittedAt: timestamp("submitted_at", { withTimezone: true }),
-//         approvedAt: timestamp("approved_at", { withTimezone: true }),
-//         createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-//         updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-//     },
-//     (table) => [
-//         index("provider_verification_id_idx").on(table.providerVerificationId),
-//     ]
-// );
