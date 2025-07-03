@@ -63,6 +63,8 @@ export class DatabaseController {
     private handleError(error: any) {
         switch (error.message) {
             default:
+                console.error("Error in DatabaseController", error);
+
                 return {
                     statusCode: 500,
                     body: JSON.stringify({
