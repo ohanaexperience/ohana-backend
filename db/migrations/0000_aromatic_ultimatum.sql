@@ -1,6 +1,6 @@
 CREATE TYPE "public"."experience_cancellation_policy" AS ENUM('strict', 'moderate', 'flexible');--> statement-breakpoint
 CREATE TYPE "public"."experience_duration" AS ENUM('1-2 hours', '2-3 hours', '3-4 hours', '4-5 hours', '5-6 hours');--> statement-breakpoint
-CREATE TYPE "public"."experience_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
+CREATE TYPE IF NOT EXISTS "public"."experience_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TYPE "public"."experience_type" AS ENUM('indoor', 'outdoor', 'both');--> statement-breakpoint
 CREATE TYPE "public"."experience_included_items" AS ENUM('food', 'drinks', 'transport', 'equipment');--> statement-breakpoint
 CREATE TYPE "public"."experience_physical_requirements" AS ENUM('low', 'medium', 'high');--> statement-breakpoint
