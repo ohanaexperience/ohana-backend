@@ -4,7 +4,6 @@ import { BaseQueryManager } from "./base";
 import { hostVerificationsTable } from "@/database/schemas";
 
 export class HostVerificationsQueryManager extends BaseQueryManager {
-
     public async getAll() {
         return await this.withDatabase(async (db) =>
             db.select().from(hostVerificationsTable)
@@ -25,25 +24,25 @@ export class HostVerificationsQueryManager extends BaseQueryManager {
 
     public async create(data: InsertHostVerifications) {
         return await this.withDatabase(async (db) =>
-            db.insert(hostVerificationsTable)
-                .values(data)
-                .returning()
+            db.insert(hostVerificationsTable).values(data).returning()
         );
     }
 
     public async update(userId: string, data: UpdateHostVerification) {
         return await this.withDatabase(async (db) =>
-            db.update(hostVerificationsTable)
+            db
+                .update(hostVerificationsTable)
                 .set(data)
                 .where(eq(hostVerificationsTable.userId, userId))
                 .returning()
         );
     }
 
-    public async delete(id: string) {
+    public async delete(userId: string) {
         return await this.withDatabase(async (db) =>
-            db.delete(hostVerificationsTable)
-                .where(eq(hostVerificationsTable.userId, id))
+            db
+                .delete(hostVerificationsTable)
+                .where(eq(hostVerificationsTable.userId, userId))
         );
     }
 }

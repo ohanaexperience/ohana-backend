@@ -25,6 +25,10 @@ export default {
                 CODE: "VERIFICATION_ALREADY_APPROVED",
                 MESSAGE: "Verification already approved.",
             },
+            SESSION_REDACTED: {
+                CODE: "VERIFICATION_SESSION_REDACTED",
+                MESSAGE: "Verification session has been redacted, please restart the verification process.",
+            },
         },
     },
 };

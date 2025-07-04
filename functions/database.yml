@@ -54,21 +54,21 @@ runSeed:
 #         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
 #         USE_RDS_PROXY: true
 
-# testDatabase:
-#     handler: src/database/lambda/testDatabase.handler
-#     timeout: 300
-#     vpc:
-#         securityGroupIds:
-#             - !Ref ProxySecurityGroup
-#         subnetIds:
-#             - !Ref PrivateSubnetA
-#             - !Ref PrivateSubnetB
-#     package:
-#         patterns:
-#             - "drizzle/**"
-#             - "!node_modules/**"
-#     environment:
-#         RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
-#         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
-#         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-#         USE_RDS_PROXY: true
+testDatabase:
+    handler: src/database/lambda/testDatabase.handler
+    timeout: 300
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    package:
+        patterns:
+            - "drizzle/**"
+            - "!node_modules/**"
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true

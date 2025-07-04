@@ -25,7 +25,28 @@ export class StripeController {
         }
     }
 
+    private isRedactedStripeError(error: any): boolean {
+        return (
+            error.type === 'StripeInvalidRequestError' &&
+            error.code === 'resource_missing' &&
+            error.message?.includes('redacted') &&
+            error.message?.includes('verificationintent')
+        );
+    }
+
     private handleError(error: any) {
+        // Handle direct Stripe errors that might bubble up
+        if (this.isRedactedStripeError(error)) {
+            console.log("Detected redacted session error in controller, treating as session redacted");
+            return {
+                statusCode: 409,
+                body: JSON.stringify({
+                    error: ERRORS.STRIPE.VERIFICATION.SESSION_REDACTED.CODE,
+                    message: ERRORS.STRIPE.VERIFICATION.SESSION_REDACTED.MESSAGE,
+                }),
+            };
+        }
+
         switch (error.message) {
             case ERRORS.STRIPE.VERIFICATION.SESSION_NOT_FOUND.CODE:
                 return {
@@ -49,7 +70,18 @@ export class StripeController {
                     }),
                 };
 
+            case ERRORS.STRIPE.VERIFICATION.SESSION_REDACTED.CODE:
+                return {
+                    statusCode: 409,
+                    body: JSON.stringify({
+                        error: ERRORS.STRIPE.VERIFICATION.SESSION_REDACTED.CODE,
+                        message: ERRORS.STRIPE.VERIFICATION.SESSION_REDACTED.MESSAGE,
+                    }),
+                };
+
             default:
+                console.error("Error in StripeController", error);
+
                 return {
                     statusCode: 500,
                     body: JSON.stringify({
