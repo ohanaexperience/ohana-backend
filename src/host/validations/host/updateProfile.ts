@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { APIGatewayEvent } from "aws-lambda";
 
-export const UpdateHostProfileSchema = z
+export const UpdateProfileSchema = z
     .object({
         languages: z
             .array(
@@ -33,6 +33,13 @@ export const UpdateHostProfileSchema = z
             path: ["_errors"],
         }
     );
-export type UpdateHostProfileData = Omit<APIGatewayEvent, "body"> & {
-    body: z.infer<typeof UpdateHostProfileSchema>;
+
+export type UpdateProfileData = Omit<APIGatewayEvent, "body"> & {
+    body: z.infer<typeof UpdateProfileSchema>;
+};
+
+export type UpdateProfileRequest = {
+    authorization: string;
+    bio?: string;
+    languages?: string[];
 };

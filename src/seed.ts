@@ -1,0 +1,1 @@
+export { seedCategories } from "./database/seeds/categories";

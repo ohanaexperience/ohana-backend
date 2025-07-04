@@ -1,6 +1,6 @@
 # Profile
 hostGetProfile:
-    handler: src/host.getProfile
+    handler: src/host/lambda/host/getProfile.handler
     timeout: 29
     events:
         - http:
@@ -23,7 +23,7 @@ hostGetProfile:
         USE_RDS_PROXY: true
 
 hostUpdateProfile:
-    handler: src/host.updateProfile
+    handler: src/host/lambda/host/updateProfile.handler
     timeout: 29
     events:
         - http:

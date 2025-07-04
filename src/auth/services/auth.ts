@@ -290,7 +290,7 @@ export class AuthService {
         }
 
         const decodedToken: any = jwtDecode(idToken);
-        const username = `google_${decodedToken.sub}`;
+        const username = decodedToken.email;
 
         console.log(
             `[googleSignIn][${Date.now() - startTime}ms] Processing user: ${

@@ -98,6 +98,20 @@ export class DatabaseTestHelper {
         return { user, host };
     }
 
+    async createTestHostVerification(userId: string, overrides: Partial<any> = {}): Promise<any> {
+        const defaultVerification = {
+            id: `test-hv-${Date.now()}`,
+            userId,
+            status: "verified",
+            submittedAt: new Date(),
+            verifiedAt: new Date(),
+            verifiedBy: "test-admin",
+            ...overrides,
+        };
+
+        return await this.db.hostVerifications.create(defaultVerification);
+    }
+
     async createTestExperience(hostId: string, overrides: Partial<any> = {}): Promise<any> {
         const defaultExperience = {
             hostId,

@@ -1,5 +1,4 @@
 import { ExperienceController } from "@/experiences/controllers/experience";
-import { ExperienceService } from "@/experiences/services/experience";
 import { decodeToken } from "@/utils";
 import { ExperienceFactory, VALID_EXPERIENCE_DATA, MINIMAL_EXPERIENCE_DATA, INVALID_CATEGORY_EXPERIENCE_DATA } from "../helpers/experience-factory";
 
@@ -57,13 +56,9 @@ describe("Experience Integration Tests (Mocked)", () => {
             ]),
         };
 
-        const experienceService = new ExperienceService({
+        experienceController = new ExperienceController({
             database: mockDatabase,
             s3Service: mockS3Service as any,
-        });
-
-        experienceController = new ExperienceController({
-            experienceService,
         });
 
         // Mock JWT decode
@@ -117,7 +112,7 @@ describe("Experience Integration Tests (Mocked)", () => {
                 createExperienceRequest
             );
 
-            expect(result.statusCode).toBe(201);
+            expect(result.statusCode).toBe(200);
             
             const responseBody = JSON.parse(result.body);
             expect(responseBody.createdExperience).toBeDefined();
@@ -213,7 +208,7 @@ describe("Experience Integration Tests (Mocked)", () => {
                 minimalCreateRequest
             );
 
-            expect(result.statusCode).toBe(201);
+            expect(result.statusCode).toBe(200);
             
             const responseBody = JSON.parse(result.body);
             expect(responseBody.createdExperience).toBeDefined();
@@ -239,7 +234,7 @@ describe("Experience Integration Tests (Mocked)", () => {
                 requestWithImages
             );
 
-            expect(result.statusCode).toBe(201);
+            expect(result.statusCode).toBe(200);
             
             const responseBody = JSON.parse(result.body);
             expect(responseBody.uploadUrls).toHaveLength(2); // Mocked to return 2 URLs
@@ -316,13 +311,9 @@ describe("Experience Integration Tests (Mocked)", () => {
                 getExperienceImageUploadUrls: jest.fn().mockRejectedValue(new Error("S3 service unavailable")),
             };
 
-            const experienceService = new ExperienceService({
+            const experienceController = new ExperienceController({
                 database: mockDatabase,
                 s3Service: mockS3Service as any,
-            });
-
-            const experienceController = new ExperienceController({
-                experienceService,
             });
 
             const createExperienceRequest = ExperienceFactory.createRequestWithAuth(

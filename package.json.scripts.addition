@@ -1,0 +1,5 @@
+# Add these scripts to your package.json scripts section:
+
+"cleanup:users": "npx ts-node scripts/cleanup-test-users.ts",
+"cleanup:users:dry": "npx ts-node scripts/cleanup-test-users.ts --dry-run",
+"cleanup:users:all": "npx ts-node scripts/cleanup-test-users.ts --pattern @example.com"

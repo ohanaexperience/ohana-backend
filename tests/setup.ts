@@ -1,3 +1,11 @@
+// Set up test environment variables
+process.env.POSTGRES_HOST = "localhost";
+process.env.POSTGRES_PORT = "5432";
+process.env.POSTGRES_DB = "test_db";
+process.env.POSTGRES_USERNAME = "test_user";
+process.env.POSTGRES_PASSWORD = "test_password";
+process.env.POSTGRES_SSL = "false";
+
 // Mock middy modules
 jest.mock("@middy/core", () => {
     return jest.fn().mockImplementation((handler) => ({

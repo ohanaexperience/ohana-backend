@@ -15,11 +15,12 @@ export class DatabaseService {
     }
 
     async runMigrations() {
+        await this.db.connect();
         await this.db.instance.execute(
             sql`CREATE EXTENSION IF NOT EXISTS postgis;`
         );
 
-        const migrationsFolder = path.join(process.cwd(), "db/migrations");
+        const migrationsFolder = path.join(process.cwd(), "drizzle");
 
         console.log("Running migrations...");
         await migrate(this.db.instance, { migrationsFolder: migrationsFolder });
@@ -27,6 +28,8 @@ export class DatabaseService {
     }
 
     async clearDatabase() {
+        await this.db.connect();
+        
         const tablesQuery = `
             SELECT table_name
             FROM information_schema.tables
@@ -44,15 +47,15 @@ export class DatabaseService {
             AND t.typtype = 'e';  -- 'e' for enum types
         `;
 
-        const tables = await this.db.instance.execute(tablesQuery);
-        const types = await this.db.instance.execute(typesQuery);
+        const tables = await this.db.instance.execute(sql.raw(tablesQuery));
+        const types = await this.db.instance.execute(sql.raw(typesQuery));
 
         // Drop all tables
         if (tables.rows.length > 0) {
             const dropTablesQuery = `DROP TABLE IF EXISTS ${tables.rows
                 .map((row) => `"${row.table_name}"`)
                 .join(", ")} CASCADE;`;
-            await this.db.instance.execute(dropTablesQuery);
+            await this.db.instance.execute(sql.raw(dropTablesQuery));
         }
 
         // Drop all enum types
@@ -60,7 +63,7 @@ export class DatabaseService {
             const dropTypesQuery = `DROP TYPE IF EXISTS ${types.rows
                 .map((row) => `"${row.type_name}"`)
                 .join(", ")} CASCADE;`;
-            await this.db.instance.execute(dropTypesQuery);
+            await this.db.instance.execute(sql.raw(dropTypesQuery));
         }
 
         console.log(

@@ -1,425 +1,310 @@
-import { APIGatewayProxyEvent, Context } from "aws-lambda";
-import { decodeToken } from "@/utils";
-import { ExperienceFactory, VALID_EXPERIENCE_DATA, MINIMAL_EXPERIENCE_DATA } from "../helpers/experience-factory";
+/**
+ * E2E Experience Tests
+ * 
+ * Tests the complete experience lifecycle including:
+ * - Creating host profiles
+ * - Creating experiences
+ * - Updating experiences
+ * - Deleting experiences
+ * - Public experience listings
+ * - Host experience management
+ */
 
-// Mock external dependencies that can't be tested e2e
-jest.mock("@/utils", () => ({
-    decodeToken: jest.fn(),
-    generateTimeSlotsFromAvailability: jest.fn().mockResolvedValue(undefined),
-}));
+import { ApiClient } from './helpers/api-client';
+import { AuthHelper, TestUser } from './helpers/auth-helper';
+import { TestDataGenerator } from './helpers/test-data-generator';
 
-jest.mock("@aws-sdk/client-s3", () => ({
-    S3Client: jest.fn().mockImplementation(() => ({
-        send: jest.fn().mockResolvedValue({}),
-    })),
-    PutObjectCommand: jest.fn(),
-}));
+describe('Experience E2E Tests', () => {
+    let apiClient: ApiClient;
+    let authHelper: AuthHelper;
+    let hostUser: TestUser;
+    let regularUser: TestUser;
 
-jest.mock("@aws-sdk/s3-request-presigner", () => ({
-    getSignedUrl: jest.fn().mockResolvedValue("https://mock-upload-url.s3.amazonaws.com/mock-key"),
-}));
+    beforeAll(async () => {
+        apiClient = new ApiClient();
+        authHelper = new AuthHelper(apiClient);
 
-// Mock database connections for e2e (since we don't want to hit real DB)
-let mockDatabaseInstance: any;
+        // Create a host user
+        hostUser = await authHelper.createAndLoginTestUser();
+        await authHelper.createHostProfile();
 
-jest.mock("@/database", () => ({
-    DatabaseFactory: {
-        create: jest.fn(() => {
-            mockDatabaseInstance = {
-                hosts: {
-                    getByUserId: jest.fn(),
-                    getById: jest.fn(),
-                },
-                categories: {
-                    getById: jest.fn(),
-                },
-                subCategories: {
-                    getById: jest.fn(),
-                },
-                experiences: {
-                    create: jest.fn(),
-                },
-                availability: {
-                    create: jest.fn(),
-                },
+        // Create a regular user
+        regularUser = await authHelper.createAndLoginTestUser();
+    });
+
+    afterAll(async () => {
+        await authHelper.cleanup();
+    });
+
+    describe('Host Profile Management', () => {
+        beforeEach(async () => {
+            // Login as host user
+            await authHelper.loginUser(hostUser.email, hostUser.password);
+        });
+
+        it('should get host profile', async () => {
+            const response = await apiClient.get('/v1/host/profile');
+
+            expect(response.status).toBe(200);
+            expect(response.data).toHaveProperty('businessName');
+            expect(response.data).toHaveProperty('hostingExperience');
+            expect(response.data).toHaveProperty('specialties');
+        });
+
+        it('should update host profile', async () => {
+            const updateData = {
+                bio: 'Updated bio for testing',
+                specialties: ['adventure', 'cultural'],
+                languages: ['en', 'fr'],
             };
-            return mockDatabaseInstance;
-        }),
-    },
-}));
 
-// Import handler after mocks are set up
-const { handler: createExperienceHandler } = require("@/experiences/lambda/host/createExperience");
+            const response = await apiClient.put('/v1/host/profile', updateData);
 
-describe("CreateExperience E2E Tests", () => {
-    let mockDatabase: any;
-    let mockContext: Context;
-    const testUserId = "test-user-123";
-    const testHostId = "test-host-456";
-
-    beforeAll(() => {
-        // Set up environment variables
-        process.env.DB_ENDPOINT = "localhost";
-        process.env.DB_PORT = "5432";
-        process.env.DB_NAME = "test_db";
-        process.env.DB_USER = "postgres";
-        process.env.DB_PASSWORD = "password";
-        process.env.ASSETS_BUCKET_NAME = "test-bucket";
-
-        // Mock Lambda context
-        mockContext = {
-            callbackWaitsForEmptyEventLoop: false,
-            functionName: "createExperience",
-            functionVersion: "1",
-            invokedFunctionArn: "arn:aws:lambda:us-east-1:123456789012:function:createExperience",
-            memoryLimitInMB: "128",
-            awsRequestId: "test-request-id",
-            logGroupName: "/aws/lambda/createExperience",
-            logStreamName: "test-stream",
-            getRemainingTimeInMillis: () => 30000,
-            done: jest.fn(),
-            fail: jest.fn(),
-            succeed: jest.fn(),
-        };
-
-        // Mock JWT decode
-        (decodeToken as jest.Mock).mockReturnValue({ sub: testUserId });
-    });
-
-    beforeEach(() => {
-        jest.clearAllMocks();
-
-        // Use the mocked database instance
-        mockDatabase = mockDatabaseInstance;
-
-        // Set up default mock responses
-        mockDatabase.hosts.getByUserId.mockResolvedValue({
-            id: testHostId,
-            userId: testUserId,
-            businessName: "Test Business",
-            status: "active",
-        });
-
-        mockDatabase.categories.getById.mockResolvedValue({
-            id: 1,
-            name: "Adventure",
-        });
-
-        mockDatabase.subCategories.getById.mockResolvedValue({
-            id: 1,
-            categoryId: 1,
-            name: "Outdoor Adventure",
-        });
-
-        mockDatabase.experiences.create.mockResolvedValue({
-            id: "new-experience-id",
-            hostId: testHostId,
-            title: "Test Experience",
-            status: "published",
-            isPublic: true,
-            pricePerPerson: 75,
-        });
-
-        mockDatabase.availability.create.mockResolvedValue({
-            id: "new-availability-id",
-            experienceId: "new-experience-id",
+            expect(response.status).toBe(200);
+            expect(response.data.bio).toBe(updateData.bio);
+            expect(response.data.specialties).toEqual(updateData.specialties);
         });
     });
 
-    const createApiGatewayEvent = (body: any, headers: Record<string, string> = {}): APIGatewayProxyEvent => ({
-        body: JSON.stringify(body),
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer mock-jwt-token",
-            ...headers,
-        },
-        multiValueHeaders: {},
-        httpMethod: "POST",
-        isBase64Encoded: false,
-        path: "/experiences",
-        pathParameters: null,
-        queryStringParameters: null,
-        multiValueQueryStringParameters: null,
-        stageVariables: null,
-        requestContext: {
-            accountId: "123456789012",
-            apiId: "test-api",
-            protocol: "HTTP/1.1",
-            httpMethod: "POST",
-            path: "/experiences",
-            stage: "test",
-            requestId: "test-request",
-            requestTime: "2024-01-01T00:00:00.000Z",
-            requestTimeEpoch: 1704067200000,
-            identity: {
-                cognitoIdentityPoolId: null,
-                accountId: null,
-                cognitoIdentityId: null,
-                caller: null,
-                sourceIp: "127.0.0.1",
-                principalOrgId: null,
-                accessKey: null,
-                cognitoAuthenticationType: null,
-                cognitoAuthenticationProvider: null,
-                userArn: null,
-                userAgent: "test-agent",
-                user: null,
-                apiKey: null,
-                apiKeyId: null,
-                clientCert: null,
-                cognitoUserPoolId: null,
-            },
-            authorizer: null,
-            resourceId: "test-resource",
-            resourcePath: "/experiences",
-        },
-        resource: "/experiences",
+    describe('Experience Creation', () => {
+        beforeEach(async () => {
+            // Login as host user
+            await authHelper.loginUser(hostUser.email, hostUser.password);
+        });
+
+        it('should create a complete experience', async () => {
+            const experienceData = TestDataGenerator.generateTestExperience();
+
+            const response = await apiClient.post('/v1/host/experiences', experienceData);
+
+            expect(response.status).toBe(201);
+            expect(response.data).toHaveProperty('createdExperience');
+            expect(response.data).toHaveProperty('uploadUrls');
+            expect(response.data.createdExperience.title).toBe(experienceData.title);
+            expect(response.data.createdExperience.hostId).toBe(hostUser.userId);
+            expect(response.data.createdExperience.pricePerPerson).toBe(experienceData.pricePerPerson);
+        });
+
+        it('should create a minimal experience', async () => {
+            const experienceData = TestDataGenerator.generateMinimalExperience();
+
+            const response = await apiClient.post('/v1/host/experiences', experienceData);
+
+            expect(response.status).toBe(201);
+            expect(response.data.createdExperience.title).toBe(experienceData.title);
+            expect(response.data.createdExperience.groupDiscountsEnabled).toBe(false);
+            expect(response.data.createdExperience.earlyBirdEnabled).toBe(false);
+        });
+
+        it('should not create experience with invalid data', async () => {
+            const invalidData = TestDataGenerator.generateInvalidExperience();
+
+            const errorResponse = await apiClient.requestWithExpectedError('post', '/v1/host/experiences', invalidData);
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toBeDefined();
+        });
+
+        it('should not create experience with invalid category', async () => {
+            const experienceData = TestDataGenerator.generateTestExperience();
+            experienceData.category.mainId = 999; // Invalid category
+
+            const errorResponse = await apiClient.requestWithExpectedError('post', '/v1/host/experiences', experienceData);
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toContain('CATEGORY');
+        });
+
+        it('should not allow non-host to create experience', async () => {
+            // Login as regular user (not a host)
+            await authHelper.loginUser(regularUser.email, regularUser.password);
+
+            const experienceData = TestDataGenerator.generateTestExperience();
+
+            const errorResponse = await apiClient.requestWithExpectedError('post', '/v1/host/experiences', experienceData);
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toContain('HOST_NOT_FOUND');
+        });
     });
 
-    describe("Successful Experience Creation", () => {
-        it("should create experience with valid data through complete Lambda flow", async () => {
-            const experienceData = VALID_EXPERIENCE_DATA;
-            const event = createApiGatewayEvent(experienceData);
+    describe('Experience Management', () => {
+        let createdExperienceId: string;
 
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(201);
+        beforeAll(async () => {
+            // Login as host and create a test experience
+            await authHelper.loginUser(hostUser.email, hostUser.password);
             
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.createdExperience).toBeDefined();
-            expect(responseBody.uploadUrls).toBeDefined();
-
-            // Verify the Lambda processed the request correctly
-            expect(mockDatabase.hosts.getByUserId).toHaveBeenCalledWith(testUserId);
-            expect(mockDatabase.categories.getById).toHaveBeenCalledWith(1);
-            expect(mockDatabase.subCategories.getById).toHaveBeenCalledWith(1);
-            expect(mockDatabase.experiences.create).toHaveBeenCalled();
-            expect(mockDatabase.availability.create).toHaveBeenCalled();
-
-            // Verify experience data passed through correctly
-            const createCall = mockDatabase.experiences.create.mock.calls[0][0];
-            expect(createCall.title).toContain("Test Adventure Experience");
-            expect(createCall.hostId).toBe(testHostId);
-            expect(createCall.pricePerPerson).toBe(75);
-            expect(createCall.status).toBe("published");
+            const experienceData = TestDataGenerator.generateTestExperience();
+            const response = await apiClient.post('/v1/host/experiences', experienceData);
+            createdExperienceId = response.data.createdExperience.id;
         });
 
-        it("should create minimal experience through complete Lambda flow", async () => {
-            const experienceData = MINIMAL_EXPERIENCE_DATA;
-            const event = createApiGatewayEvent(experienceData);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(201);
-            
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.createdExperience).toBeDefined();
-
-            // Verify optional fields are not set
-            const createCall = mockDatabase.experiences.create.mock.calls[0][0];
-            expect(createCall.groupDiscountsEnabled).toBeUndefined();
-            expect(createCall.earlyBirdEnabled).toBeUndefined();
-            expect(createCall.whatToBring).toBeUndefined();
+        beforeEach(async () => {
+            // Ensure we're logged in as host
+            await authHelper.loginUser(hostUser.email, hostUser.password);
         });
 
-        it("should handle different image types correctly", async () => {
-            const experienceDataWithImages = {
-                ...VALID_EXPERIENCE_DATA,
-                images: [
-                    { imageType: "cover", mimeType: "image/jpeg" },
-                    { imageType: "gallery", mimeType: "image/png" },
-                    { imageType: "meeting-location", mimeType: "image/webp" },
-                ],
+        it('should get host experiences', async () => {
+            const response = await apiClient.get('/v1/host/experiences');
+
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.data)).toBe(true);
+            expect(response.data.length).toBeGreaterThan(0);
+            expect(response.data.some((exp: any) => exp.id === createdExperienceId)).toBe(true);
+        });
+
+        it('should update experience', async () => {
+            const updateData = {
+                title: 'Updated Experience Title',
+                pricePerPerson: 150,
+                description: 'Updated description for the experience',
             };
-            const event = createApiGatewayEvent(experienceDataWithImages);
 
-            const result = await createExperienceHandler(event, mockContext);
+            const response = await apiClient.put(`/v1/host/experiences/${createdExperienceId}`, updateData);
 
-            expect(result.statusCode).toBe(201);
-            
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.uploadUrls).toBeDefined();
-            expect(Array.isArray(responseBody.uploadUrls)).toBe(true);
+            expect(response.status).toBe(200);
+            expect(response.data.title).toBe(updateData.title);
+            expect(response.data.pricePerPerson).toBe(updateData.pricePerPerson);
+            expect(response.data.description).toBe(updateData.description);
+        });
+
+        it('should not update non-existent experience', async () => {
+            const updateData = { title: 'Updated Title' };
+
+            const errorResponse = await apiClient.requestWithExpectedError(
+                'put',
+                '/v1/host/experiences/non-existent-id',
+                updateData
+            );
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toContain('EXPERIENCE_NOT_FOUND');
+        });
+
+        it('should not allow non-owner to update experience', async () => {
+            // Create another host
+            const anotherHost = await authHelper.createAndLoginTestUser();
+            await authHelper.createHostProfile();
+
+            const updateData = { title: 'Unauthorized Update' };
+
+            const errorResponse = await apiClient.requestWithExpectedError(
+                'put',
+                `/v1/host/experiences/${createdExperienceId}`,
+                updateData
+            );
+
+            expect(errorResponse.status).toBe(403);
+            expect(errorResponse.data.error).toContain('UNAUTHORIZED');
+        });
+
+        it('should delete experience', async () => {
+            // Create a new experience to delete
+            const experienceData = TestDataGenerator.generateMinimalExperience();
+            const createResponse = await apiClient.post('/v1/host/experiences', experienceData);
+            const experienceToDelete = createResponse.data.createdExperience.id;
+
+            const response = await apiClient.delete(`/v1/host/experiences/${experienceToDelete}`);
+
+            expect(response.status).toBe(200);
+            expect(response.data.message).toContain('deleted');
+        });
+
+        it('should not delete non-existent experience', async () => {
+            const errorResponse = await apiClient.requestWithExpectedError(
+                'delete',
+                '/v1/host/experiences/non-existent-id'
+            );
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toContain('EXPERIENCE_NOT_FOUND');
         });
     });
 
-    describe("Authentication and Authorization", () => {
-        it("should fail when authorization header is missing", async () => {
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA, { Authorization: undefined });
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(500); // Middleware should handle this
-        });
-
-        it("should fail when user is not a host", async () => {
-            mockDatabase.hosts.getByUserId.mockResolvedValue(null);
-
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
+    describe('Public Experience Listings', () => {
+        beforeAll(async () => {
+            // Create some public experiences
+            await authHelper.loginUser(hostUser.email, hostUser.password);
             
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.error).toContain("HOST_NOT_FOUND");
-        });
-    });
-
-    describe("Validation Errors", () => {
-        it("should fail with invalid category", async () => {
-            mockDatabase.categories.getById.mockResolvedValue(null);
-
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
+            // Create multiple experiences for testing
+            const experience1 = TestDataGenerator.generateTestExperience();
+            const experience2 = TestDataGenerator.generateMinimalExperience();
             
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.error).toContain("CATEGORY");
+            await apiClient.post('/v1/host/experiences', experience1);
+            await apiClient.post('/v1/host/experiences', experience2);
         });
 
-        it("should fail with mismatched subcategory", async () => {
-            mockDatabase.subCategories.getById.mockResolvedValue({
-                id: 1,
-                categoryId: 2, // Different from main category
-                name: "Mismatched Subcategory",
+        it('should get public experiences without authentication', async () => {
+            // Clear auth token to test public access
+            apiClient.clearAuthToken();
+
+            const response = await apiClient.get('/v1/experiences/public');
+
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.data)).toBe(true);
+            expect(response.data.length).toBeGreaterThan(0);
+
+            // Verify structure of returned experiences
+            const experience = response.data[0];
+            expect(experience).toHaveProperty('id');
+            expect(experience).toHaveProperty('title');
+            expect(experience).toHaveProperty('pricePerPerson');
+            expect(experience).toHaveProperty('category');
+            expect(experience).toHaveProperty('hostId');
+        });
+
+        it('should filter experiences by category', async () => {
+            const response = await apiClient.get('/v1/experiences/public?categoryId=1');
+
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.data)).toBe(true);
+            
+            // All returned experiences should have categoryId 1
+            response.data.forEach((exp: any) => {
+                expect(exp.categoryId).toBe(1);
             });
+        });
 
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
+        it('should filter experiences by price range', async () => {
+            const response = await apiClient.get('/v1/experiences/public?minPrice=50&maxPrice=100');
 
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.data)).toBe(true);
             
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.error).toContain("CATEGORY_MISMATCH");
-        });
-
-        it("should fail with invalid request body schema", async () => {
-            const invalidData = {
-                title: "", // Empty title
-                // Missing required fields
-            };
-            const event = createApiGatewayEvent(invalidData);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
-        });
-
-        it("should fail with missing required fields", async () => {
-            const incompleteData = {
-                title: "Test Experience",
-                // Missing other required fields
-            };
-            const event = createApiGatewayEvent(incompleteData);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
-        });
-    });
-
-    describe("Middleware Integration", () => {
-        it("should handle CORS headers correctly", async () => {
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            // CORS middleware should add these headers
-            expect(result.headers).toBeDefined();
-            expect(result.headers?.["Access-Control-Allow-Origin"]).toBeDefined();
-        });
-
-        it("should parse JSON body correctly through middleware", async () => {
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(201);
-            
-            // Verify that the JSON was parsed and processed
-            expect(mockDatabase.experiences.create).toHaveBeenCalled();
-            const createCall = mockDatabase.experiences.create.mock.calls[0][0];
-            expect(createCall.title).toContain("Test Adventure Experience");
-        });
-
-        it("should validate request body schema through Zod middleware", async () => {
-            const invalidData = {
-                title: "Valid Title",
-                tagline: "Valid Tagline",
-                pricePerPerson: "invalid-price", // Should be number
-                // ... other fields
-            };
-            const event = createApiGatewayEvent(invalidData);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
-        });
-    });
-
-    describe("Error Handling", () => {
-        it("should handle database connection errors gracefully", async () => {
-            mockDatabase.hosts.getByUserId.mockRejectedValue(new Error("Database connection failed"));
-
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(500);
-            
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.error).toBe("Internal server error");
-        });
-
-        it("should handle S3 service errors gracefully", async () => {
-            // Mock S3 client to throw error
-            const { S3Client } = require("@aws-sdk/client-s3");
-            S3Client.mockImplementation(() => {
-                throw new Error("S3 service unavailable");
+            // All returned experiences should be within price range
+            response.data.forEach((exp: any) => {
+                expect(exp.pricePerPerson).toBeGreaterThanOrEqual(50);
+                expect(exp.pricePerPerson).toBeLessThanOrEqual(100);
             });
-
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(500);
         });
     });
 
-    describe("Response Format", () => {
-        it("should return properly formatted success response", async () => {
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(201);
-            expect(result.headers).toBeDefined();
-            expect(typeof result.body).toBe("string");
-            
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.createdExperience).toBeDefined();
-            expect(responseBody.uploadUrls).toBeDefined();
-            expect(Array.isArray(responseBody.uploadUrls)).toBe(true);
+    describe('User Experience Views', () => {
+        beforeEach(async () => {
+            // Login as regular user
+            await authHelper.loginUser(regularUser.email, regularUser.password);
         });
 
-        it("should return properly formatted error response", async () => {
-            mockDatabase.hosts.getByUserId.mockResolvedValue(null);
+        it('should get experiences for authenticated user', async () => {
+            const response = await apiClient.get('/v1/experiences');
 
-            const event = createApiGatewayEvent(VALID_EXPERIENCE_DATA);
-
-            const result = await createExperienceHandler(event, mockContext);
-
-            expect(result.statusCode).toBe(400);
-            expect(result.headers).toBeDefined();
-            expect(typeof result.body).toBe("string");
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.data)).toBe(true);
             
-            const responseBody = JSON.parse(result.body);
-            expect(responseBody.error).toBeDefined();
-            expect(responseBody.message).toBeDefined();
+            // Authenticated users might see additional data or personalized results
+            if (response.data.length > 0) {
+                const experience = response.data[0];
+                expect(experience).toHaveProperty('id');
+                expect(experience).toHaveProperty('title');
+            }
+        });
+
+        it('should not access host-specific endpoints as regular user', async () => {
+            const errorResponse = await apiClient.requestWithExpectedError('get', '/v1/host/experiences');
+
+            expect(errorResponse.status).toBe(400);
+            expect(errorResponse.data.error).toContain('HOST_NOT_FOUND');
         });
     });
 });
