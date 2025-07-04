@@ -92,6 +92,7 @@ hostGetExperiences:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 hostUpdateExperience:
     handler: src/experiences/lambda/host/updateExperience.handler
@@ -115,6 +116,7 @@ hostUpdateExperience:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 hostDeleteExperience:
     handler: src/experiences/lambda/host/deleteExperience.handler
@@ -122,6 +124,54 @@ hostDeleteExperience:
     events:
         - http:
               path: /v1/host/experiences/{experienceId}
+              method: DELETE
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
+hostReplaceExperienceImage:
+    handler: src/s3/lambda/experiences/replaceExperienceImage.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/{experienceId}/images/{imageId}/replace
+              method: PUT
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
+hostDeleteExperienceImageById:
+    handler: src/s3/lambda/experiences/deleteExperienceImageById.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/{experienceId}/images/{imageId}
               method: DELETE
               cors: true
               authorizer:

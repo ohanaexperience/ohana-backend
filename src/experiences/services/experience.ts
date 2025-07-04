@@ -190,7 +190,9 @@ export class ExperienceService {
                 experienceId: createdExperience.id,
                 availabilityId: createdAvailability.id,
                 availability: {
-                    startDate: dayjs().tz(timezone).toDate(),
+                    startDate: dayjs(availability.startDate)
+                        .tz(timezone)
+                        .toDate(),
                     ...(availability.endDate && {
                         endDate: dayjs(availability.endDate)
                             .tz(timezone)
@@ -204,7 +206,7 @@ export class ExperienceService {
                 },
                 timezone,
             },
-            1
+            1 // Months to generate time slots for
         );
 
         const imagesWithIds = images.map((image) => ({
@@ -288,10 +290,6 @@ export class ExperienceService {
 
         if (experience.hostId !== host.id) {
             throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE);
-        }
-
-        if (this.s3Service) {
-            await this.s3Service.deleteExperienceImages(experienceId);
         }
 
         await this.db.experiences.delete(experienceId);

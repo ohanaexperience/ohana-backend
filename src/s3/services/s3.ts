@@ -17,7 +17,7 @@ import { S3ServiceOptions, ImageObject } from "../types";
 import Postgres from "@/database/postgres";
 import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";
-import { EXPERIENCE_IMAGE_TYPES } from "@/constants/experiences";
+import { EXPERIENCE_IMAGE_TYPES, EXPERIENCE_GALLERY_IMAGE_MAX_COUNT } from "@/constants/experiences";
 
 export class S3Service {
     private readonly db: Postgres;
@@ -86,6 +86,80 @@ export class S3Service {
         }));
     }
 
+    async replaceExperienceImage(request: {
+        authorization: string;
+        experienceId: string;
+        imageId: string;
+        imageType: string;
+        mimeType: string;
+    }) {
+        const { authorization, experienceId, imageId, imageType, mimeType } = request;
+
+        const { sub: userId } = decodeToken(authorization);
+
+        // Validate experience ownership
+        const experience = await this.db.experiences.getById(experienceId);
+        if (!experience) {
+            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
+        }
+
+        const host = await this.db.hosts.getByUserId(userId);
+        if (!host || experience.hostId !== host.id) {
+            throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_UPDATE.CODE);
+        }
+
+        // Find existing image in the experience to get its current URL/key
+        let existingImageUrl: string | null = null;
+        
+        switch (imageType) {
+            case "cover":
+                existingImageUrl = experience.coverImage?.url || null;
+                break;
+            case "gallery":
+                const existingGalleryImage = experience.galleryImages?.find(
+                    (img: any) => img.id === imageId
+                );
+                existingImageUrl = existingGalleryImage?.url || null;
+                break;
+            case "meeting-location":
+                existingImageUrl = experience.meetingLocation?.image?.url || null;
+                break;
+        }
+
+        // Generate new upload URL for replacement
+        const uploadUrl = await this.generateUploadUrl({
+            image: { id: imageId, mimeType, imageType },
+            experienceId,
+            userId,
+            imageType,
+        });
+
+        // Delete the old image if it exists and has a different key
+        // (this handles cases where file extension/MIME type changes)
+        if (existingImageUrl) {
+            try {
+                const oldKey = this.extractS3KeyFromUrl(existingImageUrl);
+                const fileExtension = extension(mimeType);
+                const keyPrefix = this.generateKeyPrefix(userId, experienceId, imageType);
+                const newKey = `${keyPrefix}/${imageId}.${fileExtension}`;
+                
+                // Only delete if the keys are different (different file extension)
+                if (oldKey && oldKey !== newKey) {
+                    console.log(`[S3Service] Deleting old image with different key: ${oldKey} -> ${newKey}`);
+                    await this.deleteSpecificImageByKey(oldKey);
+                }
+            } catch (error) {
+                console.log(`[S3Service] Could not delete old image, proceeding with new upload: ${error}`);
+            }
+        }
+
+        return {
+            imageId,
+            imageType,
+            uploadUrl,
+        };
+    }
+
     async deleteExperienceImages(experienceId: string) {
         try {
             // Get the experience to find the host ID
@@ -147,6 +221,137 @@ export class S3Service {
                 `[S3Service] Error deleting images for experience ${experienceId}:`,
                 error
             );
+            throw error;
+        }
+    }
+
+    async deleteSpecificImage(experienceId: string, imageId: string, imageType: string, userId: string) {
+        try {
+            const keyPrefix = this.generateKeyPrefix(userId, experienceId, imageType);
+            const key = `${keyPrefix}/${imageId}`;
+            
+            console.log(`[S3Service] Deleting specific image: ${key}`);
+            
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: this.config.bucketName,
+                Key: key,
+            });
+            
+            await this.s3Client.send(deleteCommand);
+            console.log(`[S3Service] Successfully deleted image: ${key}`);
+        } catch (error) {
+            console.error(`[S3Service] Error deleting specific image ${imageId}:`, error);
+            throw error;
+        }
+    }
+
+    async deleteExperienceImageById(request: {
+        authorization: string;
+        experienceId: string;
+        imageId: string;
+    }) {
+        const { authorization, experienceId, imageId } = request;
+
+        const { sub: userId } = decodeToken(authorization);
+
+        // Validate experience ownership
+        const experience = await this.db.experiences.getById(experienceId);
+        if (!experience) {
+            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
+        }
+
+        const host = await this.db.hosts.getByUserId(userId);
+        if (!host || experience.hostId !== host.id) {
+            throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE);
+        }
+
+        // Find the image in the experience record to get its type
+        let imageType: string | null = null;
+        let imageFound = false;
+
+        // Check cover image
+        if (experience.coverImage && experience.coverImage.id === imageId) {
+            imageType = "cover";
+            imageFound = true;
+        }
+
+        // Check gallery images
+        if (!imageFound && experience.galleryImages) {
+            const galleryImage = experience.galleryImages.find((img: any) => img.id === imageId);
+            if (galleryImage) {
+                imageType = "gallery";
+                imageFound = true;
+            }
+        }
+
+        // Check meeting location image
+        if (!imageFound && experience.meetingLocation && experience.meetingLocation.image && experience.meetingLocation.image.id === imageId) {
+            imageType = "meeting-location";
+            imageFound = true;
+        }
+
+        if (!imageFound || !imageType) {
+            throw new Error(`Image with ID ${imageId} not found in experience ${experienceId}`);
+        }
+
+        // Delete from S3
+        await this.deleteSpecificImage(experienceId, imageId, imageType, userId);
+
+        // Update database record
+        await this.removeImageFromExperience(experienceId, imageId, imageType);
+
+        return {
+            message: `Image ${imageId} successfully deleted from experience ${experienceId}`,
+        };
+    }
+
+    private async removeImageFromExperience(experienceId: string, imageId: string, imageType: string) {
+        const experience = await this.db.experiences.getById(experienceId);
+        if (!experience) {
+            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
+        }
+
+        switch (imageType) {
+            case "cover":
+                await this.db.experiences.update(experienceId, {
+                    coverImage: null,
+                });
+                break;
+            case "gallery":
+                const updatedGalleryImages = (experience.galleryImages || []).filter(
+                    (img: any) => img.id !== imageId
+                );
+                await this.db.experiences.update(experienceId, {
+                    galleryImages: updatedGalleryImages,
+                });
+                break;
+            case "meeting-location":
+                if (experience.meetingLocation) {
+                    await this.db.experiences.update(experienceId, {
+                        meetingLocation: {
+                            instructions: experience.meetingLocation.instructions,
+                        },
+                    });
+                }
+                break;
+            default:
+                throw new Error(`Unknown image type: ${imageType}`);
+        }
+    }
+
+    private async deleteSpecificImageByKey(key: string) {
+        try {
+            console.log(`[S3Service] Deleting image by key: ${key}`);
+            
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: this.config.bucketName,
+                Key: key,
+            });
+            
+            await this.s3Client.send(deleteCommand);
+            console.log(`[S3Service] Successfully deleted image: ${key}`);
+        } catch (error) {
+            console.error(`[S3Service] Error deleting image ${key}:`, error);
             throw error;
         }
     }
@@ -504,6 +709,9 @@ export class S3Service {
                     updatedGalleryImages = [...existingGalleryImages];
                     updatedGalleryImages[existingImageIndex] = imageObject;
                 } else {
+                    if (existingGalleryImages.length >= EXPERIENCE_GALLERY_IMAGE_MAX_COUNT) {
+                        throw new Error(`Maximum of ${EXPERIENCE_GALLERY_IMAGE_MAX_COUNT} gallery images allowed`);
+                    }
                     updatedGalleryImages = [
                         ...existingGalleryImages,
                         imageObject,

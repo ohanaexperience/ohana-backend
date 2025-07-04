@@ -64,6 +64,42 @@ export class S3Controller {
         }
     }
 
+    async replaceExperienceImage(request: {
+        authorization: string;
+        experienceId: string;
+        imageId: string;
+        imageType: string;
+        mimeType: string;
+    }) {
+        try {
+            const result = await this.s3Service.replaceExperienceImage(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
+    async deleteExperienceImageById(request: {
+        authorization: string;
+        experienceId: string;
+        imageId: string;
+    }) {
+        try {
+            const result = await this.s3Service.deleteExperienceImageById(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
     private handleError(error: any) {
         switch (error.message) {
             case ERRORS.EXPERIENCE.NOT_FOUND.CODE:
