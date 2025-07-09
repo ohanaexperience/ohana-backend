@@ -82,6 +82,24 @@ export class S3Controller {
         }
     }
 
+    async addExperienceImage(request: {
+        authorization: string;
+        experienceId: string;
+        imageType: string;
+        mimeType: string;
+    }) {
+        try {
+            const result = await this.s3Service.addExperienceImage(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
     async deleteExperienceImageById(request: {
         authorization: string;
         experienceId: string;

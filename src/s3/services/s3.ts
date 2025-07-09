@@ -203,6 +203,62 @@ export class S3Service {
         };
     }
 
+    async addExperienceImage(request: {
+        authorization: string;
+        experienceId: string;
+        imageType: string;
+        mimeType: string;
+    }) {
+        const { authorization, experienceId, imageType, mimeType } = request;
+
+        const { sub: userId } = decodeToken(authorization);
+
+        // Validate experience ownership
+        const experience = await this.db.experiences.getById(experienceId);
+        if (!experience) {
+            throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
+        }
+
+        const host = await this.db.hosts.getByUserId(userId);
+        if (!host || experience.hostId !== host.id) {
+            throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_UPDATE.CODE);
+        }
+
+        // Validate imageType constraints
+        if (imageType === S3Service.IMAGE_TYPES.COVER && experience.coverImage) {
+            throw new Error("Cover image already exists. Use replace endpoint instead.");
+        }
+
+        if (imageType === S3Service.IMAGE_TYPES.MEETING_LOCATION && 
+            experience.meetingLocation?.image) {
+            throw new Error("Meeting location image already exists. Use replace endpoint instead.");
+        }
+
+        if (imageType === S3Service.IMAGE_TYPES.GALLERY) {
+            const galleryImageCount = experience.galleryImages?.length || 0;
+            if (galleryImageCount >= EXPERIENCE_GALLERY_IMAGE_MAX_COUNT) {
+                throw new Error(
+                    `Maximum of ${EXPERIENCE_GALLERY_IMAGE_MAX_COUNT} gallery images allowed`
+                );
+            }
+        }
+
+        // Generate new image ID and upload URL
+        const imageId = uuidv4();
+        const uploadUrl = await this.generateUploadUrl({
+            image: { id: imageId, mimeType, imageType },
+            experienceId,
+            userId,
+            imageType,
+        });
+
+        return {
+            imageId,
+            imageType,
+            uploadUrl,
+        };
+    }
+
     async deleteExperienceImages(experienceId: string) {
         try {
             // Get the experience to find the host ID

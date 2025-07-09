@@ -11,7 +11,7 @@ export const UpdateExperiencePathSchema = z.object({
         invalid_type_error: ERRORS.EXPERIENCE.ID.INVALID_TYPE.CODE,
     }),
 });
-export const UpdateExperienceSchema = CreateExperienceSchema.partial();
+export const UpdateExperienceSchema = CreateExperienceSchema.omit({ images: true }).partial();
 export const UpdateExperienceRequestSchema = z.object({
     authorization: z.string({
         required_error: ERRORS.AUTHORIZATION.MISSING.CODE,

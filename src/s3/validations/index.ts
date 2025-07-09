@@ -1,5 +1,6 @@
 // Experiences
 export * from "./experiences/getImageUploadUrls";
+export * from "./experiences/addExperienceImage";
 export * from "./experiences/replaceExperienceImage";
 export * from "./experiences/deleteExperienceImageById";
 

@@ -2,16 +2,20 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Ohana API",
-        "description": "API documentation for Ohana backend\n\nBase URL: https://ikfwakanfh.execute-api.us-east-1.amazonaws.com",
+        "description": "API documentation for Ohana backend\n\nDev Base URL: https://aokpp8ma63.execute-api.us-east-1.amazonaws.com/dev\n\nStaging Base URL: https://4rhldoz5sh.execute-api.us-east-1.amazonaws.com/staging",
         "version": "1.0.0",
         "contact": {
-            "email": "support@ohana.com"
+            "email": "support@ohana.world"
         }
     },
     "servers": [
         {
-            "url": "https://ikfwakanfh.execute-api.us-east-1.amazonaws.com/dev",
+            "url": "https://aokpp8ma63.execute-api.us-east-1.amazonaws.com/dev",
             "description": "Development server"
+        },
+        {
+            "url": "https://4rhldoz5sh.execute-api.us-east-1.amazonaws.com/staging",
+            "description": "Staging server"
         }
     ],
     "tags": [
@@ -2486,7 +2490,7 @@
             "put": {
                 "tags": ["Host"],
                 "summary": "Update Experience",
-                "description": "Updates an existing experience for the authenticated host. All fields are optional - only provided fields will be updated. The host can only update their own experiences.",
+                "description": "Updates an existing experience for the authenticated host. All fields are optional - only provided fields will be updated. The host can only update their own experiences. Note: Images cannot be updated through this endpoint - use the dedicated image management endpoints instead.",
                 "operationId": "hostUpdateExperience",
                 "parameters": [
                     {
@@ -2758,24 +2762,6 @@
                                         "type": "string",
                                         "description": "IANA timezone identifier",
                                         "example": "Asia/Bangkok"
-                                    },
-                                    "coverImageUrl": {
-                                        "type": "string",
-                                        "format": "uri",
-                                        "description": "Cover image URL for the experience",
-                                        "example": "https://example.com/cover-image.jpg"
-                                    },
-                                    "galleryImageUrls": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "format": "uri"
-                                        },
-                                        "description": "Gallery image URLs",
-                                        "example": [
-                                            "https://example.com/gallery1.jpg",
-                                            "https://example.com/gallery2.jpg"
-                                        ]
                                     }
                                 }
                             }
@@ -2898,7 +2884,7 @@
             "delete": {
                 "tags": ["Host"],
                 "summary": "Delete Experience",
-                "description": "Deletes an existing experience for the authenticated host. The host can only delete their own experiences. This action is irreversible.",
+                "description": "Deletes an existing experience for the authenticated host. The host can only delete their own experiences. This action also removes all associated S3 images. This action is irreversible.",
                 "operationId": "hostDeleteExperience",
                 "parameters": [
                     {
@@ -3000,6 +2986,424 @@
                                         "value": {
                                             "error": "EXPERIENCE_FORBIDDEN_DELETE",
                                             "message": "You are not authorized to delete this experience."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/host/experiences/{experienceId}/images/{imageId}/replace": {
+            "put": {
+                "tags": ["Host"],
+                "summary": "Replace Experience Image",
+                "description": "Replaces an existing image for an experience. The imageType is automatically derived from the existing imageId. Only the experience owner can replace images.",
+                "operationId": "hostReplaceExperienceImage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "path",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    {
+                        "in": "path",
+                        "name": "imageId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Image unique identifier",
+                        "example": "456e7890-e89b-12d3-a456-426614174000"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New image mime type for replacement",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["mimeType"],
+                                "properties": {
+                                    "mimeType": {
+                                        "type": "string",
+                                        "enum": [
+                                            "image/jpeg",
+                                            "image/png",
+                                            "image/webp"
+                                        ],
+                                        "description": "MIME type of the replacement image",
+                                        "example": "image/jpeg"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "imageId": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "description": "Image unique identifier"
+                                        },
+                                        "imageType": {
+                                            "type": "string",
+                                            "enum": [
+                                                "cover",
+                                                "gallery",
+                                                "meeting-location"
+                                            ],
+                                            "description": "Type of image that was replaced"
+                                        },
+                                        "uploadUrl": {
+                                            "type": "string",
+                                            "format": "uri",
+                                            "description": "Pre-signed URL for uploading the replacement image"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Image not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/host/experiences/{experienceId}/images": {
+            "post": {
+                "tags": ["Host"],
+                "summary": "Add New Experience Image",
+                "description": "Adds a new image to an existing experience. For cover and meeting-location images, they must not already exist. Gallery images are added to the collection up to the maximum limit.",
+                "operationId": "hostAddExperienceImage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "path",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                ],
+                "requestBody": {
+                    "description": "New image data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["imageType", "mimeType"],
+                                "properties": {
+                                    "imageType": {
+                                        "type": "string",
+                                        "enum": ["cover", "gallery", "meeting-location"],
+                                        "description": "Type of image to add",
+                                        "example": "gallery"
+                                    },
+                                    "mimeType": {
+                                        "type": "string",
+                                        "enum": ["image/jpeg", "image/png", "image/webp"],
+                                        "description": "MIME type of the new image",
+                                        "example": "image/jpeg"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "imageId": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "description": "Generated image unique identifier"
+                                        },
+                                        "imageType": {
+                                            "type": "string",
+                                            "enum": ["cover", "gallery", "meeting-location"],
+                                            "description": "Type of image that was added"
+                                        },
+                                        "uploadUrl": {
+                                            "type": "string",
+                                            "format": "uri",
+                                            "description": "Pre-signed URL for uploading the new image"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or constraint violation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Cover Image Exists": {
+                                        "value": {
+                                            "error": "COVER_IMAGE_EXISTS",
+                                            "message": "Cover image already exists. Use replace endpoint instead."
+                                        }
+                                    },
+                                    "Gallery Limit Exceeded": {
+                                        "value": {
+                                            "error": "GALLERY_IMAGE_LIMIT_EXCEEDED",
+                                            "message": "Maximum of 8 gallery images allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Experience not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalServerError"
+                    }
+                }
+            }
+        },
+        "/v1/host/experiences/{experienceId}/images/{imageId}": {
+            "delete": {
+                "tags": ["Host"],
+                "summary": "Delete Experience Image",
+                "description": "Deletes a specific image from an experience. The imageType is automatically determined from the imageId. Only the experience owner can delete images.",
+                "operationId": "hostDeleteExperienceImage",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AuthorizationHeader"
+                    },
+                    {
+                        "in": "path",
+                        "name": "experienceId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Experience unique identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    {
+                        "in": "path",
+                        "name": "imageId",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Image unique identifier",
+                        "example": "456e7890-e89b-12d3-a456-426614174000"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Image successfully deleted from experience"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Image not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        },
+                                        "message": {
+                                            "type": "string"
                                         }
                                     }
                                 }

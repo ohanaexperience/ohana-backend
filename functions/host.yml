@@ -166,6 +166,30 @@ hostReplaceExperienceImage:
         USE_RDS_PROXY: true
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
+hostAddExperienceImage:
+    handler: src/s3/lambda/experiences/addExperienceImage.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/experiences/{experienceId}/images
+              method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
 hostDeleteExperienceImageById:
     handler: src/s3/lambda/experiences/deleteExperienceImageById.handler
     timeout: 29
