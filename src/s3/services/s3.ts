@@ -753,8 +753,11 @@ export class S3Service {
         const { name: bucket } = record.s3.bucket;
         const key = decodeURIComponent(record.s3.object.key);
 
-        const assetsDomain =
-            this.config.assetsDomain || `${bucket}.s3.${region}.amazonaws.com`;
+        // Use CloudFront domain if available, otherwise fall back to S3 domain
+        const cdnDomain = process.env.ASSETS_CDN_DOMAIN;
+        const assetsDomain = cdnDomain || 
+            this.config.assetsDomain || 
+            `${bucket}.s3.${region}.amazonaws.com`;
         const imageUrl = `https://${assetsDomain}/${key}`;
 
         const keyParts = key.split("/");

@@ -13,7 +13,7 @@ provider:
     environment:
         SERVICE: ${self:service}
         NODE_ENV: ${opt:stage, 'dev'}
-        # IMAGES_BASE_URL: https://${self:custom.resourceNames.}
+        ASSETS_CDN_DOMAIN: !GetAtt AssetsCloudFrontDistribution.DomainName
     iam:
         role:
             statements:

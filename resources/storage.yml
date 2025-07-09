@@ -5,6 +5,16 @@ Resources:
             Bucket: !Ref AssetsBucket
             PolicyDocument:
                 Statement:
+                    # Allow CloudFront to access S3 objects
+                    - Action: s3:GetObject
+                      Effect: Allow
+                      Principal:
+                          Service: cloudfront.amazonaws.com
+                      Resource: !Sub "arn:aws:s3:::${self:custom.resourceNames.assetsBucket}/*"
+                      Condition:
+                          StringEquals:
+                              "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AssetsCloudFrontDistribution}"
+                    # Allow direct S3 access as fallback (for development/testing)
                     - Action: s3:GetObject
                       Effect: Allow
                       Principal: "*"
@@ -29,3 +39,43 @@ Resources:
                 BlockPublicPolicy: false
                 IgnorePublicAcls: false
                 RestrictPublicBuckets: false
+
+    # CloudFront Origin Access Control
+    AssetsCloudFrontOriginAccessControl:
+        Type: AWS::CloudFront::OriginAccessControl
+        Properties:
+            OriginAccessControlConfig:
+                Name: ${self:custom.resourceNames.assetsBucket}-oac
+                OriginAccessControlOriginType: s3
+                SigningBehavior: always
+                SigningProtocol: sigv4
+
+    # CloudFront Distribution for Assets
+    AssetsCloudFrontDistribution:
+        Type: AWS::CloudFront::Distribution
+        Properties:
+            DistributionConfig:
+                Origins:
+                    - Id: S3Origin
+                      DomainName: !GetAtt AssetsBucket.RegionalDomainName
+                      S3OriginConfig:
+                          OriginAccessIdentity: ""
+                      OriginAccessControlId: !GetAtt AssetsCloudFrontOriginAccessControl.Id
+                DefaultCacheBehavior:
+                    TargetOriginId: S3Origin
+                    ViewerProtocolPolicy: redirect-to-https
+                    CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # Managed-CachingOptimized
+                    OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # Managed-CORS-S3Origin
+                    ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03  # Managed-SecurityHeadersPolicy
+                Enabled: true
+                Comment: "CloudFront distribution for ${self:service} assets"
+                PriceClass: PriceClass_100  # Use only North America and Europe
+                HttpVersion: http2
+                IPV6Enabled: true
+
+Outputs:
+    AssetsCloudFrontDomainName:
+        Description: CloudFront distribution domain name for assets
+        Value: !GetAtt AssetsCloudFrontDistribution.DomainName
+        Export:
+            Name: ${self:service}-${self:provider.stage}-assets-cloudfront-domain
