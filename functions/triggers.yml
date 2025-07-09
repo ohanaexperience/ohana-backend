@@ -18,6 +18,7 @@ handleProfileImageUpload:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 handleExperienceImageUpload:
     handler: src/s3/lambda/experiences/handleExperienceImageUpload.handler
@@ -39,3 +40,4 @@ handleExperienceImageUpload:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}

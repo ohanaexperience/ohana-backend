@@ -12,4 +12,5 @@ export type ImageObject = {
     mimeType: string;
     id: string;
     url: string;
+    key: string;
 };

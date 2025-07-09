@@ -68,7 +68,6 @@ export class S3Controller {
         authorization: string;
         experienceId: string;
         imageId: string;
-        imageType: string;
         mimeType: string;
     }) {
         try {
@@ -89,7 +88,9 @@ export class S3Controller {
         imageId: string;
     }) {
         try {
-            const result = await this.s3Service.deleteExperienceImageById(request);
+            const result = await this.s3Service.deleteExperienceImageById(
+                request
+            );
 
             return {
                 statusCode: 200,
@@ -108,6 +109,15 @@ export class S3Controller {
                     body: JSON.stringify({
                         error: ERRORS.EXPERIENCE.NOT_FOUND.CODE,
                         message: ERRORS.EXPERIENCE.NOT_FOUND.MESSAGE,
+                    }),
+                };
+
+            case ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE:
+                return {
+                    statusCode: 403,
+                    body: JSON.stringify({
+                        error: ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE,
+                        message: ERRORS.EXPERIENCE.FORBIDDEN_DELETE.MESSAGE,
                     }),
                 };
 

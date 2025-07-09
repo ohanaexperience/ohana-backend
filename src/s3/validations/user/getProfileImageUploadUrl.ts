@@ -3,6 +3,7 @@ import { z } from "zod";
 import { APIGatewayEvent } from "aws-lambda";
 
 import ERRORS from "@/errors";
+import { IMAGE_MIME_TYPES } from "@/constants/shared";
 
 // Schemas
 export const GetProfileImageUploadUrlSchema = z.object({
@@ -13,7 +14,7 @@ export const GetProfileImageUploadUrlSchema = z.object({
         })
         .refine(
             (mimeType) => {
-                return mimeType.includes("/") && mimeType.startsWith("image/");
+                return IMAGE_MIME_TYPES.includes(mimeType);
             },
             {
                 message: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.CODE,

@@ -196,6 +196,10 @@ export default {
             CODE: "INVALID_GOOGLE_ID_TOKEN",
             MESSAGE: "Invalid Google ID token.",
         },
+        EXPIRED: {
+            CODE: "EXPIRED_GOOGLE_ID_TOKEN",
+            MESSAGE: "Google ID token has expired. Please sign in again.",
+        },
     },
     USER: {
         MISSING: { CODE: "MISSING_USER", MESSAGE: "User is required." },

@@ -491,7 +491,10 @@ export class AuthService {
             return ticket.getPayload();
         } catch (err: any) {
             console.error("Error verifying Google token:", err);
-            throw new Error(err);
+            if (err.message && err.message.includes("Token used too late")) {
+                throw new Error(ERRORS.GOOGLE_ID_TOKEN.EXPIRED.CODE);
+            }
+            throw new Error(ERRORS.GOOGLE_ID_TOKEN.INVALID.CODE);
         }
     }
 

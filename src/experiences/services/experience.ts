@@ -292,6 +292,16 @@ export class ExperienceService {
             throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_DELETE.CODE);
         }
 
+        // Delete all S3 images associated with this experience
+        if (this.s3Service) {
+            try {
+                await this.s3Service.deleteExperienceImages(experienceId);
+            } catch (error) {
+                console.error(`Failed to delete S3 images for experience ${experienceId}:`, error);
+                // Continue with database deletion even if S3 cleanup fails
+            }
+        }
+
         await this.db.experiences.delete(experienceId);
 
         return {

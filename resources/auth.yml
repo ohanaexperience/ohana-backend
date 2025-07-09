@@ -54,6 +54,14 @@ Resources:
                   AttributeDataType: String
                   Required: false
                   Mutable: true
+                - Name: google_sub
+                  AttributeDataType: String
+                  Required: false
+                  Mutable: true
+                - Name: auth_method
+                  AttributeDataType: String
+                  Required: false
+                  Mutable: true
             UsernameAttributes:
                 - email
                 - phone_number
@@ -141,9 +149,13 @@ Resources:
                 - phone_number
                 - phone_number_verified
                 - email_verified
+                - custom:auth_method
+                - custom:google_sub
             WriteAttributes:
                 - email
                 - phone_number
+                - custom:auth_method
+                - custom:google_sub
             AllowedOAuthFlows:
                 - implicit
                 - code
@@ -153,8 +165,7 @@ Resources:
                 - openid
                 - profile
             CallbackURLs:
-                - "https://unluksv3ee.execute-api.us-east-1.amazonaws.com/dev/v1/users/google/signin"
-                - "myapp://auth/callback"
+                - !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${self:provider.stage}/v1/users/google/signin"
             LogoutURLs:
                 - "http://localhost:3000/auth/logout"
                 - "myapp://auth/logout"

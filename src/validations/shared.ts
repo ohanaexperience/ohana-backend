@@ -50,6 +50,10 @@ export const imageObjectSchema = z.object({
         required_error: "Image URL is required",
         invalid_type_error: "Image URL must be a string", 
     }).url("Invalid image URL format"),
+    key: z.string({
+        required_error: "Image key is required",
+        invalid_type_error: "Image key must be a string",
+    }),
 });
 
 export const confirmationCodeSchema = z

@@ -76,7 +76,7 @@ describe("S3Service - Image Management", () => {
         const mockExperience = {
             id: "exp-123",
             hostId: "host-123",
-            coverImage: { id: "old-img", url: "old-url", mimeType: "image/jpeg" },
+            coverImage: { id: "old-img", url: "old-url", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/cover/old-img.jpeg" },
         };
 
         const mockHost = {
@@ -156,7 +156,7 @@ describe("S3Service - Image Management", () => {
         const mockExperienceWithCover = {
             id: "exp-123",
             hostId: "host-123",
-            coverImage: { id: "img-456", url: "cover-url", mimeType: "image/jpeg" },
+            coverImage: { id: "img-456", url: "cover-url", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/cover/img-456.jpeg" },
             galleryImages: [],
             meetingLocation: { instructions: "Meet here" },
         };
@@ -166,8 +166,8 @@ describe("S3Service - Image Management", () => {
             hostId: "host-123",
             coverImage: null,
             galleryImages: [
-                { id: "img-456", url: "gallery-url", mimeType: "image/jpeg" },
-                { id: "img-789", url: "gallery-url-2", mimeType: "image/jpeg" },
+                { id: "img-456", url: "gallery-url", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/gallery/img-456.jpeg" },
+                { id: "img-789", url: "gallery-url-2", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/gallery/img-789.jpeg" },
             ],
             meetingLocation: { instructions: "Meet here" },
         };
@@ -199,7 +199,7 @@ describe("S3Service - Image Management", () => {
             const result = await s3Service.deleteExperienceImageById(mockRequest);
 
             expect(mockDatabase.experiences.update).toHaveBeenCalledWith("exp-123", {
-                galleryImages: [{ id: "img-789", url: "gallery-url-2", mimeType: "image/jpeg" }],
+                galleryImages: [{ id: "img-789", url: "gallery-url-2", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/gallery/img-789.jpeg" }],
             });
             expect(result.message).toContain("Image img-456 successfully deleted");
         });
@@ -210,7 +210,7 @@ describe("S3Service - Image Management", () => {
                 coverImage: null,
                 meetingLocation: {
                     instructions: "Meet here",
-                    image: { id: "img-456", url: "meeting-url", mimeType: "image/jpeg" },
+                    image: { id: "img-456", url: "meeting-url", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/meeting-location/img-456.jpeg" },
                 },
             };
             mockDatabase.experiences.getById.mockResolvedValue(mockExperienceWithMeetingImage);
@@ -226,7 +226,7 @@ describe("S3Service - Image Management", () => {
         it("should throw error if image not found in experience", async () => {
             const mockExperienceWithoutImage = {
                 ...mockExperienceWithCover,
-                coverImage: { id: "different-img", url: "cover-url", mimeType: "image/jpeg" },
+                coverImage: { id: "different-img", url: "cover-url", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/cover/different-img.jpeg" },
                 galleryImages: [],
             };
             mockDatabase.experiences.getById.mockResolvedValue(mockExperienceWithoutImage);
@@ -275,6 +275,7 @@ describe("S3Service - Image Management", () => {
                 id: `img-${i}`,
                 url: `url-${i}`,
                 mimeType: "image/jpeg",
+                key: `hosts/user-123/experiences/exp-123/images/gallery/img-${i}.jpeg`,
             })),
         };
 
@@ -305,7 +306,7 @@ describe("S3Service - Image Management", () => {
         it("should allow gallery image upload when under limit", async () => {
             const mockExperienceUnderLimit = {
                 ...mockExperienceWithMaxGalleryImages,
-                galleryImages: [{ id: "img-1", url: "url-1", mimeType: "image/jpeg" }],
+                galleryImages: [{ id: "img-1", url: "url-1", mimeType: "image/jpeg", key: "hosts/user-123/experiences/exp-123/images/gallery/img-1.jpeg" }],
             };
             mockDatabase.experiences.getById.mockResolvedValue(mockExperienceUnderLimit);
 
@@ -314,4 +315,5 @@ describe("S3Service - Image Management", () => {
             expect(mockDatabase.experiences.update).toHaveBeenCalled();
         });
     });
+
 });

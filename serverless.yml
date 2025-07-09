@@ -82,7 +82,7 @@ custom:
 
     scripts:
         hooks:
-            after:deploy:deploy: serverless invoke -f runMigrations
+            after:deploy:deploy: serverless invoke -f runMigrations --stage ${self:provider.stage}
 
     resourceNames:
         userPool: ${self:service}-user-pool-${self:provider.stage}
@@ -102,16 +102,16 @@ functions:
     - ${file(functions/stripe.yml)}
     - ${file(functions/host.yml)}
     - ${file(functions/webhooks.yml)}
-    - ${file(functions/triggers.yml)}
     - ${file(functions/experiences.yml)}
     - ${file(functions/time_slots.yml)}
     - ${file(functions/reservations.yml)}
     - ${file(functions/categories.yml)}
+    - ${file(functions/triggers.yml)}
 
 resources:
+    - ${file(resources/storage.yml)}
     - ${file(resources/auth.yml)}
     - ${file(resources/database.yml)}
     - ${file(resources/vpc.yml)}
     - ${file(resources/rds-proxy.yml)}
     - ${file(resources/gateway.yml)}
-    - ${file(resources/storage.yml)}

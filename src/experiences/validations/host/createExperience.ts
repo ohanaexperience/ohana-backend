@@ -35,8 +35,11 @@ import {
     EXPERIENCE_IMAGES_MAX_COUNT,
     EXPERIENCE_GALLERY_IMAGE_MAX_COUNT,
 } from "@/constants/experiences";
-import { LANGUAGES, IANA_TIMEZONES } from "@/constants/shared";
-import { imageUrlSchema } from "@/validations/shared";
+import {
+    LANGUAGES,
+    IANA_TIMEZONES,
+    IMAGE_MIME_TYPES,
+} from "@/constants/shared";
 import ERRORS from "@/errors";
 
 // Schemas
@@ -749,18 +752,15 @@ export const CreateExperienceSchema = z.object({
             z.object({
                 mimeType: z
                     .string({
-                        required_error: "MISSING_MIME_TYPE",
-                        invalid_type_error: "INVALID_MIME_TYPE_TYPE",
+                        required_error: ERRORS.MIME_TYPE.MISSING.CODE,
+                        invalid_type_error: ERRORS.MIME_TYPE.INVALID_TYPE.CODE,
                     })
                     .refine(
                         (mimeType) => {
-                            return (
-                                mimeType.includes("/") &&
-                                mimeType.startsWith("image/")
-                            );
+                            return IMAGE_MIME_TYPES.includes(mimeType);
                         },
                         {
-                            message: "INVALID_MIME_TYPE",
+                            message: ERRORS.MIME_TYPE.INVALID_IMAGE_TYPE.CODE,
                         }
                     ),
                 imageType: z.enum(

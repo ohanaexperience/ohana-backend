@@ -1,4 +1,4 @@
-import { USER_PROFILE_IMAGE_MIME_TYPES } from "@/constants/users";
+import { IMAGE_MIME_TYPES } from "@/constants/shared";
 
 export default {
     AUTHORIZATION: {
@@ -48,7 +48,7 @@ export default {
         },
         INVALID_IMAGE_TYPE: {
             CODE: "INVALID_IMAGE_TYPE",
-            MESSAGE: `Invalid image type. Only ${USER_PROFILE_IMAGE_MIME_TYPES.map(
+            MESSAGE: `Invalid image type. Only ${IMAGE_MIME_TYPES.map(
                 (types) => types
             ).join(", ")} are allowed.`,
         },

@@ -184,6 +184,15 @@ export class AuthController {
                     }),
                 };
 
+            case ERRORS.GOOGLE_ID_TOKEN.EXPIRED.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.GOOGLE_ID_TOKEN.EXPIRED.CODE,
+                        message: ERRORS.GOOGLE_ID_TOKEN.EXPIRED.MESSAGE,
+                    }),
+                };
+
             default:
                 console.error("Error in AuthController", error);
 
