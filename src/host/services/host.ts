@@ -1,7 +1,12 @@
 import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";
 import Postgres from "@/database/postgres";
-import { HostServiceOptions, GetProfileRequest, UpdateProfileRequest } from "../types";
+import {
+    HostServiceOptions,
+    GetProfileRequest,
+    GetPublicProfileRequest,
+    UpdateProfileRequest,
+} from "../types";
 
 export class HostService {
     private readonly db: Postgres;
@@ -13,22 +18,18 @@ export class HostService {
     async getProfile(request: GetProfileRequest) {
         const { sub } = decodeToken(request.authorization);
 
-        const hostVerification = await this.db.hostVerifications.getByUserId(sub);
+        const hostVerification = await this.db.hostVerifications.getByUserId(
+            sub
+        );
 
         if (!hostVerification) {
-            const error = new Error(ERRORS.HOST_VERIFICATION.NOT_VERIFIED.MESSAGE) as any;
-            error.__type = ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE;
-            error.statusCode = 400;
-            throw error;
+            throw new Error(ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE);
         }
 
         const host = await this.db.hosts.getByUserId(sub);
 
         if (!host) {
-            const error = new Error(ERRORS.HOST.NOT_FOUND.MESSAGE) as any;
-            error.__type = ERRORS.HOST.NOT_FOUND.CODE;
-            error.statusCode = 400;
-            throw error;
+            throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
         }
 
         const { id, createdAt, updatedAt, ...publicHostInfo } = host;
@@ -44,28 +45,46 @@ export class HostService {
         return cleanedHostInfo;
     }
 
+    async getPublicProfile(request: GetPublicProfileRequest) {
+        const { hostId } = request;
+
+        const host = await this.db.hosts.getByUserId(hostId);
+
+        console.log("host", host);
+
+        if (!host) {
+            throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
+        }
+
+        const { id, createdAt, updatedAt, ...publicHostInfo } = host;
+
+        const cleanedHostInfo = Object.fromEntries(
+            Object.entries(publicHostInfo).filter(
+                ([_, value]) => value !== null
+            )
+        );
+
+        return cleanedHostInfo;
+    }
+
     async updateProfile(request: UpdateProfileRequest) {
         const { sub } = decodeToken(request.authorization);
         const { bio, languages } = request;
 
         console.log("sub", sub);
 
-        const hostVerification = await this.db.hostVerifications.getByUserId(sub);
+        const hostVerification = await this.db.hostVerifications.getByUserId(
+            sub
+        );
 
         if (!hostVerification) {
-            const error = new Error(ERRORS.HOST_VERIFICATION.NOT_VERIFIED.MESSAGE) as any;
-            error.__type = ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE;
-            error.statusCode = 400;
-            throw error;
+            throw new Error(ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE);
         }
 
         const host = await this.db.hosts.getByUserId(sub);
 
         if (!host) {
-            const error = new Error(ERRORS.HOST.NOT_FOUND.MESSAGE) as any;
-            error.__type = ERRORS.HOST.NOT_FOUND.CODE;
-            error.statusCode = 400;
-            throw error;
+            throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
         }
 
         const updateData: { bio?: string; languages?: string[] } = {};

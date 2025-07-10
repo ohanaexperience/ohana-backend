@@ -22,6 +22,25 @@ hostGetProfile:
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
 
+publicGetHostProfile:
+    handler: src/host/lambda/public/getProfile.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/host/profile/public/{hostId}
+              method: GET
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+
 hostUpdateProfile:
     handler: src/host/lambda/host/updateProfile.handler
     timeout: 29

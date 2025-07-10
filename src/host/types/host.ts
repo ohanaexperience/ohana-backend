@@ -8,6 +8,10 @@ export interface GetProfileRequest {
     authorization: string;
 }
 
+export interface GetPublicProfileRequest {
+    hostId: string;
+}
+
 export interface UpdateProfileRequest {
     authorization: string;
     bio?: string;

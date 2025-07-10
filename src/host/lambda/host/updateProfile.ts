@@ -3,7 +3,10 @@ import cors from "@middy/http-cors";
 import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 
-import { UpdateProfileData, UpdateProfileSchema } from "../../validations";
+import {
+    UpdateProfileData,
+    UpdateProfileSchema,
+} from "../../validations/host/updateProfile";
 import { HostController } from "../../controllers/host";
 
 import { DatabaseFactory } from "@/database";
@@ -27,7 +30,11 @@ export const handler = middy(async (event: UpdateProfileData) => {
         };
     }
 
-    return await hostController.updateProfile({ authorization, bio, languages });
+    return await hostController.updateProfile({
+        authorization,
+        bio,
+        languages,
+    });
 })
     .use(httpHeaderNormalizer())
     .use(httpJsonBodyParser())

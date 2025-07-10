@@ -1,5 +1,11 @@
 import { HostService } from "../services/host";
-import { GetProfileRequest, UpdateProfileRequest, HostServiceOptions } from "../types";
+import {
+    GetProfileRequest,
+    UpdateProfileRequest,
+    HostServiceOptions,
+    GetPublicProfileRequest,
+} from "../types";
+
 import ERRORS from "@/errors";
 
 export class HostController {
@@ -12,6 +18,19 @@ export class HostController {
     async getProfile(request: GetProfileRequest) {
         try {
             const result = await this.hostService.getProfile(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
+    async getPublicProfile(request: GetPublicProfileRequest) {
+        try {
+            const result = await this.hostService.getPublicProfile(request);
 
             return {
                 statusCode: 200,
@@ -36,24 +55,35 @@ export class HostController {
     }
 
     private handleError(error: any) {
-        console.error("Host controller error:", error);
+        switch (error.message) {
+            case ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE,
+                        message: ERRORS.HOST_VERIFICATION.NOT_VERIFIED.MESSAGE,
+                    }),
+                };
 
-        if (error.__type) {
-            return {
-                statusCode: error.statusCode || 500,
-                body: JSON.stringify({
-                    error: error.__type,
-                    message: error.message,
-                }),
-            };
+            case ERRORS.HOST.NOT_FOUND.CODE:
+                return {
+                    statusCode: 404,
+                    body: JSON.stringify({
+                        error: ERRORS.HOST.NOT_FOUND.CODE,
+                        message: ERRORS.HOST.NOT_FOUND.MESSAGE,
+                    }),
+                };
+
+            default:
+                console.log("error", error);
+
+                return {
+                    statusCode: 500,
+                    body: JSON.stringify({
+                        error: "Internal server error",
+                        message: "An unexpected error occurred",
+                    }),
+                };
         }
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: "Internal server error",
-                message: "An unexpected error occurred",
-            }),
-        };
     }
 }
