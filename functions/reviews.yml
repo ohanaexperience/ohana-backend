@@ -1,0 +1,173 @@
+# Public review endpoints (no authentication required)
+getExperienceReviewStats:
+  handler: src/reviews/handlers/reviewHandlers.getExperienceReviewStats
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/experiences/{experienceId}/reviews/stats
+        method: get
+        cors: true
+
+# User review endpoints (requires Cognito authentication)
+createReview:
+  handler: src/reviews/handlers/reviewHandlers.createReview
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews
+        method: post
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+getReview:
+  handler: src/reviews/handlers/reviewHandlers.getReview
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}
+        method: get
+        cors: true
+
+getReviews:
+  handler: src/reviews/handlers/reviewHandlers.getReviews
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews
+        method: get
+        cors: true
+
+updateReview:
+  handler: src/reviews/handlers/reviewHandlers.updateReview
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}
+        method: put
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+deleteReview:
+  handler: src/reviews/handlers/reviewHandlers.deleteReview
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}
+        method: delete
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+flagReview:
+  handler: src/reviews/handlers/reviewHandlers.flagReview
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/flag
+        method: post
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+recordHelpfulVote:
+  handler: src/reviews/handlers/reviewHandlers.recordHelpfulVote
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/vote
+        method: post
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+getUserEligibleReservations:
+  handler: src/reviews/handlers/reviewHandlers.getUserEligibleReservations
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/users/me/eligible-reviews
+        method: get
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}
+
+# Host review endpoints (requires Cognito authentication)
+addHostResponse:
+  handler: src/reviews/handlers/reviewHandlers.addHostResponse
+  timeout: 29
+  vpc:
+    securityGroupIds:
+      - ${self:custom.securityGroupIds.lambda}
+    subnetIds: ${self:custom.subnetIds.private}
+  environment:
+    RDS_PROXY_ENDPOINT: ${self:custom.rdsProxy.endpoint}
+  events:
+    - http:
+        path: /v1/host/reviews/{reviewId}/response
+        method: post
+        cors: true
+        authorizer:
+          name: ${self:custom.cognitoAuthorizer.name}
+          arn: ${self:custom.cognitoAuthorizer.arn}

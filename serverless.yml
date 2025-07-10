@@ -106,6 +106,7 @@ functions:
     - ${file(functions/time_slots.yml)}
     - ${file(functions/reservations.yml)}
     - ${file(functions/categories.yml)}
+    - ${file(functions/reviews.yml)}
     - ${file(functions/triggers.yml)}
 
 resources:

@@ -12,15 +12,18 @@ import { ExperienceServiceOptions } from "../types";
 
 import Postgres from "@/database/postgres";
 import { S3Service } from "@/s3/services/s3";
+import { ReviewsQueryManager } from "@/database/postgres/query_managers/reviews";
 import { decodeToken, generateTimeSlotsFromAvailability } from "@/utils";
 import ERRORS from "@/errors";
 
 export class ExperienceService {
     private readonly db: Postgres;
     private readonly s3Service?: S3Service;
+    private readonly reviewsManager: ReviewsQueryManager;
 
     constructor({ database, s3Service }: ExperienceServiceOptions) {
         this.db = database;
+        this.reviewsManager = new ReviewsQueryManager(database.database);
 
         if (s3Service) {
             this.s3Service = s3Service;
@@ -31,7 +34,8 @@ export class ExperienceService {
     async publicGetExperiences(request: PublicExperienceSearchRequest) {
         const { ...queryParams } = request;
 
-        return await this.db.experiences.searchExperiences(queryParams);
+        const experiences = await this.db.experiences.searchExperiences(queryParams);
+        return await this.addReviewDataToExperiences(experiences);
     }
 
     // Authenticated User
@@ -42,7 +46,8 @@ export class ExperienceService {
 
         console.log("sub", sub);
 
-        return await this.db.experiences.searchExperiences(queryParams);
+        const experiences = await this.db.experiences.searchExperiences(queryParams);
+        return await this.addReviewDataToExperiences(experiences);
     }
 
     // Host
@@ -59,7 +64,8 @@ export class ExperienceService {
             throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
         }
 
-        return await this.db.experiences.getAllByHostId(host.id);
+        const experiences = await this.db.experiences.getAllByHostId(host.id);
+        return await this.addReviewDataToExperiences(experiences);
     }
 
     async hostCreateExperience(request: CreateExperienceRequest) {
@@ -306,6 +312,52 @@ export class ExperienceService {
 
         return {
             message: "Experience deleted successfully.",
+        };
+    }
+
+    // Helper method to add review data to experiences
+    private async addReviewDataToExperiences(experiences: any[]) {
+        const experiencesWithReviews = await Promise.all(
+            experiences.map(async (experience) => {
+                const reviewStats = await this.reviewsManager.getExperienceReviewStats(experience.id);
+                return {
+                    ...experience,
+                    reviewStats: reviewStats || {
+                        totalReviews: 0,
+                        averageRating: 0,
+                        ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+                        categoryAverages: {
+                            valueForMoney: 0,
+                            communication: 0,
+                            accuracy: 0,
+                            location: 0,
+                            checkin: 0,
+                            cleanliness: 0,
+                        },
+                    },
+                };
+            })
+        );
+        return experiencesWithReviews;
+    }
+
+    private async addReviewDataToExperience(experience: any) {
+        const reviewStats = await this.reviewsManager.getExperienceReviewStats(experience.id);
+        return {
+            ...experience,
+            reviewStats: reviewStats || {
+                totalReviews: 0,
+                averageRating: 0,
+                ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+                categoryAverages: {
+                    valueForMoney: 0,
+                    communication: 0,
+                    accuracy: 0,
+                    location: 0,
+                    checkin: 0,
+                    cleanliness: 0,
+                },
+            },
         };
     }
 }

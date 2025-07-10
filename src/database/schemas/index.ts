@@ -4,3 +4,4 @@ export * from "./hosts";
 export * from "./experiences";
 export * from "./categories";
 export * from "./reservations";
+export * from "./reviews";
