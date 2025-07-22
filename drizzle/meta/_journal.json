@@ -5,15 +5,36 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1751379753859,
-      "tag": "0000_dear_preak",
+      "when": 1752864217660,
+      "tag": "0000_new_star_brand",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1751393199003,
-      "tag": "0001_amazing_molten_man",
+      "when": 1752991309486,
+      "tag": "0001_aspiring_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753023268645,
+      "tag": "0002_yellow_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1753034443628,
+      "tag": "0003_clammy_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753035940452,
+      "tag": "0004_goofy_killmonger",
       "breakpoints": true
     }
   ]

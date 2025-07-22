@@ -14,7 +14,7 @@ export class ExperienceFactory {
                 subId: 1,  // Outdoor adventure subcategory
             },
             languages: ["en", "es"],
-            experienceType: "adventure",
+            type: "adventure",
             description: "This is a comprehensive test experience that covers all the amazing aspects of adventure tourism. Perfect for testing the complete flow.",
             startingLocation: {
                 address: "123 Start Street, Test City, NY 10001",
@@ -46,9 +46,8 @@ export class ExperienceFactory {
             },
             includedItems: ["equipment", "snacks", "guide"],
             whatToBring: "Comfortable shoes, water bottle, and weather-appropriate clothing",
-            physicalRequirements: "moderate",
+            physicalRequirements: "Moderate physical fitness required. Ability to walk on uneven terrain for extended periods.",
             ageRecommendations: "adult-only",
-            accessibilityInfo: "Not wheelchair accessible due to uneven terrain",
             durationHours: 4,
             timezone: "America/New_York",
             availability: {
@@ -86,7 +85,7 @@ export class ExperienceFactory {
                 subId: 1,
             },
             languages: ["en"],
-            experienceType: "cultural",
+            type: "cultural",
             description: "A minimal experience for testing basic functionality",
             startingLocation: {
                 address: "Start Point",
@@ -109,7 +108,7 @@ export class ExperienceFactory {
                 autoCancelEnabled: false,
             },
             includedItems: [],
-            physicalRequirements: "easy",
+            physicalRequirements: "No specific physical requirements",
             ageRecommendations: "all-ages",
             durationHours: 1,
             timezone: "America/New_York",
@@ -133,7 +132,7 @@ export class ExperienceFactory {
                 subId: 3,  // Cooking class subcategory
             },
             languages: ["en", "fr"],
-            experienceType: "culinary",
+            type: "culinary",
             description: "Learn to cook authentic dishes in this hands-on culinary experience",
             startingLocation: {
                 address: "Cooking Studio, 789 Chef Street",
@@ -161,9 +160,8 @@ export class ExperienceFactory {
             },
             includedItems: ["ingredients", "equipment", "recipes", "meal"],
             whatToBring: "Apron (optional - we provide one)",
-            physicalRequirements: "easy",
+            physicalRequirements: "Ability to stand for extended periods",
             ageRecommendations: "teen-and-up",
-            accessibilityInfo: "Wheelchair accessible kitchen",
             durationHours: 3,
             timezone: "America/New_York",
             availability: {
@@ -203,7 +201,7 @@ export class ExperienceFactory {
                 subId: 1,
             },
             languages: [],
-            experienceType: "adventure",
+            type: "adventure",
             description: "Too short", // Description too short
             startingLocation: {
                 address: "",
@@ -226,7 +224,7 @@ export class ExperienceFactory {
                 autoCancelEnabled: false,
             },
             includedItems: [],
-            physicalRequirements: "easy",
+            physicalRequirements: "Invalid requirements test",
             ageRecommendations: "all-ages",
             durationHours: 0, // Invalid duration
             timezone: "Invalid/Timezone",

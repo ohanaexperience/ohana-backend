@@ -21,6 +21,49 @@ export class SubCategoriesQueryManager extends BaseQueryManager {
             return results[0] || null;
         });
     }
+
+    public async getBySlug(slug: string) {
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(subCategoriesTable)
+                .where(eq(subCategoriesTable.slug, slug));
+
+            return results[0] || null;
+        });
+    }
+
+    public async getByCategoryId(categoryId: number) {
+        return await this.withDatabase(async (db) => {
+            return await db
+                .select()
+                .from(subCategoriesTable)
+                .where(eq(subCategoriesTable.categoryId, categoryId));
+        });
+    }
+
+    public async update(id: number, data: UpdateSubCategory) {
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .update(subCategoriesTable)
+                .set(data)
+                .where(eq(subCategoriesTable.id, id))
+                .returning();
+
+            return results[0] || null;
+        });
+    }
+
+    public async create(data: InsertSubCategory) {
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .insert(subCategoriesTable)
+                .values(data)
+                .returning();
+
+            return results[0] || null;
+        });
+    }
 }
 
 export type InsertSubCategory = InferInsertModel<typeof subCategoriesTable>;

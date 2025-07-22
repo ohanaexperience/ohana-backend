@@ -1,9 +1,7 @@
-CREATE TYPE "public"."age_range" AS ENUM('18-25', '26-35', '36-45', '46-55', '56-65', '66+');--> statement-breakpoint
+CREATE TYPE "public"."age_recommendation" AS ENUM('18-25', '26-35', '36-45', '46-55', '56-65', '66+');--> statement-breakpoint
 CREATE TYPE "public"."experience_cancellation_policy" AS ENUM('strict', 'moderate', 'flexible');--> statement-breakpoint
 CREATE TYPE "public"."experience_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TYPE "public"."experience_type" AS ENUM('indoor', 'outdoor', 'both');--> statement-breakpoint
-CREATE TYPE "public"."experience_included_items" AS ENUM('food', 'drinks', 'transport', 'equipment');--> statement-breakpoint
-CREATE TYPE "public"."experience_physical_requirements" AS ENUM('low', 'medium', 'high');--> statement-breakpoint
 CREATE TYPE "public"."host_verification_provider" AS ENUM('stripe_identity');--> statement-breakpoint
 CREATE TYPE "public"."host_verification_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
 CREATE TYPE "public"."user_auth_provider" AS ENUM('google', 'apple', 'email');--> statement-breakpoint
@@ -37,6 +35,28 @@ CREATE TABLE "experience_availability" (
 	CONSTRAINT "experience_availability_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE "experience_guest_requirements" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"experience_id" uuid NOT NULL,
+	"icon" jsonb NOT NULL,
+	"text" text NOT NULL,
+	"sort_order" integer DEFAULT 0,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "experience_guest_requirements_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
+CREATE TABLE "experience_included_items" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"experience_id" uuid NOT NULL,
+	"icon" jsonb NOT NULL,
+	"text" text NOT NULL,
+	"sort_order" integer DEFAULT 0,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
+	CONSTRAINT "experience_included_items_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 CREATE TABLE "experience_time_slots" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"experience_id" uuid NOT NULL,
@@ -66,7 +86,8 @@ CREATE TABLE "experiences" (
 	"starting_location" "point" NOT NULL,
 	"ending_location_address" text NOT NULL,
 	"ending_location" "point" NOT NULL,
-	"meeting_location" jsonb,
+	"meeting_location_instructions" text NOT NULL,
+	"meeting_location_image" jsonb,
 	"price_per_person" integer NOT NULL,
 	"group_discounts_enabled" boolean DEFAULT false,
 	"discount_percentage_for_3_plus" integer,
@@ -81,11 +102,8 @@ CREATE TABLE "experiences" (
 	"auto_cancel_hours" integer,
 	"cover_image" jsonb,
 	"gallery_images" jsonb,
-	"included_items" "experience_included_items"[] DEFAULT '{}' NOT NULL,
-	"what_to_bring" text,
-	"physical_requirements" "experience_physical_requirements" NOT NULL,
-	"age_range" "age_range" NOT NULL,
-	"accessibility_info" text,
+	"physical_requirements" text,
+	"age_recommendation" "age_recommendation",
 	"duration_hours" integer NOT NULL,
 	"timezone" text NOT NULL,
 	"status" "experience_status" DEFAULT 'draft',
@@ -126,12 +144,11 @@ CREATE TABLE "users" (
 	"phone_number" text,
 	"first_name" text,
 	"last_name" text,
-	"profile_image_url" text,
+	"profile_image" jsonb,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
-	CONSTRAINT "users_phone_number_unique" UNIQUE("phone_number"),
-	CONSTRAINT "users_profile_image_url_unique" UNIQUE("profile_image_url")
+	CONSTRAINT "users_phone_number_unique" UNIQUE("phone_number")
 );
 --> statement-breakpoint
 CREATE TABLE "reservations" (
@@ -171,6 +188,8 @@ CREATE TABLE "verification_codes" (
 --> statement-breakpoint
 ALTER TABLE "sub_categories" ADD CONSTRAINT "sub_categories_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "experience_availability" ADD CONSTRAINT "experience_availability_experience_id_experiences_id_fk" FOREIGN KEY ("experience_id") REFERENCES "public"."experiences"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "experience_guest_requirements" ADD CONSTRAINT "experience_guest_requirements_experience_id_experiences_id_fk" FOREIGN KEY ("experience_id") REFERENCES "public"."experiences"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "experience_included_items" ADD CONSTRAINT "experience_included_items_experience_id_experiences_id_fk" FOREIGN KEY ("experience_id") REFERENCES "public"."experiences"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "experience_time_slots" ADD CONSTRAINT "experience_time_slots_experience_id_experiences_id_fk" FOREIGN KEY ("experience_id") REFERENCES "public"."experiences"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "experience_time_slots" ADD CONSTRAINT "experience_time_slots_availability_id_experience_availability_id_fk" FOREIGN KEY ("availability_id") REFERENCES "public"."experience_availability"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "experiences" ADD CONSTRAINT "experiences_host_id_hosts_id_fk" FOREIGN KEY ("host_id") REFERENCES "public"."hosts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

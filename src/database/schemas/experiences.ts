@@ -17,12 +17,10 @@ import { categoriesTable, subCategoriesTable } from "./categories";
 import {
     EXPERIENCE_STATUS,
     EXPERIENCE_TYPE,
-    EXPERIENCE_INCLUDED_ITEMS,
-    EXPERIENCE_PHYSICAL_REQUIREMENTS,
     EXPERIENCE_CANCELLATION_POLICY,
     EXPERIENCE_AGE_RECOMMENDATIONS,
 } from "@/constants/experiences";
-import { ExperienceMeetingLocation, ImageObject } from "@/types/experiences";
+import { ImageObject } from "@/types/experiences";
 
 // Enums
 export const experienceStatusEnum = pgEnum(
@@ -33,20 +31,12 @@ export const experienceTypeEnum = pgEnum(
     "experience_type",
     EXPERIENCE_TYPE as [string, ...string[]]
 );
-export const includedItemsEnum = pgEnum(
-    "experience_included_items",
-    EXPERIENCE_INCLUDED_ITEMS as [string, ...string[]]
-);
-export const physicalRequirementsEnum = pgEnum(
-    "experience_physical_requirements",
-    EXPERIENCE_PHYSICAL_REQUIREMENTS as [string, ...string[]]
-);
 export const cancellationPolicyEnum = pgEnum(
     "experience_cancellation_policy",
     EXPERIENCE_CANCELLATION_POLICY as [string, ...string[]]
 );
-export const ageRangeEnum = pgEnum(
-    "age_range",
+export const ageRecommendationEnum = pgEnum(
+    "age_recommendation",
     EXPERIENCE_AGE_RECOMMENDATIONS as [string, ...string[]]
 );
 
@@ -65,15 +55,17 @@ export const experiencesTable = pgTable("experiences", {
         .references(() => subCategoriesTable.id)
         .notNull(),
     languages: text("languages").array().default([]).notNull(),
-    experienceType: experienceTypeEnum("experience_type").notNull(),
+    type: experienceTypeEnum("experience_type").notNull(),
     description: text("description").notNull(),
 
     startingLocationAddress: text("starting_location_address").notNull(),
     startingLocation: point("starting_location", { mode: "tuple" }).notNull(),
     endingLocationAddress: text("ending_location_address").notNull(),
     endingLocation: point("ending_location", { mode: "tuple" }).notNull(),
-    meetingLocation:
-        jsonb("meeting_location").$type<ExperienceMeetingLocation>(),
+    meetingLocationInstructions: text(
+        "meeting_location_instructions"
+    ).notNull(),
+    meetingLocationImage: jsonb("meeting_location_image").$type<ImageObject>(),
 
     pricePerPerson: integer("price_per_person").notNull(),
 
@@ -95,23 +87,45 @@ export const experiencesTable = pgTable("experiences", {
     coverImage: jsonb("cover_image").$type<ImageObject>(),
     galleryImages: jsonb("gallery_images").$type<ImageObject[]>(),
 
-    includedItems: includedItemsEnum("included_items")
-        .array()
-        .default([])
-        .notNull(),
-    whatToBring: text("what_to_bring"),
-    physicalRequirements: physicalRequirementsEnum(
-        "physical_requirements"
-    ).notNull(),
-
-    ageRange: ageRangeEnum("age_range").notNull(),
-    accessibilityInfo: text("accessibility_info"),
+    physicalRequirements: text("physical_requirements"),
+    ageRecommendation: ageRecommendationEnum("age_recommendation"),
 
     durationHours: integer("duration_hours").notNull(),
     timezone: text("timezone").notNull(),
 
     status: experienceStatusEnum("status").default("draft"),
     isPublic: boolean("is_public").default(true),
+    
+    
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export type IncludedItemIcon = {
+    name: string;
+    type: 'material' | 'ionicons' | 'fontawesome5';
+};
+
+export const experienceIncludedItemsTable = pgTable("experience_included_items", {
+    id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
+    experienceId: uuid("experience_id")
+        .references(() => experiencesTable.id, { onDelete: "cascade" })
+        .notNull(),
+    icon: jsonb("icon").$type<IncludedItemIcon>().notNull(),
+    text: text("text").notNull(),
+    sortOrder: integer("sort_order").default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const experienceGuestRequirementsTable = pgTable("experience_guest_requirements", {
+    id: uuid("id").primaryKey().notNull().unique().defaultRandom(),
+    experienceId: uuid("experience_id")
+        .references(() => experiencesTable.id, { onDelete: "cascade" })
+        .notNull(),
+    icon: jsonb("icon").$type<IncludedItemIcon>().notNull(),
+    text: text("text").notNull(),
+    sortOrder: integer("sort_order").default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

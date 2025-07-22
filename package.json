@@ -13,6 +13,7 @@
         "test:watch": "jest --watch --selectProjects unit",
         "test:coverage": "jest --coverage --selectProjects unit",
         "db:generate": "drizzle-kit generate",
+        "db:seed": "serverless invoke -f runSeed",
         "docs:build": "redocly build-docs docs/ohana.json --output docs/dist/index.html",
         "docs:deploy": "serverless client deploy",
         "cleanup:users": "AWS_PROFILE=ohana-deployer node scripts/cleanup-test-users.js",

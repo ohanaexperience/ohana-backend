@@ -247,7 +247,7 @@ describe("Experience Integration Tests (Mocked)", () => {
                 tagline: "Test",
                 category: { mainId: 1, subId: 1 },
                 languages: [],
-                experienceType: "adventure",
+                type: "adventure",
                 description: "Test description",
                 startingLocation: {
                     address: "Start",
@@ -264,7 +264,7 @@ describe("Experience Integration Tests (Mocked)", () => {
                 cancellationPolicy: "flexible",
                 groupSize: { minGuests: 1, maxGuests: 4, autoCancelEnabled: false },
                 includedItems: [],
-                physicalRequirements: "easy",
+                physicalRequirements: "No specific requirements",
                 ageRecommendations: "all-ages",
                 durationHours: 2,
                 timezone: "America/New_York",

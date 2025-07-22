@@ -22,13 +22,7 @@ import {
     EXPERIENCE_CANCELLATION_POLICY,
     EXPERIENCE_GROUP_SIZE_MIN,
     EXPERIENCE_GROUP_SIZE_MAX,
-    EXPERIENCE_INCLUDED_ITEMS,
-    EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH,
-    EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH,
-    EXPERIENCE_PHYSICAL_REQUIREMENTS,
     EXPERIENCE_AGE_RECOMMENDATIONS,
-    EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
-    EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
     EXPERIENCE_IMAGE_TYPES,
     EXPERIENCE_IMAGES_MIN_COUNT,
@@ -114,7 +108,7 @@ export const CreateExperienceSchema = z.object({
             invalid_type_error: ERRORS.LANGUAGES.INVALID_TYPE.CODE,
         }
     ),
-    experienceType: z.enum(EXPERIENCE_TYPE as [string, ...string[]], {
+    type: z.enum(EXPERIENCE_TYPE as [string, ...string[]], {
         errorMap: (issue, ctx) => {
             if (issue.code === z.ZodIssueCode.invalid_type) {
                 if (issue.received === "undefined") {
@@ -483,134 +477,72 @@ export const CreateExperienceSchema = z.object({
 
     includedItems: z
         .array(
-            z.enum(
-                EXPERIENCE_INCLUDED_ITEMS.map((item) => item) as [
-                    string,
-                    ...string[]
-                ],
-                {
-                    errorMap: (issue, ctx) => {
-                        if (issue.code === z.ZodIssueCode.invalid_type) {
-                            if (issue.received === "undefined") {
-                                return {
-                                    message:
-                                        ERRORS.EXPERIENCE.INCLUDED_ITEMS.MISSING
-                                            .CODE,
-                                };
-                            }
-
-                            return {
-                                message:
-                                    ERRORS.EXPERIENCE.INCLUDED_ITEMS
-                                        .INVALID_TYPE.CODE,
-                            };
-                        }
-                        if (issue.code === z.ZodIssueCode.invalid_enum_value) {
-                            return {
-                                message:
-                                    ERRORS.EXPERIENCE.INCLUDED_ITEMS
-                                        .INVALID_VALUE.CODE,
-                            };
-                        }
-                        return { message: ctx.defaultError };
-                    },
-                }
-            )
+            z.object({
+                icon: z.object({
+                    name: z.string({
+                        required_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.ICON_NAME_MISSING.CODE,
+                        invalid_type_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.ICON_NAME_INVALID_TYPE.CODE,
+                    }),
+                    type: z.enum(['material', 'ionicons', 'fontawesome5'], {
+                        required_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.ICON_TYPE_MISSING.CODE,
+                        invalid_type_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.ICON_TYPE_INVALID_TYPE.CODE,
+                    }),
+                }),
+                text: z.string({
+                    required_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.TEXT_MISSING.CODE,
+                    invalid_type_error: ERRORS.EXPERIENCE.INCLUDED_ITEMS.TEXT_INVALID_TYPE.CODE,
+                }),
+            })
         )
         .optional(),
-    whatToBring: z
-        .string({
-            invalid_type_error:
-                ERRORS.EXPERIENCE.WHAT_TO_BRING.INVALID_TYPE.CODE,
-        })
-        // .min(
-        //     EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH,
-        //     ERRORS.EXPERIENCE.WHAT_TO_BRING.MIN_LENGTH.CODE
-        // )
-        .max(
-            EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH,
-            ERRORS.EXPERIENCE.WHAT_TO_BRING.MAX_LENGTH.CODE
+    guestRequirements: z
+        .array(
+            z.object({
+                icon: z.object({
+                    name: z.string({
+                        required_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.ICON_NAME_MISSING.CODE,
+                        invalid_type_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.ICON_NAME_INVALID_TYPE.CODE,
+                    }),
+                    type: z.enum(['material', 'ionicons', 'fontawesome5'], {
+                        required_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.ICON_TYPE_MISSING.CODE,
+                        invalid_type_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.ICON_TYPE_INVALID_TYPE.CODE,
+                    }),
+                }),
+                text: z.string({
+                    required_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.TEXT_MISSING.CODE,
+                    invalid_type_error: ERRORS.EXPERIENCE.GUEST_REQUIREMENTS.TEXT_INVALID_TYPE.CODE,
+                }),
+            })
         )
         .optional(),
-    physicalRequirements: z.enum(
-        EXPERIENCE_PHYSICAL_REQUIREMENTS.map((requirement) => requirement) as [
-            string,
-            ...string[]
-        ],
-        {
-            errorMap: (issue, ctx) => {
-                if (issue.code === z.ZodIssueCode.invalid_type) {
-                    if (issue.received === "undefined") {
+    physicalRequirements: z.string().optional(),
+    ageRecommendations: z
+        .enum(
+            EXPERIENCE_AGE_RECOMMENDATIONS.map((age) => age) as [
+                string,
+                ...string[]
+            ],
+            {
+                errorMap: (issue, ctx) => {
+                    if (issue.code === z.ZodIssueCode.invalid_type) {
                         return {
                             message:
-                                ERRORS.EXPERIENCE.PHYSICAL_REQUIREMENTS.MISSING
+                                ERRORS.EXPERIENCE.AGE_RECOMMENDATIONS.INVALID_TYPE
                                     .CODE,
                         };
                     }
-                    return {
-                        message:
-                            ERRORS.EXPERIENCE.PHYSICAL_REQUIREMENTS.INVALID_TYPE
-                                .CODE,
-                    };
-                }
-                if (issue.code === z.ZodIssueCode.invalid_enum_value) {
-                    return {
-                        message:
-                            ERRORS.EXPERIENCE.PHYSICAL_REQUIREMENTS
-                                .INVALID_VALUE.CODE,
-                    };
-                }
-                return { message: ctx.defaultError };
-            },
-        }
-    ),
-    ageRecommendations: z.enum(
-        EXPERIENCE_AGE_RECOMMENDATIONS.map((age) => age) as [
-            string,
-            ...string[]
-        ],
-        {
-            errorMap: (issue, ctx) => {
-                if (issue.code === z.ZodIssueCode.invalid_type) {
-                    if (issue.received === "undefined") {
+                    if (issue.code === z.ZodIssueCode.invalid_enum_value) {
                         return {
                             message:
-                                ERRORS.EXPERIENCE.AGE_RECOMMENDATIONS.MISSING
+                                ERRORS.EXPERIENCE.AGE_RECOMMENDATIONS.INVALID_VALUE
                                     .CODE,
                         };
                     }
-
-                    return {
-                        message:
-                            ERRORS.EXPERIENCE.AGE_RECOMMENDATIONS.INVALID_TYPE
-                                .CODE,
-                    };
-                }
-                if (issue.code === z.ZodIssueCode.invalid_enum_value) {
-                    return {
-                        message:
-                            ERRORS.EXPERIENCE.AGE_RECOMMENDATIONS.INVALID_VALUE
-                                .CODE,
-                    };
-                }
-                return { message: ctx.defaultError };
-            },
-        }
-    ),
-    accessibilityInfo: z
-        .string({
-            required_error: ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MISSING.CODE,
-            invalid_type_error:
-                ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.INVALID_TYPE.CODE,
-        })
-        // .min(
-        //     EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
-        //     ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MIN_LENGTH.CODE
-        // )
-        .max(
-            EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
-            ERRORS.EXPERIENCE.ACCESSIBILITY_INFO.MAX_LENGTH.CODE
-        ),
+                    return { message: ctx.defaultError };
+                },
+            }
+        )
+        .optional(),
 
     durationHours: z
         .number({

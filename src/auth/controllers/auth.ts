@@ -159,7 +159,7 @@ export class AuthController {
 
             case ERRORS.USER.ALREADY_EXISTS.CODE:
                 return {
-                    statusCode: 400,
+                    statusCode: 409,
                     body: JSON.stringify({
                         error: ERRORS.USER.ALREADY_EXISTS.CODE,
                         message: ERRORS.USER.ALREADY_EXISTS.MESSAGE,

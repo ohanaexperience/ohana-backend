@@ -72,13 +72,46 @@ export class UserService {
             throw new Error(ERRORS.USER.NOT_FOUND.CODE);
         }
 
-        const updatedUser = await this.db.users.update(sub, {
-            ...data,
-            updatedAt: new Date(),
-        });
+        // Separate user fields from host fields
+        const { bio, languages, ...userFields } = data;
 
-        console.log("updatedUser", updatedUser);
+        // Update user fields if any
+        if (Object.keys(userFields).length > 0) {
+            await this.db.users.update(sub, {
+                ...userFields,
+                updatedAt: new Date(),
+            });
+        }
 
-        return updatedUser;
+        // Update host fields if any and user is a verified host
+        if (bio !== undefined || languages !== undefined) {
+            const hostVerification =
+                await this.db.hostVerifications.getByUserId(sub);
+
+            if (!hostVerification || hostVerification.status !== "approved") {
+                throw new Error(ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE);
+            }
+
+            const host = await this.db.hosts.getByUserId(sub);
+
+            if (!host) {
+                throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
+            }
+
+            const hostUpdateData: {
+                bio?: string;
+                languages?: string[];
+                updatedAt: Date;
+            } = {
+                updatedAt: new Date(),
+            };
+            if (bio !== undefined) hostUpdateData.bio = bio;
+            if (languages !== undefined) hostUpdateData.languages = languages;
+
+            await this.db.hosts.update(sub, hostUpdateData);
+        }
+
+        // Return the updated profile (including host data if applicable)
+        return this.getProfile({ authorization });
     }
 }

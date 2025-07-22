@@ -218,7 +218,7 @@ describe("S3Service - Image Management", () => {
             const result = await s3Service.deleteExperienceImageById(mockRequest);
 
             expect(mockDatabase.experiences.update).toHaveBeenCalledWith("exp-123", {
-                meetingLocation: { instructions: "Meet here" },
+                meetingLocation: { instructions: "Meet here", image: null },
             });
             expect(result.message).toContain("Image img-456 successfully deleted");
         });

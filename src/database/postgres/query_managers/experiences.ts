@@ -81,6 +81,7 @@ export class ExperiencesQueryManager extends BaseQueryManager {
         );
     }
 
+
     public async searchExperiences(filters: Record<string, any>) {
         const conditions: SQL[] = [];
 
@@ -148,13 +149,12 @@ export class ExperiencesQueryManager extends BaseQueryManager {
             "endingLocationAddress",
             experiencesTable.endingLocationAddress
         );
-        addTextFilter("whatToBring", experiencesTable.whatToBring);
 
         // Exact matches
         addExactFilter("hostId", experiencesTable.hostId);
         addExactFilter("categoryId", experiencesTable.categoryId);
         addExactFilter("subCategoryId", experiencesTable.subCategoryId);
-        addExactFilter("experienceType", experiencesTable.experienceType);
+        addExactFilter("type", experiencesTable.type);
         addExactFilter(
             "cancellationPolicy",
             experiencesTable.cancellationPolicy
@@ -163,7 +163,7 @@ export class ExperiencesQueryManager extends BaseQueryManager {
             "physicalRequirements",
             experiencesTable.physicalRequirements
         );
-        addExactFilter("ageRange", experiencesTable.ageRange);
+        addExactFilter("ageRecommendation", experiencesTable.ageRecommendation);
         addExactFilter("status", experiencesTable.status);
         addExactFilter("isPublic", experiencesTable.isPublic);
 

@@ -23,9 +23,7 @@ import { requireBody, zodValidator } from "@/middleware";
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-const {
-    ASSETS_BUCKET_NAME,
-} = process.env;
+const { ASSETS_BUCKET_NAME } = process.env;
 
 const dbConfig = createDatabaseConfig();
 const db = DatabaseFactory.create({ postgres: dbConfig });

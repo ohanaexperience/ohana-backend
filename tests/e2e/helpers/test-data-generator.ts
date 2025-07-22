@@ -31,7 +31,7 @@ export class TestDataGenerator {
                 subId: 1,  // Outdoor Adventure subcategory
             },
             languages: ['en'],
-            experienceType: 'adventure' as const,
+            type: 'adventure' as const,
             description: `This is a comprehensive test experience created for e2e testing. It includes all required fields and should be fully functional. Created at ${new Date().toISOString()}.`,
             startingLocation: {
                 address: '123 Adventure Start Street, Test City, TC 12345',
@@ -59,7 +59,7 @@ export class TestDataGenerator {
                 'Light refreshments',
                 'Photo opportunities',
             ],
-            physicalRequirements: 'moderate' as const,
+            physicalRequirements: 'Moderate physical fitness required',
             ageRecommendations: 'adults-only' as const,
             durationHours: 3,
             timezone: 'America/New_York',
@@ -97,7 +97,7 @@ export class TestDataGenerator {
                 subId: 1,
             },
             languages: ['en'],
-            experienceType: 'cultural' as const,
+            type: 'cultural' as const,
             description: 'Minimal test experience description.',
             startingLocation: {
                 address: '123 Start St, Test City',
@@ -120,7 +120,7 @@ export class TestDataGenerator {
                 autoCancelEnabled: false,
             },
             includedItems: ['guide'],
-            physicalRequirements: 'easy' as const,
+            physicalRequirements: 'No specific physical requirements',
             ageRecommendations: 'all-ages' as const,
             durationHours: 2,
             timezone: 'America/New_York',
@@ -141,7 +141,7 @@ export class TestDataGenerator {
                 subId: 999,
             },
             languages: [],
-            experienceType: 'invalid' as any,
+            type: 'invalid' as any,
             // Missing required fields
         };
     }

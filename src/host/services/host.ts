@@ -76,4 +76,48 @@ export class HostService {
 
         return { message: "Host profile updated successfully." };
     }
+
+    async getHosts(request: { bio?: string; languages?: string[]; limit?: number; offset?: number }) {
+        const { bio, languages, limit = 20, offset = 0 } = request;
+
+        const filters: Record<string, any> = {
+            limit,
+            offset,
+        };
+
+        if (bio) {
+            filters.bio = bio;
+        }
+
+        if (languages && languages.length > 0) {
+            filters.languages = languages;
+        }
+
+        const hosts = await this.db.hosts.searchHosts(filters);
+
+        // Format the response to group user and host data
+        const formattedHosts = hosts.map(host => ({
+            userId: host.id,
+            firstName: host.firstName,
+            lastName: host.lastName,
+            email: host.email,
+            profileImage: host.profileImage,
+            bio: host.bio,
+            languages: host.languages,
+            socials: host.socials,
+            isActive: host.isActive,
+            verificationStatus: host.verificationStatus,
+            createdAt: host.createdAt,
+            updatedAt: host.updatedAt,
+        }));
+
+        return {
+            hosts: formattedHosts,
+            pagination: {
+                limit,
+                offset,
+                total: formattedHosts.length,
+            },
+        };
+    }
 }

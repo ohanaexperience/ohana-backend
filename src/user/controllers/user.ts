@@ -49,6 +49,24 @@ export class UserController {
                     }),
                 };
 
+            case ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.HOST_VERIFICATION.NOT_VERIFIED.CODE,
+                        message: ERRORS.HOST_VERIFICATION.NOT_VERIFIED.MESSAGE,
+                    }),
+                };
+
+            case ERRORS.HOST.NOT_FOUND.CODE:
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        error: ERRORS.HOST.NOT_FOUND.CODE,
+                        message: ERRORS.HOST.NOT_FOUND.MESSAGE,
+                    }),
+                };
+
             default:
                 console.error("Error in UserController", error);
 

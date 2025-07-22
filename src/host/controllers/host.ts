@@ -35,6 +35,19 @@ export class HostController {
         }
     }
 
+    async getHosts(request: { bio?: string; languages?: string[]; limit?: number; offset?: number }) {
+        try {
+            const result = await this.hostService.getHosts(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
     private handleError(error: any) {
         console.error("Host controller error:", error);
 

@@ -24,9 +24,50 @@ publicGetExperiences:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
+
         # CACHE_TTL: 300
         # MAX_RESULTS_PER_REQUEST: 50
         # ENABLE_ANALYTICS: true
+
+publicGetCollections:
+    handler: src/experiences/lambda/public/getCollections.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/experiences/collections
+              method: GET
+              cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+
+publicGetCollectionExperiences:
+    handler: src/experiences/lambda/public/getCollectionExperiences.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/experiences/collections/{slug}
+              method: GET
+              cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
 
 getExperiences:
     handler: src/experiences/lambda/user/getExperiences.handler

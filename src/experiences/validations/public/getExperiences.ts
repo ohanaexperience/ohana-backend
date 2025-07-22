@@ -5,7 +5,6 @@ import { APIGatewayEvent } from "aws-lambda";
 import {
     EXPERIENCE_TYPE,
     EXPERIENCE_CANCELLATION_POLICY,
-    EXPERIENCE_PHYSICAL_REQUIREMENTS,
     EXPERIENCE_AGE_RECOMMENDATIONS,
     EXPERIENCE_STATUS,
 } from "@/constants/experiences";
@@ -24,14 +23,12 @@ export const PublicExperienceSearchBaseSchema = z.object({
     hostId: z.string().uuid().optional(),
     categoryId: z.coerce.number().int().positive().optional(),
     subCategoryId: z.coerce.number().int().positive().optional(),
-    experienceType: z.enum(EXPERIENCE_TYPE as [string, ...string[]]).optional(),
+    type: z.enum(EXPERIENCE_TYPE as [string, ...string[]]).optional(),
     cancellationPolicy: z
         .enum(EXPERIENCE_CANCELLATION_POLICY as [string, ...string[]])
         .optional(),
-    physicalRequirements: z
-        .enum(EXPERIENCE_PHYSICAL_REQUIREMENTS as [string, ...string[]])
-        .optional(),
-    ageRange: z
+    physicalRequirements: z.string().optional(),
+    ageRecommendation: z
         .enum(EXPERIENCE_AGE_RECOMMENDATIONS as [string, ...string[]])
         .optional(),
     status: z.enum(EXPERIENCE_STATUS as [string, ...string[]]).optional(),

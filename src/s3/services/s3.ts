@@ -13,6 +13,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { GetProfileImageUploadUrlRequest } from "../validations";
 import { S3ServiceOptions, ImageObject } from "../types";
+import { ImageObject as ExperienceImageObject } from "@/types/experiences";
 
 import Postgres from "@/database/postgres";
 import { decodeToken } from "@/utils";
@@ -531,10 +532,11 @@ export class S3Service {
                 break;
             case S3Service.IMAGE_TYPES.MEETING_LOCATION:
                 if (experience.meetingLocation) {
-                    const { image, ...meetingLocationWithoutImage } =
-                        experience.meetingLocation;
                     await this.db.experiences.update(experienceId, {
-                        meetingLocation: meetingLocationWithoutImage,
+                        meetingLocation: {
+                            ...experience.meetingLocation,
+                            image: null,
+                        },
                     });
                 }
                 break;
@@ -741,9 +743,11 @@ export class S3Service {
     }
 
     private parseS3Event(request: S3Event): {
-        type: "profile" | "experience";
+        type: "profile" | "experience" | "category" | "subcategory";
         userId: string;
         experienceId: string;
+        categoryId?: string;
+        subCategoryId?: string;
         imageType: string;
         imageUrl: string;
         key: string;
@@ -770,6 +774,10 @@ export class S3Service {
                 return this.parseProfileImageEvent(keyParts, baseParams);
             case "experience":
                 return this.parseExperienceImageEvent(keyParts, baseParams);
+            case "category":
+                return this.parseCategoryImageEvent(keyParts, baseParams);
+            case "subcategory":
+                return this.parseSubCategoryImageEvent(keyParts, baseParams);
             default:
                 throw new Error(`Unsupported S3 key pattern: ${key}`);
         }
@@ -782,6 +790,14 @@ export class S3Service {
 
         if (this.isExperienceImagePattern(keyParts)) {
             return "experience";
+        }
+
+        if (this.isCategoryImagePattern(keyParts)) {
+            return "category";
+        }
+
+        if (this.isSubCategoryImagePattern(keyParts)) {
+            return "subcategory";
         }
 
         return null;
@@ -802,6 +818,22 @@ export class S3Service {
             keyParts[0] === "hosts" &&
             keyParts[2] === "experiences" &&
             keyParts[4] === "images"
+        );
+    }
+
+    private isCategoryImagePattern(keyParts: string[]): boolean {
+        return (
+            keyParts.length >= 4 &&
+            keyParts[0] === "categories" &&
+            keyParts[2] === "images"
+        );
+    }
+
+    private isSubCategoryImagePattern(keyParts: string[]): boolean {
+        return (
+            keyParts.length >= 4 &&
+            keyParts[0] === "subcategories" &&
+            keyParts[2] === "images"
         );
     }
 
@@ -830,6 +862,32 @@ export class S3Service {
             userId,
             experienceId,
             imageType,
+        };
+    }
+
+    private parseCategoryImageEvent(keyParts: string[], baseParams: any) {
+        const categoryId = keyParts[1];
+
+        return {
+            ...baseParams,
+            type: "category",
+            categoryId,
+            userId: "", // Not needed for categories
+            experienceId: "", // Not needed for categories
+            imageType: "category",
+        };
+    }
+
+    private parseSubCategoryImageEvent(keyParts: string[], baseParams: any) {
+        const subCategoryId = keyParts[1];
+
+        return {
+            ...baseParams,
+            type: "subcategory",
+            subCategoryId,
+            userId: "", // Not needed for subcategories
+            experienceId: "", // Not needed for subcategories
+            imageType: "subcategory",
         };
     }
 
@@ -927,5 +985,121 @@ export class S3Service {
             default:
                 throw new Error(`Unknown image type: ${imageType}`);
         }
+    }
+
+    // Generic helper methods for admin functionality
+    async generatePresignedUploadUrl(request: {
+        key: string;
+        mimeType: string;
+    }) {
+        const { key, mimeType } = request;
+
+        this.logInfo(`Generating presigned URL for upload:`);
+        this.logInfo(`- Bucket: ${this.config.bucketName}`);
+        this.logInfo(`- Key: ${key}`);
+        this.logInfo(`- Content-Type: ${mimeType}`);
+
+        const command = new PutObjectCommand({
+            Bucket: this.config.bucketName,
+            Key: key,
+            ContentType: mimeType,
+        });
+
+        const preSignedUrl = await getSignedUrl(this.s3Client, command, {
+            expiresIn: S3Service.PRESIGNED_URL_EXPIRY,
+        });
+
+        this.logInfo(
+            `Generated presigned URL: ${preSignedUrl.split("?")[0]}?[REDACTED]`
+        );
+
+        return preSignedUrl;
+    }
+
+    getPublicUrl(key: string): string {
+        return this.config.assetsDomain
+            ? `https://${this.config.assetsDomain}/${key}`
+            : `https://${this.config.bucketName}.s3.amazonaws.com/${key}`;
+    }
+
+    async deleteObject(key: string) {
+        try {
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: this.config.bucketName,
+                Key: key,
+            });
+
+            await this.s3Client.send(deleteCommand);
+            this.logInfo(`Deleted object: ${key}`);
+        } catch (error) {
+            this.logError(`Failed to delete object ${key}:`, error);
+            throw error;
+        }
+    }
+
+    async handleCategoryImageUpload(request: S3Event) {
+        const parsedEvent = this.parseS3Event(request);
+
+        if (parsedEvent.type !== "category") {
+            throw new Error("Invalid event type for category image upload");
+        }
+
+        const { categoryId, imageUrl, key } = parsedEvent;
+        const { imageId, mimeType } = this.extractImageMetadata(key);
+
+        if (!categoryId) {
+            throw new Error("Category ID not found in S3 key");
+        }
+
+        const category = await this.db.categories.getById(parseInt(categoryId, 10));
+        if (!category) {
+            throw new Error("Category not found");
+        }
+
+        const imageObject: ExperienceImageObject = {
+            id: imageId,
+            url: imageUrl,
+            key,
+            mimeType,
+        };
+
+        await this.db.categories.update(parseInt(categoryId, 10), {
+            image: imageObject,
+        });
+
+        this.logInfo(`Successfully updated category ${categoryId} image`);
+    }
+
+    async handleSubCategoryImageUpload(request: S3Event) {
+        const parsedEvent = this.parseS3Event(request);
+
+        if (parsedEvent.type !== "subcategory") {
+            throw new Error("Invalid event type for subcategory image upload");
+        }
+
+        const { subCategoryId, imageUrl, key } = parsedEvent;
+        const { imageId, mimeType } = this.extractImageMetadata(key);
+
+        if (!subCategoryId) {
+            throw new Error("Subcategory ID not found in S3 key");
+        }
+
+        const subCategory = await this.db.subCategories.getById(parseInt(subCategoryId, 10));
+        if (!subCategory) {
+            throw new Error("Subcategory not found");
+        }
+
+        const imageObject: ExperienceImageObject = {
+            id: imageId,
+            url: imageUrl,
+            key,
+            mimeType,
+        };
+
+        await this.db.subCategories.update(parseInt(subCategoryId, 10), {
+            image: imageObject,
+        });
+
+        this.logInfo(`Successfully updated subcategory ${subCategoryId} image`);
     }
 }

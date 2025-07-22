@@ -1,5 +1,5 @@
 {
-  "id": "82127fd1-df2f-4b3c-889d-8651ca81c6f3",
+  "id": "3dd866fb-1a4b-4573-ba1b-51cf3cba9981",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -192,6 +192,168 @@
       "uniqueConstraints": {
         "experience_availability_id_unique": {
           "name": "experience_availability_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.experience_guest_requirements": {
+      "name": "experience_guest_requirements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "experience_id": {
+          "name": "experience_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "experience_guest_requirements_experience_id_experiences_id_fk": {
+          "name": "experience_guest_requirements_experience_id_experiences_id_fk",
+          "tableFrom": "experience_guest_requirements",
+          "tableTo": "experiences",
+          "columnsFrom": [
+            "experience_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "experience_guest_requirements_id_unique": {
+          "name": "experience_guest_requirements_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.experience_included_items": {
+      "name": "experience_included_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "experience_id": {
+          "name": "experience_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "experience_included_items_experience_id_experiences_id_fk": {
+          "name": "experience_included_items_experience_id_experiences_id_fk",
+          "tableFrom": "experience_included_items",
+          "tableTo": "experiences",
+          "columnsFrom": [
+            "experience_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "experience_included_items_id_unique": {
+          "name": "experience_included_items_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "id"
@@ -458,8 +620,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "meeting_location": {
-          "name": "meeting_location",
+        "meeting_location_instructions": {
+          "name": "meeting_location_instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meeting_location_image": {
+          "name": "meeting_location_image",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
@@ -552,37 +720,16 @@
           "primaryKey": false,
           "notNull": false
         },
-        "included_items": {
-          "name": "included_items",
-          "type": "experience_included_items[]",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'"
-        },
-        "what_to_bring": {
-          "name": "what_to_bring",
+        "physical_requirements": {
+          "name": "physical_requirements",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "physical_requirements": {
-          "name": "physical_requirements",
-          "type": "experience_physical_requirements",
+        "age_recommendation": {
+          "name": "age_recommendation",
+          "type": "age_recommendation",
           "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "age_range": {
-          "name": "age_range",
-          "type": "age_range",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "accessibility_info": {
-          "name": "accessibility_info",
-          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -903,9 +1050,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "profile_image_url": {
-          "name": "profile_image_url",
-          "type": "text",
+        "profile_image": {
+          "name": "profile_image",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -940,13 +1087,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "phone_number"
-          ]
-        },
-        "users_profile_image_url_unique": {
-          "name": "users_profile_image_url_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "profile_image_url"
           ]
         }
       },
@@ -1208,8 +1348,8 @@
     }
   },
   "enums": {
-    "public.age_range": {
-      "name": "age_range",
+    "public.age_recommendation": {
+      "name": "age_recommendation",
       "schema": "public",
       "values": [
         "18-25",
@@ -1245,25 +1385,6 @@
         "indoor",
         "outdoor",
         "both"
-      ]
-    },
-    "public.experience_included_items": {
-      "name": "experience_included_items",
-      "schema": "public",
-      "values": [
-        "food",
-        "drinks",
-        "transport",
-        "equipment"
-      ]
-    },
-    "public.experience_physical_requirements": {
-      "name": "experience_physical_requirements",
-      "schema": "public",
-      "values": [
-        "low",
-        "medium",
-        "high"
       ]
     },
     "public.host_verification_provider": {

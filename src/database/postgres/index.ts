@@ -9,6 +9,9 @@ import {
     HostVerificationsQueryManager,
     HostsQueryManager,
     ExperiencesQueryManager,
+    ExperienceIncludedItemsQueryManager,
+    ExperienceGuestRequirementsQueryManager,
+    ExperienceCollectionsQueryManager,
     CategoriesQueryManager,
     SubCategoriesQueryManager,
     TimeSlotsQueryManager,
@@ -26,6 +29,9 @@ export default class Postgres {
     private _hostVerifications?: HostVerificationsQueryManager;
     private _hosts?: HostsQueryManager;
     private _experiences?: ExperiencesQueryManager;
+    private _experienceIncludedItems?: ExperienceIncludedItemsQueryManager;
+    private _experienceGuestRequirements?: ExperienceGuestRequirementsQueryManager;
+    private _experienceCollections?: ExperienceCollectionsQueryManager;
     private _categories?: CategoriesQueryManager;
     private _subCategories?: SubCategoriesQueryManager;
     private _timeSlots?: TimeSlotsQueryManager;
@@ -133,6 +139,36 @@ export default class Postgres {
             );
         }
         return this._experiences;
+    }
+
+    get experienceIncludedItems(): ExperienceIncludedItemsQueryManager {
+        if (!this._experienceIncludedItems) {
+            this._experienceIncludedItems = new ExperienceIncludedItemsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._experienceIncludedItems;
+    }
+
+    get experienceGuestRequirements(): ExperienceGuestRequirementsQueryManager {
+        if (!this._experienceGuestRequirements) {
+            this._experienceGuestRequirements = new ExperienceGuestRequirementsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._experienceGuestRequirements;
+    }
+
+    get experienceCollections(): ExperienceCollectionsQueryManager {
+        if (!this._experienceCollections) {
+            this._experienceCollections = new ExperienceCollectionsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._experienceCollections;
     }
 
     get categories(): CategoriesQueryManager {

@@ -26,6 +26,22 @@ runSeed:
         subnetIds:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+        S3_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
+clearDatabase:
+    handler: src/database/lambda/clearDatabase.handler
+    timeout: 300
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     package:
         patterns:
             - "drizzle/**"
@@ -35,24 +51,6 @@ runSeed:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
-# clearDatabase:
-#     handler: src/database/lambda/clearDatabase.handler
-#     timeout: 300
-#     vpc:
-#         securityGroupIds:
-#             - !Ref ProxySecurityGroup
-#         subnetIds:
-#             - !Ref PrivateSubnetA
-#             - !Ref PrivateSubnetB
-#     package:
-#         patterns:
-#             - "drizzle/**"
-#             - "!node_modules/**"
-#     environment:
-#         RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
-#         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
-#         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-#         USE_RDS_PROXY: true
 
 testDatabase:
     handler: src/database/lambda/testDatabase.handler
@@ -67,6 +65,53 @@ testDatabase:
         patterns:
             - "drizzle/**"
             - "!node_modules/**"
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+
+# seedExperiences:
+#     handler: src/database/lambda/seedExperiences.handler
+#     timeout: 300
+#     vpc:
+#         securityGroupIds:
+#             - !Ref ProxySecurityGroup
+#         subnetIds:
+#             - !Ref PrivateSubnetA
+#             - !Ref PrivateSubnetB
+#     environment:
+#         RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+#         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+#         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+#         USE_RDS_PROXY: true
+#         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+#         ASSETS_DOMAIN: !GetAtt AssetsCloudFrontDistribution.DomainName
+
+seedCollections:
+    handler: src/database/lambda/seedCollections.handler
+    timeout: 300
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        USE_RDS_PROXY: true
+
+seedCollectionItems:
+    handler: src/database/lambda/seedCollectionItems.handler
+    timeout: 300
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
     environment:
         RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}

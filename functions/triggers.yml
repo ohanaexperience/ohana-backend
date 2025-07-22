@@ -41,3 +41,30 @@ handleExperienceImageUpload:
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+# handleCategoryImageUpload:
+#     handler: src/triggers/lambda/handleCategoryImageUpload.handler
+#     events:
+#         - s3:
+#               bucket: ${self:custom.resourceNames.assetsBucket}
+#               existing: true
+#               event: s3:ObjectCreated:*
+#               rules:
+#                   - prefix: categories/
+#         - s3:
+#               bucket: ${self:custom.resourceNames.assetsBucket}
+#               existing: true
+#               event: s3:ObjectCreated:*
+#               rules:
+#                   - prefix: subcategories/
+#     vpc:
+#         securityGroupIds:
+#             - !Ref ProxySecurityGroup
+#         subnetIds:
+#             - !Ref PrivateSubnetA
+#             - !Ref PrivateSubnetB
+#     environment:
+#         RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+#         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+#         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+#         USE_RDS_PROXY: true
+#         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}

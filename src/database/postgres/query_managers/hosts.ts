@@ -1,7 +1,7 @@
-import { eq, InferInsertModel } from "drizzle-orm";
+import { eq, InferInsertModel, SQL, ilike, and, sql } from "drizzle-orm";
 
 import { BaseQueryManager } from "./base";
-import { hostsTable } from "@/database/schemas";
+import { hostsTable, usersTable, hostVerificationsTable } from "@/database/schemas";
 
 export class HostsQueryManager extends BaseQueryManager {
 
@@ -43,6 +43,64 @@ export class HostsQueryManager extends BaseQueryManager {
             db.delete(hostsTable)
                 .where(eq(hostsTable.id, userId))
         );
+    }
+
+    public async searchHosts(filters: Record<string, any>) {
+        return await this.withDatabase(async (db) => {
+            const conditions: SQL[] = [];
+
+            // Only show active hosts
+            conditions.push(eq(hostsTable.isActive, true));
+
+            // Text search filters
+            if (filters.bio) {
+                conditions.push(ilike(hostsTable.bio, `%${filters.bio}%`));
+            }
+
+            // Language filter - matches if any language in the filter array is in the host's languages
+            if (filters.languages && Array.isArray(filters.languages) && filters.languages.length > 0) {
+                const languageConditions = filters.languages.map((lang: string) => 
+                    sql`${lang} = ANY(${hostsTable.languages})`
+                );
+                conditions.push(sql`(${sql.join(languageConditions, sql` OR `)})`);
+            }
+
+            // Join with users and hostVerifications to get complete host info
+            const query = db
+                .select({
+                    id: hostsTable.id,
+                    bio: hostsTable.bio,
+                    languages: hostsTable.languages,
+                    socials: hostsTable.socials,
+                    isActive: hostsTable.isActive,
+                    createdAt: hostsTable.createdAt,
+                    updatedAt: hostsTable.updatedAt,
+                    // User info
+                    email: usersTable.email,
+                    firstName: usersTable.firstName,
+                    lastName: usersTable.lastName,
+                    profileImage: usersTable.profileImage,
+                    // Verification status
+                    verificationStatus: hostVerificationsTable.status,
+                })
+                .from(hostsTable)
+                .innerJoin(usersTable, eq(hostsTable.id, usersTable.id))
+                .innerJoin(hostVerificationsTable, eq(hostsTable.id, hostVerificationsTable.userId))
+                .where(and(
+                    ...conditions,
+                    eq(hostVerificationsTable.status, 'approved') // Only show approved hosts
+                ));
+
+            // Apply limit and offset if provided
+            if (filters.limit) {
+                query.limit(filters.limit);
+            }
+            if (filters.offset) {
+                query.offset(filters.offset);
+            }
+
+            return await query;
+        });
     }
 }
 

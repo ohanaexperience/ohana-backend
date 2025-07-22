@@ -27,11 +27,32 @@ export class ExperienceService {
         }
     }
 
+    // Helper method to enrich experiences with related data
+    private async enrichExperiencesWithRelatedData(experiences: any[]) {
+        const enrichedExperiences = await Promise.all(
+            experiences.map(async (experience) => {
+                const [includedItems, guestRequirements] = await Promise.all([
+                    this.db.experienceIncludedItems.getByExperienceId(experience.id),
+                    this.db.experienceGuestRequirements.getByExperienceId(experience.id),
+                ]);
+
+                return {
+                    ...experience,
+                    includedItems,
+                    guestRequirements,
+                };
+            })
+        );
+
+        return enrichedExperiences;
+    }
+
     // Public User
     async publicGetExperiences(request: PublicExperienceSearchRequest) {
         const { ...queryParams } = request;
 
-        return await this.db.experiences.searchExperiences(queryParams);
+        const experiences = await this.db.experiences.searchExperiences(queryParams);
+        return await this.enrichExperiencesWithRelatedData(experiences);
     }
 
     // Authenticated User
@@ -42,7 +63,8 @@ export class ExperienceService {
 
         console.log("sub", sub);
 
-        return await this.db.experiences.searchExperiences(queryParams);
+        const experiences = await this.db.experiences.searchExperiences(queryParams);
+        return await this.enrichExperiencesWithRelatedData(experiences);
     }
 
     // Host
@@ -59,7 +81,8 @@ export class ExperienceService {
             throw new Error(ERRORS.HOST.NOT_FOUND.CODE);
         }
 
-        return await this.db.experiences.getAllByHostId(host.id);
+        const experiences = await this.db.experiences.getAllByHostId(host.id);
+        return await this.enrichExperiencesWithRelatedData(experiences);
     }
 
     async hostCreateExperience(request: CreateExperienceRequest) {
@@ -69,7 +92,7 @@ export class ExperienceService {
             tagline,
             category,
             languages,
-            experienceType,
+            type,
             description,
             startingLocation,
             endingLocation,
@@ -80,10 +103,9 @@ export class ExperienceService {
             cancellationPolicy,
             groupSize,
             includedItems,
-            whatToBring,
+            guestRequirements,
             physicalRequirements,
             ageRecommendations,
-            accessibilityInfo,
             durationHours,
             timezone,
             availability,
@@ -131,7 +153,7 @@ export class ExperienceService {
             categoryId: category.mainId,
             subCategoryId: category.subId,
             languages,
-            experienceType,
+            type,
             description,
             startingLocationAddress: startingLocation.address,
             startingLocation: [
@@ -140,9 +162,8 @@ export class ExperienceService {
             ],
             endingLocationAddress: endingLocation.address,
             endingLocation: [endingLocation.longitude, endingLocation.latitude],
-            meetingLocation: {
-                instructions: meetingLocation.instructions,
-            },
+            meetingLocationInstructions: meetingLocation.instructions,
+            meetingLocationImage: null,
             pricePerPerson,
             ...(groupDiscounts && {
                 groupDiscountsEnabled: true,
@@ -160,16 +181,37 @@ export class ExperienceService {
             minGuests: groupSize.minGuests,
             maxGuests: groupSize.maxGuests,
             autoCancelEnabled: groupSize.autoCancelEnabled,
-            includedItems,
-            ...(whatToBring && { whatToBring }),
             physicalRequirements,
-            ageRange: ageRecommendations,
-            accessibilityInfo,
+            ...(ageRecommendations && { ageRecommendation: ageRecommendations }),
             durationHours,
             timezone,
             status: "published",
             isPublic: true,
         });
+
+        // Create included items if provided
+        if (includedItems && includedItems.length > 0) {
+            for (let i = 0; i < includedItems.length; i++) {
+                await this.db.experienceIncludedItems.create({
+                    experienceId: createdExperience.id,
+                    icon: includedItems[i].icon,
+                    text: includedItems[i].text,
+                    sortOrder: i,
+                });
+            }
+        }
+
+        // Create guest requirements if provided
+        if (guestRequirements && guestRequirements.length > 0) {
+            for (let i = 0; i < guestRequirements.length; i++) {
+                await this.db.experienceGuestRequirements.create({
+                    experienceId: createdExperience.id,
+                    icon: guestRequirements[i].icon,
+                    text: guestRequirements[i].text,
+                    sortOrder: i,
+                });
+            }
+        }
 
         const createdAvailability = await this.db.availability.create({
             startDate: new Date(availability.startDate),
@@ -219,7 +261,10 @@ export class ExperienceService {
             images: imagesWithIds,
         });
 
-        return { createdExperience, uploadUrls };
+        // Enrich the created experience with the related data
+        const [enrichedExperience] = await this.enrichExperiencesWithRelatedData([createdExperience]);
+
+        return { createdExperience: enrichedExperience, uploadUrls };
     }
 
     async hostUpdateExperience(request: UpdateExperienceRequest) {
@@ -245,7 +290,7 @@ export class ExperienceService {
             throw new Error(ERRORS.EXPERIENCE.FORBIDDEN_UPDATE.CODE);
         }
 
-        const { startingLocation, endingLocation, ...restData } =
+        const { startingLocation, endingLocation, meetingLocation, ...restData } =
             experienceData;
 
         const updateData = {
@@ -255,18 +300,27 @@ export class ExperienceService {
                 startingLocation: [
                     startingLocation.longitude,
                     startingLocation.latitude,
-                ],
+                ] as [number, number],
             }),
             ...(endingLocation && {
                 endingLocationAddress: endingLocation.address,
                 endingLocation: [
                     endingLocation.longitude,
                     endingLocation.latitude,
-                ],
+                ] as [number, number],
+            }),
+            ...(meetingLocation && {
+                meetingLocationInstructions: meetingLocation.instructions,
+                // Note: meetingLocationImage would need to be handled separately if updating images
             }),
         };
 
-        return await this.db.experiences.update(experienceId, updateData);
+        const updatedExperience = await this.db.experiences.update(experienceId, updateData);
+        
+        // Enrich the updated experience with the related data
+        const [enrichedExperience] = await this.enrichExperiencesWithRelatedData([updatedExperience]);
+        
+        return enrichedExperience;
     }
 
     async hostDeleteExperience(request: DeleteExperienceRequest) {

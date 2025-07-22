@@ -63,9 +63,6 @@ export const EXPERIENCE_INCLUDED_ITEMS = [
 export const EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH = 10;
 export const EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH = 1000;
 
-// Physical Requirements
-export const EXPERIENCE_PHYSICAL_REQUIREMENTS = ["low", "medium", "high"];
-
 // Age Recommendations
 export const EXPERIENCE_AGE_RECOMMENDATIONS = [
     "18-25",
@@ -76,12 +73,10 @@ export const EXPERIENCE_AGE_RECOMMENDATIONS = [
     "66+",
 ];
 
-// Accessibility Info
-export const EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH = 10;
-export const EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH = 1000;
-
 // Experience Duration
-export const EXPERIENCE_DURATION_HOURS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+export const EXPERIENCE_DURATION_HOURS = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+];
 
 // Experience Status
 export const EXPERIENCE_STATUS = ["draft", "published", "archived"];

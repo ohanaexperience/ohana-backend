@@ -22,6 +22,8 @@ export class CategoryController {
     }
 
     private handleError(error: any) {
+        console.log("CategoryController error", error);
+
         switch (error.message) {
             default:
                 return {

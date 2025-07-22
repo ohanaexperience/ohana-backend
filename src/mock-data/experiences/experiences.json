@@ -7,7 +7,7 @@
             "subId": 7
         },
         "languages": ["english", "thai"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Join us for an immersive Thai cooking experience where you'll learn to prepare authentic dishes like Pad Thai, Tom Yum soup, and Green Curry. Our experienced local chef will guide you through traditional cooking techniques using fresh ingredients from local markets.",
         "startingLocation": {
             "address": "123 Sukhumvit Road, Watthana, Bangkok 10110, Thailand",
@@ -48,7 +48,6 @@
         "whatToBring": "Please bring an apron if you have one, though we will provide aprons for all participants. Comfortable closed-toe shoes are recommended.",
         "physicalRequirements": "low",
         "ageRecommendations": "18-25",
-        "accessibilityInfo": "The cooking school is wheelchair accessible with ramps and accessible restrooms. Please let us know in advance if you have any specific accessibility needs.",
         "durationHours": 4,
         "timezone": "Asia/Bangkok",
         "availability": {
@@ -66,7 +65,7 @@
             "subId": 1
         },
         "languages": ["english", "japanese"],
-        "experienceType": "outdoor",
+        "type": "outdoor",
         "description": "Escape the bustling city and immerse yourself in nature with this guided hike up Mount Takao. Enjoy breathtaking views of Tokyo and Mount Fuji (on clear days), visit the historic Yakuoin Temple, and learn about local flora and fauna from our knowledgeable guide.",
         "startingLocation": {
             "address": "Takaosanguchi Station, 2177 Takaomachi, Hachioji, Tokyo 193-0844, Japan",
@@ -102,7 +101,6 @@
         "whatToBring": "Comfortable hiking shoes, water bottle, weather-appropriate clothing, and a light snack. Walking poles will be provided if needed.",
         "physicalRequirements": "medium",
         "ageRecommendations": "26-35",
-        "accessibilityInfo": "This hike involves steep trails and uneven terrain. Not suitable for wheelchairs or those with mobility issues. Alternative cable car routes available upon request.",
         "durationHours": 6,
         "timezone": "Asia/Tokyo",
         "availability": {
@@ -119,7 +117,7 @@
             "subId": 14
         },
         "languages": ["english", "thai"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Discover the beauty of traditional Thai art in this hands-on workshop. Learn about Thai painting techniques, create your own artwork using natural pigments, and understand the cultural significance behind traditional Thai artistic motifs.",
         "startingLocation": {
             "address": "456 Charoen Krung Road, Bang Rak, Bangkok 10500, Thailand",
@@ -145,7 +143,6 @@
         "includedItems": ["equipment"],
         "physicalRequirements": "low",
         "ageRecommendations": "36-45",
-        "accessibilityInfo": "The art studio is located on the 3rd floor with elevator access. All materials and seating can be adjusted for different accessibility needs.",
         "durationHours": 3,
         "timezone": "Asia/Bangkok",
         "availability": {
@@ -163,7 +160,7 @@
             "subId": 32
         },
         "languages": ["english", "japanese"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Engage your family in exciting science experiments and discoveries. Kids will learn about physics, chemistry, and biology through interactive demonstrations and hands-on activities. Perfect for curious minds of all ages!",
         "startingLocation": {
             "address": "789 Science Park Avenue, Odaiba, Minato City, Tokyo 135-0091, Japan",
@@ -202,7 +199,6 @@
         "whatToBring": "Comfortable clothes that can get a little messy. We provide lab coats and safety equipment for all participants.",
         "physicalRequirements": "low",
         "ageRecommendations": "18-25",
-        "accessibilityInfo": "All experiment stations are wheelchair accessible. We can accommodate various learning needs and provide additional support as required.",
         "durationHours": 2,
         "timezone": "Asia/Tokyo",
         "availability": {
@@ -219,7 +215,7 @@
             "subId": 19
         },
         "languages": ["english", "thai"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Experience the healing power of traditional Thai massage combined with guided meditation. Our certified therapists will help you release tension and stress while teaching you mindfulness techniques you can practice at home.",
         "startingLocation": {
             "address": "88 Wellness Center, Silom Road, Bang Rak, Bangkok 10500, Thailand",
@@ -253,7 +249,6 @@
         "whatToBring": "Comfortable, loose-fitting clothes for the massage session. Meditation cushions and oils will be provided.",
         "physicalRequirements": "low",
         "ageRecommendations": "46-55",
-        "accessibilityInfo": "The wellness center is fully accessible with ramps and accessible treatment rooms. Please inform us of any mobility needs when booking.",
         "durationHours": 3,
         "timezone": "Asia/Bangkok",
         "availability": {
@@ -271,7 +266,7 @@
             "subId": 25
         },
         "languages": ["english", "japanese"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Dive into Tokyo's famous nightlife scene! Start with authentic karaoke in a private booth, then explore hidden local bars in Shibuya and Shinjuku. Our local guide will introduce you to Japanese drinking culture and help you make new friends.",
         "startingLocation": {
             "address": "321 Shibuya Center Gai, Shibuya City, Tokyo 150-0043, Japan",
@@ -307,7 +302,6 @@
         "whatToBring": "Valid ID for age verification, comfortable walking shoes, and cash for additional drinks if desired.",
         "physicalRequirements": "low",
         "ageRecommendations": "26-35",
-        "accessibilityInfo": "Some venues may have stairs and narrow spaces. Please contact us in advance if you have mobility concerns so we can plan an accessible route.",
         "durationHours": 5,
         "timezone": "Asia/Tokyo",
         "availability": {
@@ -324,7 +318,7 @@
             "subId": 28
         },
         "languages": ["english", "thai"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Master the basics of Thai language in this intensive crash course designed specifically for travelers. Learn essential phrases, proper pronunciation, cultural dos and don'ts, and practice real-life conversations with native speakers.",
         "startingLocation": {
             "address": "200 Language Learning Center, Phloenchit Road, Pathum Wan, Bangkok 10330, Thailand",
@@ -355,7 +349,6 @@
         "whatToBring": "Notebook and pen for taking notes. All learning materials and audio resources will be provided.",
         "physicalRequirements": "low",
         "ageRecommendations": "18-25",
-        "accessibilityInfo": "The learning center is wheelchair accessible with elevators and accessible restrooms. Audio assistance available for hearing-impaired participants.",
         "durationHours": 6,
         "timezone": "Asia/Bangkok",
         "availability": {
@@ -373,7 +366,7 @@
             "subId": 22
         },
         "languages": ["english", "japanese"],
-        "experienceType": "outdoor",
+        "type": "outdoor",
         "description": "Explore Tokyo like a local! Visit hidden neighborhoods, secret gardens, traditional shops, and local eateries that most tourists never see. Our native Tokyo guide will share fascinating stories and insider knowledge.",
         "startingLocation": {
             "address": "JR Kichijoji Station North Exit, Musashino, Tokyo 180-0004, Japan",
@@ -406,7 +399,6 @@
         "whatToBring": "Comfortable walking shoes, weather-appropriate clothing, and a camera to capture the hidden gems we'll discover.",
         "physicalRequirements": "medium",
         "ageRecommendations": "56-65",
-        "accessibilityInfo": "This tour involves considerable walking on various terrains including stairs and uneven paths. Not suitable for wheelchairs, but we can modify the route for those with minor mobility issues.",
         "durationHours": 4,
         "timezone": "Asia/Tokyo",
         "availability": {
@@ -423,7 +415,7 @@
             "subId": 3
         },
         "languages": ["english", "thai"],
-        "experienceType": "outdoor",
+        "type": "outdoor",
         "description": "Experience Bangkok from a unique perspective! Kayak along the historic Chao Phraya River and its peaceful canals, visit beautiful riverside temples, and learn about the city's rich history from our knowledgeable guide.",
         "startingLocation": {
             "address": "Thonburi Kayak Station, 150 Wang Thonglang, Bangkok Yai, Bangkok 10600, Thailand",
@@ -459,7 +451,6 @@
         "whatToBring": "Swimwear, sunscreen, hat, quick-dry clothes, and waterproof bag for personal items. Life jackets and paddles provided.",
         "physicalRequirements": "medium",
         "ageRecommendations": "26-35",
-        "accessibilityInfo": "Kayaking requires moderate physical ability and balance. Not suitable for non-swimmers or those with severe mobility limitations. Basic swimming ability required.",
         "durationHours": 5,
         "timezone": "Asia/Bangkok",
         "availability": {
@@ -477,7 +468,7 @@
             "subId": 8
         },
         "languages": ["english", "japanese"],
-        "experienceType": "indoor",
+        "type": "indoor",
         "description": "Embark on a journey through Japan's sake culture! Taste 8 premium sakes from different regions, learn about brewing techniques, and enjoy carefully selected traditional appetizers that complement each variety. Perfect for sake enthusiasts and curious beginners alike.",
         "startingLocation": {
             "address": "Tokyo Sake House, 77 Ginza District, Chuo City, Tokyo 104-0061, Japan",
@@ -515,7 +506,6 @@
         "whatToBring": "Valid ID for age verification. All tasting equipment and traditional sake cups will be provided.",
         "physicalRequirements": "low",
         "ageRecommendations": "36-45",
-        "accessibilityInfo": "The sake house has traditional low seating but can accommodate chair seating upon request. Wheelchair accessible entrance available.",
         "durationHours": 3,
         "timezone": "Asia/Tokyo",
         "availability": {

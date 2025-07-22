@@ -25,7 +25,7 @@ const s3Controller = new S3Controller({
     database: db,
     s3Client,
     bucketName: process.env.ASSETS_BUCKET_NAME!,
-    assetsDomain: process.env.ASSETS_DOMAIN,
+    assetsDomain: process.env.ASSETS_CDN_DOMAIN,
 });
 
 export const handler = middy(async (event: AddExperienceImageData) => {

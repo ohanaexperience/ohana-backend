@@ -121,7 +121,7 @@ describe("Experience Integration Tests", () => {
                     subId: 1,
                 },
                 languages: ["en"],
-                experienceType: "adventure" as const,
+                type: "adventure" as const,
                 description: "This should fail because user is not a host",
                 startingLocation: {
                     address: "123 Start Street",
@@ -144,7 +144,7 @@ describe("Experience Integration Tests", () => {
                     autoCancelEnabled: false,
                 },
                 includedItems: ["equipment"],
-                physicalRequirements: "easy" as const,
+                physicalRequirements: "Basic fitness level required",
                 ageRecommendations: "all-ages" as const,
                 durationHours: 2,
                 timezone: "America/New_York",

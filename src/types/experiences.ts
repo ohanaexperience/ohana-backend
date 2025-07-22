@@ -5,7 +5,7 @@ export type TimeSlot = {
 
 export type ExperienceMeetingLocation = {
     instructions: string;
-    image: ImageObject;
+    image: ImageObject | null;
 };
 
 export type ImageObject = {

@@ -1,15 +1,11 @@
-# Profile
-hostGetProfile:
-    handler: src/host/lambda/host/getProfile.handler
+getHosts:
+    handler: src/host/lambda/public/getHosts.handler
     timeout: 29
     events:
         - http:
-              path: /v1/host/profile
+              path: /v1/hosts
               method: GET
               cors: true
-              authorizer:
-                  type: COGNITO_USER_POOLS
-                  authorizerId: { Ref: ApiGatewayAuthorizer }
     vpc:
         securityGroupIds:
             - !Ref ProxySecurityGroup
@@ -21,29 +17,7 @@ hostGetProfile:
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
         USE_RDS_PROXY: true
-
-hostUpdateProfile:
-    handler: src/host/lambda/host/updateProfile.handler
-    timeout: 29
-    events:
-        - http:
-              path: /v1/host/profile
-              method: PUT
-              cors: true
-              authorizer:
-                  type: COGNITO_USER_POOLS
-                  authorizerId: { Ref: ApiGatewayAuthorizer }
-    vpc:
-        securityGroupIds:
-            - !Ref ProxySecurityGroup
-        subnetIds:
-            - !Ref PrivateSubnetA
-            - !Ref PrivateSubnetB
-    environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
-        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
-        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 # Experiences
 hostCreateExperience:

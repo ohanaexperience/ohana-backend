@@ -120,7 +120,7 @@ export class DatabaseTestHelper {
             categoryId: 1, // Assuming category 1 exists from seeding
             subCategoryId: 1,
             languages: ["en"],
-            experienceType: "adventure",
+            type: "adventure",
             description: "This is a test experience description",
             startingLocationAddress: "123 Start Street",
             startingLocation: [-74.0060, 40.7128], // [longitude, latitude]
@@ -135,7 +135,7 @@ export class DatabaseTestHelper {
             maxGuests: 4,
             autoCancelEnabled: false,
             includedItems: ["equipment"],
-            physicalRequirements: "easy",
+            physicalRequirements: "Moderate physical fitness required",
             ageRange: "all-ages",
             durationHours: 2,
             timezone: "America/New_York",

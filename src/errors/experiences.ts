@@ -19,19 +19,11 @@ import {
     EXPERIENCE_CANCELLATION_POLICY,
     EXPERIENCE_GROUP_SIZE_MIN,
     EXPERIENCE_GROUP_SIZE_MAX,
-    EXPERIENCE_INCLUDED_ITEMS,
-    EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH,
-    EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH,
-    EXPERIENCE_PHYSICAL_REQUIREMENTS,
     EXPERIENCE_AGE_RECOMMENDATIONS,
-    EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH,
-    EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH,
     EXPERIENCE_DURATION_HOURS,
     EXPERIENCE_IMAGE_TYPES,
     EXPERIENCE_IMAGES_MIN_COUNT,
     EXPERIENCE_IMAGES_MAX_COUNT,
-    EXPERIENCE_GALLERY_IMAGE_MIN_COUNT,
-    EXPERIENCE_GALLERY_IMAGE_MAX_COUNT,
 } from "@/constants/experiences";
 import { CATEGORIES, SUB_CATEGORIES } from "@/constants/categories";
 import { IANA_TIMEZONES } from "@/constants/shared";
@@ -532,41 +524,63 @@ export default {
                 CODE: "INVALID_EXPERIENCE_INCLUDED_ITEMS_TYPE",
                 MESSAGE: "Included items must be an array.",
             },
-            INVALID_VALUE: {
-                CODE: "INVALID_EXPERIENCE_INCLUDED_ITEMS_VALUE",
-                MESSAGE: `Invalid included items. Must be one of the following: ${EXPERIENCE_INCLUDED_ITEMS.map(
-                    (item) => item
-                ).join(", ")}`,
+            ICON_NAME_MISSING: {
+                CODE: "MISSING_INCLUDED_ITEM_ICON_NAME",
+                MESSAGE: "Icon name is required for included item.",
+            },
+            ICON_NAME_INVALID_TYPE: {
+                CODE: "INVALID_INCLUDED_ITEM_ICON_NAME_TYPE",
+                MESSAGE: "Icon name must be a string.",
+            },
+            ICON_TYPE_MISSING: {
+                CODE: "MISSING_INCLUDED_ITEM_ICON_TYPE",
+                MESSAGE: "Icon type is required for included item.",
+            },
+            ICON_TYPE_INVALID_TYPE: {
+                CODE: "INVALID_INCLUDED_ITEM_ICON_TYPE",
+                MESSAGE: "Icon type must be one of: material, ionicons, fontawesome5.",
+            },
+            TEXT_MISSING: {
+                CODE: "MISSING_INCLUDED_ITEM_TEXT",
+                MESSAGE: "Text is required for included item.",
+            },
+            TEXT_INVALID_TYPE: {
+                CODE: "INVALID_INCLUDED_ITEM_TEXT_TYPE",
+                MESSAGE: "Text must be a string.",
             },
         },
-        WHAT_TO_BRING: {
-            INVALID_TYPE: {
-                CODE: "INVALID_EXPERIENCE_WHAT_TO_BRING_TYPE",
-                MESSAGE: "What to bring must be a string.",
-            },
-            MIN_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH",
-                MESSAGE: `What to bring must be at least ${EXPERIENCE_WHAT_TO_BRING_MIN_LENGTH} characters.`,
-            },
-            MAX_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH",
-                MESSAGE: `What to bring must be less than ${EXPERIENCE_WHAT_TO_BRING_MAX_LENGTH} characters.`,
-            },
-        },
-        PHYSICAL_REQUIREMENTS: {
+        GUEST_REQUIREMENTS: {
             MISSING: {
-                CODE: "MISSING_EXPERIENCE_PHYSICAL_REQUIREMENTS",
-                MESSAGE: "Physical requirements are required.",
+                CODE: "MISSING_EXPERIENCE_GUEST_REQUIREMENTS",
+                MESSAGE: "Guest requirements are required.",
             },
             INVALID_TYPE: {
-                CODE: "INVALID_EXPERIENCE_PHYSICAL_REQUIREMENTS_TYPE",
-                MESSAGE: "Physical requirements must be a string.",
+                CODE: "INVALID_EXPERIENCE_GUEST_REQUIREMENTS_TYPE",
+                MESSAGE: "Guest requirements must be an array.",
             },
-            INVALID_VALUE: {
-                CODE: "INVALID_EXPERIENCE_PHYSICAL_REQUIREMENTS_VALUE",
-                MESSAGE: `Invalid physical requirements. Must be one of the following: ${EXPERIENCE_PHYSICAL_REQUIREMENTS.map(
-                    (requirement) => requirement
-                ).join(", ")}`,
+            ICON_NAME_MISSING: {
+                CODE: "MISSING_GUEST_REQUIREMENT_ICON_NAME",
+                MESSAGE: "Icon name is required for guest requirement.",
+            },
+            ICON_NAME_INVALID_TYPE: {
+                CODE: "INVALID_GUEST_REQUIREMENT_ICON_NAME_TYPE",
+                MESSAGE: "Icon name must be a string.",
+            },
+            ICON_TYPE_MISSING: {
+                CODE: "MISSING_GUEST_REQUIREMENT_ICON_TYPE",
+                MESSAGE: "Icon type is required for guest requirement.",
+            },
+            ICON_TYPE_INVALID_TYPE: {
+                CODE: "INVALID_GUEST_REQUIREMENT_ICON_TYPE",
+                MESSAGE: "Icon type must be one of: material, ionicons, fontawesome5.",
+            },
+            TEXT_MISSING: {
+                CODE: "MISSING_GUEST_REQUIREMENT_TEXT",
+                MESSAGE: "Text is required for guest requirement.",
+            },
+            TEXT_INVALID_TYPE: {
+                CODE: "INVALID_GUEST_REQUIREMENT_TEXT_TYPE",
+                MESSAGE: "Text must be a string.",
             },
         },
         AGE_RECOMMENDATIONS: {
@@ -583,24 +597,6 @@ export default {
                 MESSAGE: `Invalid age recommendations. Must be one of the following: ${EXPERIENCE_AGE_RECOMMENDATIONS.map(
                     (age) => age
                 ).join(", ")}`,
-            },
-        },
-        ACCESSIBILITY_INFO: {
-            MISSING: {
-                CODE: "MISSING_EXPERIENCE_ACCESSIBILITY_INFO",
-                MESSAGE: "Accessibility info is required.",
-            },
-            INVALID_TYPE: {
-                CODE: "INVALID_EXPERIENCE_ACCESSIBILITY_INFO_TYPE",
-                MESSAGE: "Accessibility info must be a string.",
-            },
-            MIN_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH",
-                MESSAGE: `Accessibility info must be at least ${EXPERIENCE_ACCESSIBILITY_INFO_MIN_LENGTH} characters.`,
-            },
-            MAX_LENGTH: {
-                CODE: "INVALID_EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH",
-                MESSAGE: `Accessibility info must be less than ${EXPERIENCE_ACCESSIBILITY_INFO_MAX_LENGTH} characters.`,
             },
         },
         DURATION_HOURS: {

@@ -2,5 +2,6 @@ export * from "./users";
 export * from "./hostVerifications";
 export * from "./hosts";
 export * from "./experiences";
+export * from "./experience_collections";
 export * from "./categories";
 export * from "./reservations";

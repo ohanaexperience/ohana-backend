@@ -185,3 +185,10 @@ Resources:
             Type: COGNITO_USER_POOLS
             ProviderARNs:
                 - !GetAtt UserPool.Arn
+
+    AdminGroup:
+        Type: AWS::Cognito::UserPoolGroup
+        Properties:
+            GroupName: admin
+            Description: Administrative users
+            UserPoolId: !Ref UserPool
