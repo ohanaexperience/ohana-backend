@@ -1,36 +1,21 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import middy from "@middy/core";
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
+import httpJsonBodyParser from "@middy/http-json-body-parser";
+import cors from "@middy/http-cors";
 
 import { AdminController } from "@/admin/controllers/admin";
 import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
+import { requireAdmin } from "@/middleware";
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-    let database: ReturnType<typeof DatabaseFactory.create> | null = null;
+const dbConfig = createDatabaseConfig();
+const database = DatabaseFactory.create({ postgres: dbConfig });
+const adminController = new AdminController({ database });
 
-    try {
-        // Setup database connection
-        const dbConfig = createDatabaseConfig();
-        database = DatabaseFactory.create({ postgres: dbConfig });
-        await database.connect();
-
-        // Create controller and handle request
-        const controller = new AdminController({ database });
-        const result = await controller.getCategories();
-
-        return result;
-    } catch (error) {
-        console.error("getCategories handler error:", error);
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: "Internal server error",
-                error: error instanceof Error ? error.message : "Unknown error",
-            }),
-        };
-    } finally {
-        if (database) {
-            await database.close();
-        }
-    }
-};
+export const handler = middy(async () => {
+    return await adminController.getCategories();
+})
+    .use(httpHeaderNormalizer())
+    .use(httpJsonBodyParser())
+    .use(requireAdmin())
+    .use(cors());

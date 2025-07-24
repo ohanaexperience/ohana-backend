@@ -45,7 +45,7 @@ export const zodValidator = (options: ZodValidatorOptions) => {
             }
 
             if (headers) {
-                const validatedHeaders = headers.parse(request.event.headers);
+                const validatedHeaders = headers.parse(request.event.headers || {});
 
                 request.event = {
                     ...request.event,
@@ -65,7 +65,7 @@ export const zodValidator = (options: ZodValidatorOptions) => {
             if (queryStringParameters) {
                 const validatedQueryStringParameters =
                     queryStringParameters.parse(
-                        request.event.queryStringParameters
+                        request.event.queryStringParameters || {}
                     );
 
                 request.event = {
@@ -76,7 +76,7 @@ export const zodValidator = (options: ZodValidatorOptions) => {
 
             if (pathParameters) {
                 const validatedPathParameters = pathParameters.parse(
-                    request.event.pathParameters
+                    request.event.pathParameters || {}
                 );
 
                 request.event = {

@@ -92,15 +92,10 @@ export class AdminService {
     }
 
     async getCategoryImageUploadUrl(request: {
-        authorization: string;
         categoryId: number;
         mimeType: string;
     }) {
-        const { authorization, categoryId, mimeType } = request;
-
-        // Verify admin authorization
-        const { sub } = decodeToken(authorization);
-        // TODO: Add admin role check here
+        const { categoryId, mimeType } = request;
 
         const category = await this.db.categories.getById(categoryId);
         if (!category) {
@@ -266,15 +261,10 @@ export class AdminService {
     }
 
     async getSubCategoryImageUploadUrl(request: {
-        authorization: string;
         subCategoryId: number;
         mimeType: string;
     }) {
-        const { authorization, subCategoryId, mimeType } = request;
-
-        // Verify admin authorization
-        const { sub } = decodeToken(authorization);
-        // TODO: Add admin role check here
+        const { subCategoryId, mimeType } = request;
 
         const subCategory = await this.db.subCategories.getById(subCategoryId);
         if (!subCategory) {

@@ -2,38 +2,27 @@ import middy from "@middy/core";
 import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import cors from "@middy/http-cors";
 
-import { APIGatewayProxyEvent } from "aws-lambda";
-
 import { AdminController } from "@/admin/controllers/admin";
 import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
+import { requireAdmin, requirePathParameters, zodValidator } from "@/middleware";
+import { UnfeatureExperienceData, UnfeatureExperiencePathSchema } from "@/admin/validations";
 
 const dbConfig = createDatabaseConfig();
 const database = DatabaseFactory.create({ postgres: dbConfig });
 const adminController = new AdminController({ database });
 
-export const handler = middy(async (event: APIGatewayProxyEvent) => {
+export const handler = middy(async (event: UnfeatureExperienceData) => {
     const { authorization } = event.headers;
-    const experienceId = event.pathParameters?.experienceId;
-
-    if (!authorization) {
-        return {
-            statusCode: 401,
-            body: JSON.stringify({ message: "Authorization header required" }),
-        };
-    }
-
-    if (!experienceId) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ message: "experienceId is required" }),
-        };
-    }
+    const { experienceId } = event.pathParameters;
 
     return await adminController.unfeatureExperience({
-        authorization,
+        authorization: authorization!,
         experienceId,
     });
 })
-    .use(cors())
-    .use(httpHeaderNormalizer());
+    .use(httpHeaderNormalizer())
+    .use(requirePathParameters())
+    .use(zodValidator({ pathParameters: UnfeatureExperiencePathSchema }))
+    .use(requireAdmin())
+    .use(cors());

@@ -1,10 +1,6 @@
-import { DatabaseFactory } from "@/database";
-import { createDatabaseConfig } from "@/database/proxy-config";
+import { Postgres } from "@/database";
 
-export async function seedCollectionItems(): Promise<void> {
-    const dbConfig = createDatabaseConfig();
-    const database = DatabaseFactory.create({ postgres: dbConfig });
-
+export async function seedCollectionItems(database: Postgres): Promise<void> {
     console.log("Starting collection items seeding...");
 
     try {

@@ -1,74 +1,44 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import middy from "@middy/core";
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
+import httpJsonBodyParser from "@middy/http-json-body-parser";
+import cors from "@middy/http-cors";
 import { S3Client } from "@aws-sdk/client-s3";
 
 import { AdminController } from "@/admin/controllers/admin";
 import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
 import { S3Service } from "@/s3/services/s3";
+import { requireAdmin, requireBody, zodValidator } from "@/middleware";
+import { CreateSubCategoryData, CreateSubCategoryBodySchema } from "@/admin/validations";
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-    let database: ReturnType<typeof DatabaseFactory.create> | null = null;
+const dbConfig = createDatabaseConfig();
+const database = DatabaseFactory.create({ postgres: dbConfig });
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || "us-east-1",
+});
+const s3Service = new S3Service({
+    database,
+    s3Client,
+    bucketName: process.env.ASSETS_BUCKET_NAME!,
+    assetsDomain: process.env.ASSETS_CDN_DOMAIN,
+});
+const adminController = new AdminController({ database, s3Service });
 
-    try {
-        const authorization = event.headers.Authorization || event.headers.authorization;
-        if (!authorization) {
-            return {
-                statusCode: 401,
-                body: JSON.stringify({ message: "Authorization header required" }),
-            };
-        }
+export const handler = middy(async (event: CreateSubCategoryData) => {
+    const { authorization } = event.headers;
+    const { categoryId, name, slug, imageMimeType } = event.body;
 
-        const body = JSON.parse(event.body || "{}");
-        const { categoryId, name, slug, imageMimeType } = body;
-
-        if (!categoryId || !name || !slug) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "categoryId, name and slug are required" }),
-            };
-        }
-
-        // Setup database connection
-        const dbConfig = createDatabaseConfig();
-        database = DatabaseFactory.create({ postgres: dbConfig });
-        await database.connect();
-
-        // Setup S3
-        const s3Client = new S3Client({
-            region: process.env.AWS_REGION || "us-east-1",
-        });
-
-        const s3Service = new S3Service({
-            database,
-            s3Client,
-            bucketName: process.env.ASSETS_BUCKET_NAME!,
-            assetsDomain: process.env.ASSETS_CDN_DOMAIN,
-        });
-
-        // Create controller and handle request
-        const controller = new AdminController({ database, s3Service });
-        const result = await controller.createSubCategory({
-            authorization,
-            categoryId: parseInt(categoryId, 10),
-            name,
-            slug,
-            imageMimeType,
-        });
-
-        return result;
-    } catch (error) {
-        console.error("createSubCategory handler error:", error);
-
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: "Internal server error",
-                error: error instanceof Error ? error.message : "Unknown error",
-            }),
-        };
-    } finally {
-        if (database) {
-            await database.close();
-        }
-    }
-};
+    return await adminController.createSubCategory({
+        authorization: authorization!,
+        categoryId: parseInt(categoryId, 10),
+        name,
+        slug,
+        imageMimeType,
+    });
+})
+    .use(httpHeaderNormalizer())
+    .use(httpJsonBodyParser())
+    .use(requireBody())
+    .use(zodValidator({ body: CreateSubCategoryBodySchema }))
+    .use(requireAdmin())
+    .use(cors());

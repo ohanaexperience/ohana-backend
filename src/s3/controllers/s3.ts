@@ -119,6 +119,21 @@ export class S3Controller {
         }
     }
 
+    async handleCategoryImageUpload(request: S3Event) {
+        try {
+            const result = await this.s3Service.handleCategoryImageUpload(
+                request
+            );
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
     private handleError(error: any) {
         switch (error.message) {
             case ERRORS.EXPERIENCE.NOT_FOUND.CODE:

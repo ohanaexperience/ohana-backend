@@ -59,7 +59,6 @@ export class AdminController {
     }
 
     async getCategoryImageUploadUrl(request: {
-        authorization: string;
         categoryId: number;
         mimeType: string;
     }) {
@@ -112,7 +111,6 @@ export class AdminController {
     }
 
     async getSubCategoryImageUploadUrl(request: {
-        authorization: string;
         subCategoryId: number;
         mimeType: string;
     }) {

@@ -2,6 +2,7 @@ import { Handler } from "aws-lambda";
 import { DatabaseFactory } from "../index";
 import { createDatabaseConfig } from "../proxy-config";
 import { seedCategories } from "../seeds/categories";
+import { seedCollectionItems } from "../seeds/collection_items";
 
 export const handler: Handler = async () => {
     console.log("Starting database seeding...");
@@ -14,6 +15,7 @@ export const handler: Handler = async () => {
 
         // Run seed functions
         await seedCategories(db);
+        await seedCollectionItems(db);
 
         console.log("Database seeding completed successfully!");
 
