@@ -96,6 +96,9 @@ export const experiencesTable = pgTable("experiences", {
     status: experienceStatusEnum("status").default("draft"),
     isPublic: boolean("is_public").default(true),
     
+    // Review statistics
+    averageRating: integer("average_rating").default(0),
+    totalReviews: integer("total_reviews").default(0),
     
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),

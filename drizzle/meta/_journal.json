@@ -36,6 +36,13 @@
       "when": 1753035940452,
       "tag": "0004_goofy_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753341831746,
+      "tag": "0005_futuristic_jocasta",
+      "breakpoints": true
     }
   ]
 }

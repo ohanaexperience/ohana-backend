@@ -4,8 +4,12 @@ import stripeErrors from "./stripe";
 import hostErrors from "./host";
 import timeSlotsErrors from "./timeSlots";
 import reservationsErrors from "./reservations";
+import reviewsErrors from "./reviews";
 
 import { LANGUAGES } from "@/constants/shared";
+
+// Export error classes
+export * from "./classes";
 
 export default {
     ...baseErrors,
@@ -235,4 +239,5 @@ export default {
     ...experienceErrors,
     ...timeSlotsErrors,
     ...reservationsErrors,
+    ...reviewsErrors,
 };

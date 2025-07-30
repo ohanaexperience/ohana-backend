@@ -1,0 +1,303 @@
+# User Review Endpoints
+createReview:
+  handler: src/reviews/lambda/user/createReview.handler
+  events:
+    - http:
+        path: /v1/reviews
+        method: POST
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+updateReview:
+  handler: src/reviews/lambda/user/updateReview.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}
+        method: PUT
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+deleteReview:
+  handler: src/reviews/lambda/user/deleteReview.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}
+        method: DELETE
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+voteHelpful:
+  handler: src/reviews/lambda/user/voteHelpful.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/helpful
+        method: POST
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+removeHelpfulVote:
+  handler: src/reviews/lambda/user/removeHelpfulVote.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/helpful
+        method: DELETE
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getMyReviews:
+  handler: src/reviews/lambda/user/getMyReviews.handler
+  events:
+    - http:
+        path: /v1/reviews/my
+        method: GET
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getReviewImageUploadUrl:
+  handler: src/reviews/lambda/user/getReviewImageUploadUrl.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/images/upload-url
+        method: POST
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+    ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
+# Host Review Endpoints
+respondToReview:
+  handler: src/reviews/lambda/host/respondToReview.handler
+  events:
+    - http:
+        path: /v1/reviews/{reviewId}/host/response
+        method: POST
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getHostReviews:
+  handler: src/reviews/lambda/host/getHostReviews.handler
+  events:
+    - http:
+        path: /v1/reviews/host
+        method: GET
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+# Public Review Endpoints
+getExperienceReviews:
+  handler: src/reviews/lambda/public/getExperienceReviews.handler
+  events:
+    - http:
+        path: /v1/experiences/{experienceId}/reviews
+        method: GET
+        cors: true
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getReviewStats:
+  handler: src/reviews/lambda/public/getReviewStats.handler
+  events:
+    - http:
+        path: /v1/experiences/{experienceId}/review-stats
+        method: GET
+        cors: true
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getPublicHostReviews:
+  handler: src/reviews/lambda/public/getHostReviews.handler
+  events:
+    - http:
+        path: /v1/hosts/{hostId}/reviews
+        method: GET
+        cors: true
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+# Admin Review Endpoints
+moderateReview:
+  handler: src/reviews/lambda/admin/moderateReview.handler
+  events:
+    - http:
+        path: /v1/admin/reviews/{reviewId}/moderate
+        method: PUT
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true
+
+getAllReviews:
+  handler: src/reviews/lambda/admin/getAllReviews.handler
+  events:
+    - http:
+        path: /v1/admin/reviews
+        method: GET
+        cors: true
+        authorizer:
+          type: COGNITO_USER_POOLS
+          authorizerId: { Ref: ApiGatewayAuthorizer }
+  vpc:
+    securityGroupIds:
+      - !Ref ProxySecurityGroup
+    subnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetB
+  environment:
+    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
+    POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+    POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+    USE_RDS_PROXY: true

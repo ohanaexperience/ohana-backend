@@ -17,6 +17,7 @@ import {
     TimeSlotsQueryManager,
     AvailabilityQueryManager,
     ReservationsQueryManager,
+    ReviewsQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -37,6 +38,7 @@ export default class Postgres {
     private _timeSlots?: TimeSlotsQueryManager;
     private _availability?: AvailabilityQueryManager;
     private _reservations?: ReservationsQueryManager;
+    private _reviews?: ReviewsQueryManager;
 
     constructor(config: PostgresConfig) {
         this.config = config;
@@ -219,6 +221,16 @@ export default class Postgres {
             );
         }
         return this._reservations;
+    }
+
+    get reviews(): ReviewsQueryManager {
+        if (!this._reviews) {
+            this._reviews = new ReviewsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._reviews;
     }
 
     private getInstance(): NodePgDatabase {

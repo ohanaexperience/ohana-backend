@@ -45,6 +45,7 @@ export class S3Service {
         EXPERIENCES: "experiences",
         PROFILE: "profile",
         IMAGES: "images",
+        REVIEWS: "reviews",
     } as const;
 
     private logInfo(message: string, data?: any) {
@@ -94,6 +95,50 @@ export class S3Service {
 
         return {
             uploadUrl: preSignedUrl,
+        };
+    }
+
+    async getReviewImageUploadUrl(opts: {
+        reviewId: string;
+        mimeType: string;
+        imageId?: string;
+    }) {
+        const { reviewId, mimeType, imageId = uuidv4() } = opts;
+        const fileExtension = extension(mimeType);
+        const fileName = `${imageId}.${fileExtension}`;
+        const key = `${S3Service.PATH_SEPARATORS.REVIEWS}/${reviewId}/${S3Service.PATH_SEPARATORS.IMAGES}/${fileName}`;
+
+        this.logInfo(`Generating presigned URL for review image upload:`);
+        this.logInfo(`- Bucket: ${this.config.bucketName}`);
+        this.logInfo(`- Key: ${key}`);
+        this.logInfo(`- Content-Type: ${mimeType}`);
+        this.logInfo(`- Review ID: ${reviewId}`);
+
+        const command = new PutObjectCommand({
+            Bucket: this.config.bucketName,
+            Key: key,
+            ContentType: mimeType,
+            Metadata: {
+                reviewId,
+                imageId,
+            },
+        });
+
+        const presignedUrl = await getSignedUrl(this.s3Client, command, {
+            expiresIn: S3Service.PRESIGNED_URL_EXPIRY,
+        });
+
+        this.logInfo(
+            `Generated presigned URL: ${presignedUrl.split("?")[0]}?[REDACTED]`
+        );
+
+        const publicUrl = `https://${this.config.assetsDomain}/${key}`;
+
+        return {
+            uploadUrl: presignedUrl,
+            publicUrl,
+            key,
+            imageId,
         };
     }
 

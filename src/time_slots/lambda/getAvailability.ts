@@ -16,12 +16,12 @@ const timeSlotController = new TimeSlotController({
 });
 
 export const handler = middy(async (event: TimeSlotSearchData) => {
-    const { authorization } = event.headers;
+    const userId = event.requestContext.authorizer?.claims?.sub;
+    const { experienceId } = event.pathParameters || {};
 
-    console.log("event", event);
-
-    return await timeSlotController.getTimeSlots({
-        authorization: authorization!,
+    return await timeSlotController.getAvailability({
+        userId,
+        experienceId,
         ...event.queryStringParameters,
     });
 })

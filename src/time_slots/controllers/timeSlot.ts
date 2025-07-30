@@ -11,9 +11,9 @@ export class TimeSlotController {
         this.timeSlotService = new TimeSlotService(opts);
     }
 
-    async getTimeSlots(request: TimeSlotSearchRequest) {
+    async getAvailability(request: TimeSlotSearchRequest) {
         try {
-            const result = await this.timeSlotService.getTimeSlots(request);
+            const result = await this.timeSlotService.getAvailability(request);
 
             return {
                 statusCode: 200,
@@ -23,6 +23,7 @@ export class TimeSlotController {
             return this.handleError(err);
         }
     }
+
 
     private handleError(error: any) {
         switch (error.message) {

@@ -1,9 +1,9 @@
-getTimeSlots:
-    handler: src/time_slots/lambda/getTimeSlots.handler
+getAvailability:
+    handler: src/time_slots/lambda/getAvailability.handler
     timeout: 29
     events:
         - http:
-              path: /v1/experiences/time-slots
+              path: /v1/experiences/{experienceId}/availability
               method: GET
               cors: true
               authorizer:

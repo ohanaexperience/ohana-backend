@@ -10,3 +10,4 @@ export * from "./sub_categories";
 export * from "./availability";
 export * from "./time_slots";
 export * from "./reservations";
+export * from "./reviews";

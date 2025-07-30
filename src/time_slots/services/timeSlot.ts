@@ -2,8 +2,8 @@ import { TimeSlotOptions } from "../types";
 import { TimeSlotSearchRequest } from "../validations";
 
 import Postgres from "@/database/postgres";
-import { decodeToken } from "@/utils";
 import ERRORS from "@/errors";
+import dayjs from "dayjs";
 
 export class TimeSlotService {
     private readonly db: Postgres;
@@ -12,12 +12,19 @@ export class TimeSlotService {
         this.db = database;
     }
 
-    async getTimeSlots(request: TimeSlotSearchRequest) {
-        const { authorization, experienceId, startDate, endDate } = request;
-
-        const { sub } = decodeToken(authorization);
-
-        console.log("sub", sub);
+    async getAvailability(request: TimeSlotSearchRequest) {
+        const { 
+            userId, 
+            experienceId, 
+            startDate, 
+            endDate, 
+            date,
+            timezone,
+            partySize,
+            limit = 50,
+            offset = 0,
+            view = 'detailed'
+        } = request;
 
         const experience = await this.db.experiences.getById(experienceId);
 
@@ -25,10 +32,35 @@ export class TimeSlotService {
             throw new Error(ERRORS.EXPERIENCE.NOT_FOUND.CODE);
         }
 
-        return await this.db.timeSlots.getByDateRange({
-            experienceId,
-            ...(startDate && { startDate }),
-            ...(endDate && { endDate }),
-        });
+        // If specific date requested, override date range
+        const effectiveStartDate = date || startDate;
+        const effectiveEndDate = date || endDate;
+
+        // Handle different view modes
+        switch (view) {
+            case 'summary':
+            case 'calendar':
+                // Return aggregated data for calendar display
+                return await this.db.timeSlots.getAvailabilitySummary({
+                    experienceId,
+                    startDate: effectiveStartDate!,
+                    endDate: effectiveEndDate!,
+                    timezone,
+                });
+
+            case 'detailed':
+            default:
+                // Get detailed timeslots with pagination
+                return await this.db.timeSlots.getByDateRangePaginated({
+                    experienceId,
+                    startDate: effectiveStartDate,
+                    endDate: effectiveEndDate,
+                    partySize,
+                    limit,
+                    offset,
+                    timezone,
+                });
+        }
     }
+
 }
