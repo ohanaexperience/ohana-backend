@@ -8,7 +8,7 @@ import { CreateReservationData, CreateReservationSchema } from "../validations";
 
 import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
-import { requireBody, zodValidator } from "@/middleware";
+import { requireBody, zodValidator, idempotencyHeaders } from "@/middleware";
 
 const dbConfig = createDatabaseConfig();
 const db = DatabaseFactory.create({ postgres: dbConfig });
@@ -30,4 +30,5 @@ export const handler = middy(async (event: CreateReservationData) => {
     .use(httpJsonBodyParser())
     .use(requireBody())
     .use(zodValidator({ body: CreateReservationSchema }))
+    .use(idempotencyHeaders())
     .use(cors());

@@ -14,6 +14,7 @@ provider:
         SERVICE: ${self:service}
         NODE_ENV: ${opt:stage, 'dev'}
         ASSETS_CDN_DOMAIN: !GetAtt AssetsCloudFrontDistribution.DomainName
+        AWS_ACCOUNT_ID: !Ref AWS::AccountId
     iam:
         role:
             statements:
@@ -95,6 +96,12 @@ custom:
         cognitoSnsRole: ${self:service}-cognito-sns-role-${self:provider.stage}
         assetsBucket: ${self:service}-assets-bucket-${self:provider.stage}
 
+    # RDS Proxy configuration - only enabled for production
+    useRdsProxy:
+        production: true
+        staging: false
+        dev: false
+
 functions:
     - ${file(functions/auth.yml)}
     - ${file(functions/database.yml)}
@@ -115,5 +122,5 @@ resources:
     - ${file(resources/auth.yml)}
     - ${file(resources/database.yml)}
     - ${file(resources/vpc.yml)}
-    - ${file(resources/rds-proxy.yml)}
+    - ${file(resources/rds-proxy-${self:provider.stage}.yml)}
     - ${file(resources/gateway.yml)}

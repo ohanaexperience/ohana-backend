@@ -1,0 +1,18 @@
+# RDS Proxy resources for dev environment
+# Dev uses direct connections to RDS, so no proxy resources are created
+
+Resources:
+    # Database credentials stored in Secrets Manager (shared across stages)
+    DatabaseSecret:
+        Type: AWS::SecretsManager::Secret
+        Properties:
+            Name: ${self:service}-${self:provider.stage}-db-credentials
+            Description: Database credentials for RDS
+            SecretString: '{"username": "${env:POSTGRES_USERNAME}", "password": "${env:POSTGRES_PASSWORD}"}'
+            Tags:
+                - Key: Service
+                  Value: ${self:service}
+                - Key: Stage
+                  Value: ${self:provider.stage}
+
+# No RDS Proxy outputs for dev environment

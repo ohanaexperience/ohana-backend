@@ -24,8 +24,9 @@ export class TimeSlotController {
         }
     }
 
-
     private handleError(error: any) {
+        console.log("TimeSlotController error:", error);
+
         switch (error.message) {
             case ERRORS.EXPERIENCE.NOT_FOUND.CODE:
                 return {

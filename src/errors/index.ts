@@ -5,6 +5,7 @@ import hostErrors from "./host";
 import timeSlotsErrors from "./timeSlots";
 import reservationsErrors from "./reservations";
 import reviewsErrors from "./reviews";
+import paymentErrors from "./payments";
 
 import { LANGUAGES } from "@/constants/shared";
 
@@ -13,6 +14,7 @@ export * from "./classes";
 
 export default {
     ...baseErrors,
+    ...paymentErrors,
     EMAIL: {
         MISSING: {
             CODE: "MISSING_EMAIL",

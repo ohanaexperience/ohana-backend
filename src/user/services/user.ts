@@ -12,12 +12,8 @@ export class UserService {
         this.db = database;
     }
 
-    async getProfile(request: { authorization: string }) {
-        const { authorization } = request;
-
-        const { sub } = decodeToken(authorization);
-
-        const user = await this.db.users.getByUserId(sub);
+    private async fetchUserProfileData(userId: string) {
+        const user = await this.db.users.getByUserId(userId);
 
         if (!user) {
             throw new Error(ERRORS.USER.NOT_FOUND.CODE);
@@ -32,11 +28,11 @@ export class UserService {
 
         let hostData = null;
         const hostVerification = await this.db.hostVerifications.getByUserId(
-            sub
+            userId
         );
 
         if (hostVerification && hostVerification.status === "approved") {
-            const host = await this.db.hosts.getByUserId(sub);
+            const host = await this.db.hosts.getByUserId(userId);
 
             if (host) {
                 const { id, createdAt, updatedAt, ...publicHostInfo } = host;
@@ -49,12 +45,44 @@ export class UserService {
             }
         }
 
+        return {
+            userInfo: cleanedUserInfo,
+            hostData,
+            isHost: !!hostData,
+        };
+    }
+
+    async getProfile(request: { authorization: string }) {
+        const { authorization } = request;
+
+        const { sub } = decodeToken(authorization);
+
+        const { userInfo, hostData, isHost } = await this.fetchUserProfileData(sub);
+
         const profileData = {
-            ...cleanedUserInfo,
+            ...userInfo,
             ...(hostData ? { ...hostData, isHost: true } : { isHost: false }),
         };
 
         console.log("User profile retrieved:", profileData);
+
+        return profileData;
+    }
+
+    async getPublicProfile(request: { userId: string }) {
+        const { userId } = request;
+
+        const { userInfo, hostData } = await this.fetchUserProfileData(userId);
+
+        // Remove sensitive fields from user info
+        const { authProvider, ...publicUserInfo } = userInfo;
+
+        const profileData = {
+            ...publicUserInfo,
+            ...(hostData ? { ...hostData, isHost: true } : { isHost: false }),
+        };
+
+        console.log("Public profile retrieved:", profileData);
 
         return profileData;
     }

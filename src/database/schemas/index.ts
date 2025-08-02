@@ -6,3 +6,5 @@ export * from "./experience_collections";
 export * from "./categories";
 export * from "./reservations";
 export * from "./reviews";
+export * from "./payments";
+export * from "./reservation-events";

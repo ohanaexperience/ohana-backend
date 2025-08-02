@@ -11,9 +11,24 @@ export class WebhookController {
         this.webhookService = new WebhookService(opts);
     }
 
-    async handleStripeWebhook(request: StripeWebhookData) {
+    async handleIdentityWebhook(request: StripeWebhookData) {
         try {
-            const result = await this.webhookService.handleStripeWebhook(
+            const result = await this.webhookService.handleIdentityWebhook(
+                request
+            );
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
+    async handlePaymentWebhook(request: StripeWebhookData) {
+        try {
+            const result = await this.webhookService.handlePaymentWebhook(
                 request
             );
 

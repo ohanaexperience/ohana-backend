@@ -21,11 +21,11 @@ Resources:
             MasterUsername: ${env:POSTGRES_USERNAME}
             MasterUserPassword: ${env:POSTGRES_PASSWORD}
             DeletionProtection: false
-            BackupRetentionPeriod: 7
+            BackupRetentionPeriod: 1
             PreferredBackupWindow: "03:00-04:00"
             PreferredMaintenanceWindow: "sun:04:00-sun:05:00"
-            EnableCloudwatchLogsExports:
-                - postgresql
+            # EnableCloudwatchLogsExports:
+            #     - postgresql
             DBClusterParameterGroupName: !Ref PostgresParameterGroup
             ServerlessV2ScalingConfiguration:
                 MinCapacity: 0
@@ -48,3 +48,17 @@ Resources:
             DBClusterIdentifier: !Ref PostgresRDSServerlessCluster
             Engine: aurora-postgresql
             DBInstanceClass: db.serverless
+
+Outputs:
+    # RDS cluster endpoints for direct connections
+    RDSClusterEndpoint:
+        Description: RDS Cluster endpoint for direct database connections
+        Value: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        Export:
+            Name: ${self:service}-${self:provider.stage}-rds-cluster-endpoint
+
+    RDSClusterPort:
+        Description: RDS Cluster port
+        Value: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        Export:
+            Name: ${self:service}-${self:provider.stage}-rds-cluster-port

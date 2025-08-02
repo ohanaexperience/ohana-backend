@@ -17,10 +17,12 @@ adminCreateCategory:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminGetCategoryImageUploadUrl:
@@ -41,10 +43,12 @@ adminGetCategoryImageUploadUrl:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminUpdateCategoryImage:
@@ -65,10 +69,12 @@ adminUpdateCategoryImage:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminDeleteCategoryImage:
@@ -89,10 +95,12 @@ adminDeleteCategoryImage:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 # Admin Subcategories
@@ -114,10 +122,12 @@ adminGetSubCategoryImageUploadUrl:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminUpdateSubCategoryImage:
@@ -138,10 +148,12 @@ adminUpdateSubCategoryImage:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminDeleteSubCategoryImage:
@@ -162,10 +174,12 @@ adminDeleteSubCategoryImage:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 adminGetCategories:
@@ -186,11 +200,12 @@ adminGetCategories:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
-
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 # Admin Featured Experiences
 adminFeatureExperience:
     handler: src/admin/lambda/experiences/featureExperience.handler
@@ -210,11 +225,12 @@ adminFeatureExperience:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
-
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 adminUnfeatureExperience:
     handler: src/admin/lambda/experiences/unfeatureExperience.handler
     timeout: 29
@@ -233,7 +249,9 @@ adminUnfeatureExperience:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port

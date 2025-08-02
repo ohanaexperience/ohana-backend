@@ -1,4 +1,4 @@
-import { eq, InferInsertModel } from "drizzle-orm";
+import { eq, InferInsertModel, and, lt } from "drizzle-orm";
 
 import { BaseQueryManager } from "./base";
 import { reservationsTable } from "@/database/schemas";
@@ -43,6 +43,18 @@ export class ReservationsQueryManager extends BaseQueryManager {
         });
     }
 
+    public async getByIdempotencyKey(idempotencyKey: string) {
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(reservationsTable)
+                .where(eq(reservationsTable.idempotencyKey, idempotencyKey))
+                .limit(1);
+
+            return results[0] || null;
+        });
+    }
+
     public async create(data: InsertReservation) {
         return await this.withDatabase(async (db) => {
             const results = await db
@@ -78,6 +90,20 @@ export class ReservationsQueryManager extends BaseQueryManager {
                 .returning();
 
             return results[0] || null;
+        });
+    }
+
+    public async getExpiredHolds() {
+        return await this.withDatabase(async (db) => {
+            return await db
+                .select()
+                .from(reservationsTable)
+                .where(
+                    and(
+                        eq(reservationsTable.status, 'held'),
+                        lt(reservationsTable.holdExpiresAt, new Date())
+                    )
+                );
         });
     }
 }

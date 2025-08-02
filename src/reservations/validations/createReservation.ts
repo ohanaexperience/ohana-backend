@@ -37,6 +37,15 @@ export const CreateReservationSchema = z.object({
             RESERVATION_NUMBER_OF_GUESTS_MAX,
             ERRORS.RESERVATIONS.NUMBER_OF_GUESTS.MAX_VALUE.CODE
         ),
+    
+    // Guest information
+    guestName: z.string().min(1),
+    guestEmail: z.string().email(),
+    guestPhone: z.string().optional(),
+    specialRequests: z.string().optional(),
+    
+    // Idempotency key for payment
+    idempotencyKey: z.string().min(1),
 });
 export const CreateReservationRequestSchema = z.object({
     authorization: z.string({

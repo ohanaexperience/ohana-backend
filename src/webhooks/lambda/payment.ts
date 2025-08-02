@@ -13,7 +13,7 @@ import { requireBody, zodValidator } from "@/middleware";
 
 const {
     STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET,
+    STRIPE_PAYMENT_WEBHOOK_SECRET,
 } = process.env;
 
 const dbConfig = createDatabaseConfig();
@@ -22,13 +22,13 @@ const stripeClient = new stripe(STRIPE_SECRET_KEY!);
 const webhookController = new WebhookController({
     database: db,
     stripeClient,
-    stripeWebhookSecret: STRIPE_WEBHOOK_SECRET!,
+    stripeWebhookSecret: STRIPE_PAYMENT_WEBHOOK_SECRET!,
 });
 
 export const handler = middy(async (event: StripeWebhookData) => {
-    console.log("event", event);
+    console.log("Payment webhook event received", event.headers);
 
-    return await webhookController.handleStripeWebhook(event);
+    return await webhookController.handlePaymentWebhook(event);
 })
     .use(httpHeaderNormalizer())
     .use(requireBody())

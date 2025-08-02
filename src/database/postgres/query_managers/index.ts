@@ -11,3 +11,5 @@ export * from "./availability";
 export * from "./time_slots";
 export * from "./reservations";
 export * from "./reviews";
+export * from "./payments";
+export * from "./reservation-events";

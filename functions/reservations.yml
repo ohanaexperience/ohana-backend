@@ -16,7 +16,113 @@ createReservation:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+
+createHold:
+    handler: src/reservations/lambda/createHold.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/reservations/hold
+              method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+
+convertHold:
+    handler: src/reservations/lambda/convertHold.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/reservations/hold/convert
+              method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+
+confirmReservation:
+    handler: src/reservations/lambda/confirmReservation.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/reservations/confirm
+              method: POST
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+
+getReservationHistory:
+    handler: src/reservations/lambda/getReservationHistory.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/reservations/{reservationId}/history
+              method: GET
+              cors: true
+              authorizer:
+                  type: COGNITO_USER_POOLS
+                  authorizerId: { Ref: ApiGatewayAuthorizer }
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port

@@ -5,6 +5,22 @@ import {
 
 export default {
     RESERVATIONS: {
+        NOT_FOUND: {
+            CODE: "RESERVATION_NOT_FOUND",
+            MESSAGE: "Reservation not found.",
+        },
+        CANNOT_CANCEL: {
+            CODE: "RESERVATION_CANNOT_CANCEL",
+            MESSAGE: "This reservation cannot be cancelled.",
+        },
+        INVALID_HOLD_STATUS: {
+            CODE: "INVALID_HOLD_STATUS",
+            MESSAGE: "This reservation is not in a held status and cannot be converted.",
+        },
+        HOLD_EXPIRED: {
+            CODE: "HOLD_EXPIRED",
+            MESSAGE: "The reservation hold has expired.",
+        },
         NUMBER_OF_GUESTS: {
             MISSING: {
                 CODE: "RESERVATION_NUMBER_OF_GUESTS_MISSING",

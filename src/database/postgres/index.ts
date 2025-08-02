@@ -18,6 +18,8 @@ import {
     AvailabilityQueryManager,
     ReservationsQueryManager,
     ReviewsQueryManager,
+    PaymentsQueryManager,
+    ReservationEventsQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -39,6 +41,8 @@ export default class Postgres {
     private _availability?: AvailabilityQueryManager;
     private _reservations?: ReservationsQueryManager;
     private _reviews?: ReviewsQueryManager;
+    private _payments?: PaymentsQueryManager;
+    private _reservationEvents?: ReservationEventsQueryManager;
 
     constructor(config: PostgresConfig) {
         this.config = config;
@@ -233,6 +237,26 @@ export default class Postgres {
         return this._reviews;
     }
 
+    get payments(): PaymentsQueryManager {
+        if (!this._payments) {
+            this._payments = new PaymentsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._payments;
+    }
+
+    get reservationEvents(): ReservationEventsQueryManager {
+        if (!this._reservationEvents) {
+            this._reservationEvents = new ReservationEventsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._reservationEvents;
+    }
+
     private getInstance(): NodePgDatabase {
         if (!this.instance) {
             throw new Error(
@@ -244,5 +268,12 @@ export default class Postgres {
 
     async close(): Promise<void> {
         await this.client.end();
+    }
+
+    async transaction<T>(
+        fn: (tx: NodePgDatabase) => Promise<T>
+    ): Promise<T> {
+        await this.connect();
+        return await this.instance.transaction(fn);
     }
 }

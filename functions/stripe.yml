@@ -17,7 +17,9 @@ authCreateVerificationSession:
             - !Ref PrivateSubnetB
     environment:
         STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port

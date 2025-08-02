@@ -1,5 +1,5 @@
 Resources:
-    # RDS Proxy for connection pooling and management
+    # RDS Proxy for connection pooling and management (Production only)
     PostgresRDSProxy:
         Type: AWS::RDS::DBProxy
         Properties:
@@ -23,7 +23,7 @@ Resources:
                 - Key: Stage
                   Value: ${self:provider.stage}
 
-    # # RDS Proxy Target Group
+    # RDS Proxy Target Group
     PostgresRDSProxyTargetGroup:
         Type: AWS::RDS::DBProxyTargetGroup
         Properties:
@@ -32,7 +32,7 @@ Resources:
             DBClusterIdentifiers:
                 - !Ref PostgresRDSServerlessCluster
 
-    # # IAM Role for RDS Proxy
+    # IAM Role for RDS Proxy
     RDSProxyRole:
         Type: AWS::IAM::Role
         Properties:
@@ -68,14 +68,16 @@ Resources:
         Type: AWS::SecretsManager::Secret
         Properties:
             Name: ${self:service}-${self:provider.stage}-db-credentials
-            Description: Database credentials for RDS Proxy
+            Description: Database credentials for RDS
             SecretString: '{"username": "${env:POSTGRES_USERNAME}", "password": "${env:POSTGRES_PASSWORD}"}'
             Tags:
                 - Key: Service
                   Value: ${self:service}
                 - Key: Stage
                   Value: ${self:provider.stage}
+
 Outputs:
+    # RDS Proxy endpoint for production
     RDSProxyEndpoint:
         Description: RDS Proxy endpoint for database connections
         Value: !GetAtt PostgresRDSProxy.Endpoint

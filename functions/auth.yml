@@ -13,10 +13,12 @@ authPhoneRegister:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailRegister:
@@ -34,10 +36,12 @@ authEmailRegister:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authResendEmailCode:
@@ -55,10 +59,12 @@ authResendEmailCode:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmEmailCode:
@@ -76,10 +82,12 @@ authConfirmEmailCode:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
@@ -98,10 +106,12 @@ authForgotPassword:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authConfirmForgotPassword:
@@ -119,10 +129,12 @@ authConfirmForgotPassword:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authEmailLogin:
@@ -140,10 +152,12 @@ authEmailLogin:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_ID: !Ref UserPool
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
@@ -162,10 +176,12 @@ authRefreshTokens:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL_CLIENT_ID: !Ref UserPoolClient
 
 authGoogleLogin:
@@ -183,10 +199,12 @@ authGoogleLogin:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         USER_POOL: ${self:custom.resourceNames.userPool}
         USER_POOL_CLIENT: ${self:custom.resourceNames.userPoolClient}
         USER_POOL_ID: !Ref UserPool

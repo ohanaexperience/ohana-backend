@@ -5,7 +5,9 @@ import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
 
 export const handler: Handler = async () => {
-    console.log("Deleting all experiences from database...");
+    console.log(
+        "Emptying reservations, payments, and reservation_events tables..."
+    );
 
     let database: ReturnType<typeof DatabaseFactory.create> | null = null;
 
@@ -18,47 +20,59 @@ export const handler: Handler = async () => {
         await database.connect();
         console.log("Database connection established");
 
-        // Create host verification first
-        // await database.hostVerifications.create({
-        //     userId: "c4e834a8-0091-70ce-0edf-0cfb462c39c9",
-        //     provider: "stripe_identity",
-        //     status: "approved",
-        //     submittedAt: new Date(),
-        //     approvedAt: new Date(),
-        // });
+        // Empty tables in correct order (children first, then parent)
+        console.log("Emptying reservation_events table...");
+        await database.instance.execute(
+            sql`TRUNCATE TABLE reservation_events CASCADE`
+        );
 
-        // await database.hosts.create({
-        //     id: "c4e834a8-0091-70ce-0edf-0cfb462c39c9",
-        // });
+        console.log("Emptying payments table...");
+        await database.instance.execute(sql`TRUNCATE TABLE payments CASCADE`);
 
-        // await database.hostVerifications.delete(
-        //     "c418c438-9041-7091-430f-977eafebd85c"
-        // );
-        // await database.users.delete("c418c438-9041-7091-430f-977eafebd85c");
+        console.log("Emptying reservations table...");
+        await database.instance.execute(
+            sql`TRUNCATE TABLE reservations CASCADE`
+        );
 
-        const hostVerifications = await database.hostVerifications.getAll();
-        const hosts = await database.hosts.getAll();
-        // const users = await database.users.getAll();
+        // Verify tables are empty
+        const reservationCount = await database.instance.execute(
+            sql`SELECT COUNT(*) FROM reservations`
+        );
+        const paymentCount = await database.instance.execute(
+            sql`SELECT COUNT(*) FROM payments`
+        );
+        const eventCount = await database.instance.execute(
+            sql`SELECT COUNT(*) FROM reservation_events`
+        );
 
-        // console.log("users", users);
-        console.log("hosts", hosts);
-        console.log("hostVerifications", hostVerifications);
+        console.log("Tables emptied successfully!");
+        console.log(
+            `Reservations remaining: ${reservationCount.rows[0].count}`
+        );
+        console.log(`Payments remaining: ${paymentCount.rows[0].count}`);
+        console.log(
+            `Reservation events remaining: ${eventCount.rows[0].count}`
+        );
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                hostVerifications,
-                hosts,
-                // users,
+                message: "Tables emptied successfully",
+                results: {
+                    reservations: reservationCount.rows[0].count,
+                    payments: paymentCount.rows[0].count,
+                    reservationEvents: eventCount.rows[0].count,
+                },
+                timestamp: new Date().toISOString(),
             }),
         };
     } catch (error) {
-        console.error("Failed to delete experiences:", error);
+        console.error("Failed to empty tables:", error);
 
         return {
             statusCode: 500,
             body: JSON.stringify({
-                message: "Failed to delete experiences",
+                message: "Failed to empty tables",
                 error: error instanceof Error ? error.message : "Unknown error",
                 timestamp: new Date().toISOString(),
             }),

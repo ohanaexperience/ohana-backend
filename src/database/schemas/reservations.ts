@@ -10,6 +10,7 @@ import { experiencesTable, experienceTimeSlotsTable } from "./experiences";
 import { usersTable } from "./users";
 
 export const reservationStatusEnum = pgEnum("reservation_status", [
+    "held",
     "pending",
     "confirmed",
     "cancelled",
@@ -53,6 +54,12 @@ export const reservationsTable = pgTable("reservations", {
     // Payment info
     paymentIntentId: text("payment_intent_id"), // Stripe payment intent
     paymentStatus: text("payment_status").default("pending"),
+
+    // Idempotency
+    idempotencyKey: text("idempotency_key").unique(),
+
+    // Hold management
+    holdExpiresAt: timestamp("hold_expires_at", { withTimezone: true }),
 
     // Cancellation
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),

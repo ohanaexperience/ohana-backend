@@ -16,10 +16,12 @@ userGetProfile:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 
 userUpdateProfile:
     handler: src/user/lambda/updateProfile.handler
@@ -39,10 +41,12 @@ userUpdateProfile:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 
 userGetProfileImageUploadUrl:
     handler: src/s3/lambda/user/getProfileImageUploadUrl.handler
@@ -62,8 +66,32 @@ userGetProfileImageUploadUrl:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
+
+userGetPublicProfile:
+    handler: src/user/lambda/public/getProfile.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/user/public/profile/{userId}
+              method: GET
+              cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port

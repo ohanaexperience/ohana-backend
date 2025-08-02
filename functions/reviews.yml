@@ -16,11 +16,12 @@ createReview:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 updateReview:
   handler: src/reviews/lambda/user/updateReview.handler
   events:
@@ -38,11 +39,12 @@ updateReview:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 deleteReview:
   handler: src/reviews/lambda/user/deleteReview.handler
   events:
@@ -60,11 +62,12 @@ deleteReview:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 voteHelpful:
   handler: src/reviews/lambda/user/voteHelpful.handler
   events:
@@ -82,11 +85,12 @@ voteHelpful:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 removeHelpfulVote:
   handler: src/reviews/lambda/user/removeHelpfulVote.handler
   events:
@@ -104,11 +108,12 @@ removeHelpfulVote:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getMyReviews:
   handler: src/reviews/lambda/user/getMyReviews.handler
   events:
@@ -126,11 +131,12 @@ getMyReviews:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getReviewImageUploadUrl:
   handler: src/reviews/lambda/user/getReviewImageUploadUrl.handler
   events:
@@ -148,10 +154,12 @@ getReviewImageUploadUrl:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
     ASSETS_BUCKET_NAME: ${self:custom.resourceNames.assetsBucket}
 
 # Host Review Endpoints
@@ -172,11 +180,12 @@ respondToReview:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getHostReviews:
   handler: src/reviews/lambda/host/getHostReviews.handler
   events:
@@ -194,11 +203,12 @@ getHostReviews:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 # Public Review Endpoints
 getExperienceReviews:
   handler: src/reviews/lambda/public/getExperienceReviews.handler
@@ -214,11 +224,12 @@ getExperienceReviews:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getReviewStats:
   handler: src/reviews/lambda/public/getReviewStats.handler
   events:
@@ -233,11 +244,12 @@ getReviewStats:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getPublicHostReviews:
   handler: src/reviews/lambda/public/getHostReviews.handler
   events:
@@ -252,11 +264,12 @@ getPublicHostReviews:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 # Admin Review Endpoints
 moderateReview:
   handler: src/reviews/lambda/admin/moderateReview.handler
@@ -275,11 +288,12 @@ moderateReview:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
-
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
 getAllReviews:
   handler: src/reviews/lambda/admin/getAllReviews.handler
   events:
@@ -297,7 +311,9 @@ getAllReviews:
       - !Ref PrivateSubnetA
       - !Ref PrivateSubnetB
   environment:
-    RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
     POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
     POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-    USE_RDS_PROXY: true
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+    RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+    RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port

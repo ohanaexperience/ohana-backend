@@ -1,9 +1,9 @@
-import { eq, InferInsertModel, SQL, gte, lte, and, sql, count, sum } from "drizzle-orm";
+import { eq, InferInsertModel, SQL, gte, lte, and, or, sql, count, sum, inArray } from "drizzle-orm";
 
 import dayjs from "dayjs";
 
 import { BaseQueryManager } from "./base";
-import { experienceTimeSlotsTable } from "@/database/schemas";
+import { experienceTimeSlotsTable, reservationsTable } from "@/database/schemas";
 
 export class TimeSlotsQueryManager extends BaseQueryManager {
 
@@ -15,6 +15,50 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
                 .where(eq(experienceTimeSlotsTable.id, timeSlotId));
 
             return results[0] || null;
+        });
+    }
+
+    public async getByIdWithBookedCount(timeSlotId: string, includeHeld: boolean = false) {
+        return await this.withDatabase(async (db) => {
+            // First get the time slot
+            const timeSlot = await db
+                .select()
+                .from(experienceTimeSlotsTable)
+                .where(eq(experienceTimeSlotsTable.id, timeSlotId))
+                .then(results => results[0]);
+
+            if (!timeSlot) {
+                return null;
+            }
+
+            // Then get the sum of guests for this time slot
+            const statusConditions = includeHeld 
+                ? or(
+                    eq(reservationsTable.status, 'held'),
+                    eq(reservationsTable.status, 'pending'),
+                    eq(reservationsTable.status, 'confirmed')
+                )
+                : or(
+                    eq(reservationsTable.status, 'pending'),
+                    eq(reservationsTable.status, 'confirmed')
+                );
+            
+            const [bookingData] = await db
+                .select({
+                    totalGuests: sum(reservationsTable.numberOfGuests).as('total_guests'),
+                })
+                .from(reservationsTable)
+                .where(
+                    and(
+                        eq(reservationsTable.timeSlotId, timeSlotId),
+                        statusConditions
+                    )
+                );
+
+            return {
+                ...timeSlot,
+                bookedCount: Number(bookingData?.totalGuests || 0),
+            };
         });
     }
 
@@ -94,12 +138,7 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
             );
         }
 
-        // Filter by party size if provided
-        if (partySize) {
-            conditions.push(
-                sql`${experienceTimeSlotsTable.maxCapacity} - ${experienceTimeSlotsTable.bookedCount} >= ${partySize}`
-            );
-        }
+        // Note: Party size filtering is now done after calculating booked counts
 
         return await this.withDatabase(async (db) => {
             // Get total count for pagination
@@ -108,8 +147,8 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
                 .from(experienceTimeSlotsTable)
                 .where(and(...conditions));
 
-            // Get paginated results
-            const timeslots = await db
+            // Get paginated results with dynamic booked count
+            const timeslotsRaw = await db
                 .select({
                     id: experienceTimeSlotsTable.id,
                     experienceId: experienceTimeSlotsTable.experienceId,
@@ -118,8 +157,6 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
                     localDate: experienceTimeSlotsTable.localDate,
                     localTime: experienceTimeSlotsTable.localTime,
                     maxCapacity: experienceTimeSlotsTable.maxCapacity,
-                    bookedCount: experienceTimeSlotsTable.bookedCount,
-                    remainingCapacity: sql<number>`${experienceTimeSlotsTable.maxCapacity} - ${experienceTimeSlotsTable.bookedCount}`,
                     status: experienceTimeSlotsTable.status,
                     price: sql<number>`50`, // TODO: Add price to schema
                     duration: sql<number>`120`, // TODO: Add duration from experience
@@ -129,6 +166,45 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
                 .orderBy(experienceTimeSlotsTable.slotDateTime)
                 .limit(limit)
                 .offset(offset);
+
+            // Get booked counts for all time slots
+            const timeSlotIds = timeslotsRaw.map(ts => ts.id);
+            const bookingCounts = await db
+                .select({
+                    timeSlotId: reservationsTable.timeSlotId,
+                    totalGuests: sum(reservationsTable.numberOfGuests).as('total_guests'),
+                })
+                .from(reservationsTable)
+                .where(
+                    and(
+                        inArray(reservationsTable.timeSlotId, timeSlotIds),
+                        or(
+                            eq(reservationsTable.status, 'held'),
+                            eq(reservationsTable.status, 'pending'),
+                            eq(reservationsTable.status, 'confirmed')
+                        )
+                    )
+                )
+                .groupBy(reservationsTable.timeSlotId);
+
+            // Merge booked counts with time slots
+            const bookingCountMap = new Map(
+                bookingCounts.map(bc => [bc.timeSlotId, Number(bc.totalGuests || 0)])
+            );
+
+            let timeslots = timeslotsRaw.map(ts => {
+                const bookedCount = bookingCountMap.get(ts.id) || 0;
+                return {
+                    ...ts,
+                    bookedCount,
+                    remainingCapacity: ts.maxCapacity - bookedCount,
+                };
+            });
+
+            // Apply party size filter if provided
+            if (partySize) {
+                timeslots = timeslots.filter(ts => ts.remainingCapacity >= partySize);
+            }
 
             return {
                 timeslots,
@@ -142,20 +218,7 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
         });
     }
 
-    public async updateBookedCount(timeSlotId: string, newBookedCount: number) {
-        return await this.withDatabase(async (db) => {
-            const results = await db
-                .update(experienceTimeSlotsTable)
-                .set({
-                    bookedCount: newBookedCount,
-                    updatedAt: new Date(),
-                })
-                .where(eq(experienceTimeSlotsTable.id, timeSlotId))
-                .returning();
-
-            return results[0] || null;
-        });
-    }
+    // Removed updateBookedCount - booked count is now calculated dynamically
 
     public async getAll() {
         return await this.withDatabase(async (db) =>
@@ -172,16 +235,13 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
         const { experienceId, startDate, endDate } = params;
 
         return await this.withDatabase(async (db) => {
-            const results = await db
+            // Get all time slots in date range
+            const timeslots = await db
                 .select({
+                    id: experienceTimeSlotsTable.id,
                     date: experienceTimeSlotsTable.localDate,
-                    totalSlots: count(experienceTimeSlotsTable.id).as('total_slots'),
-                    availableSlots: sum(
-                        sql<number>`case when ${experienceTimeSlotsTable.status} = 'available' and ${experienceTimeSlotsTable.bookedCount} < ${experienceTimeSlotsTable.maxCapacity} then 1 else 0 end`
-                    ).as('available_slots'),
-                    minPrice: sql<number>`50`.as('min_price'), // TODO: Add price to schema
-                    totalCapacity: sum(experienceTimeSlotsTable.maxCapacity).as('total_capacity'),
-                    totalBooked: sum(experienceTimeSlotsTable.bookedCount).as('total_booked'),
+                    maxCapacity: experienceTimeSlotsTable.maxCapacity,
+                    status: experienceTimeSlotsTable.status,
                 })
                 .from(experienceTimeSlotsTable)
                 .where(
@@ -190,22 +250,73 @@ export class TimeSlotsQueryManager extends BaseQueryManager {
                         gte(experienceTimeSlotsTable.localDate, dayjs(startDate).toDate()),
                         lte(experienceTimeSlotsTable.localDate, dayjs(endDate).toDate())
                     )
+                );
+
+            // Get booked counts for all time slots
+            const timeSlotIds = timeslots.map(ts => ts.id);
+            const bookingCounts = timeSlotIds.length > 0 ? await db
+                .select({
+                    timeSlotId: reservationsTable.timeSlotId,
+                    totalGuests: sum(reservationsTable.numberOfGuests).as('total_guests'),
+                })
+                .from(reservationsTable)
+                .where(
+                    and(
+                        inArray(reservationsTable.timeSlotId, timeSlotIds),
+                        or(
+                            eq(reservationsTable.status, 'held'),
+                            eq(reservationsTable.status, 'pending'),
+                            eq(reservationsTable.status, 'confirmed')
+                        )
+                    )
                 )
-                .groupBy(experienceTimeSlotsTable.localDate)
-                .orderBy(experienceTimeSlotsTable.localDate);
+                .groupBy(reservationsTable.timeSlotId) : [];
+
+            // Create a map of booked counts
+            const bookingCountMap = new Map(
+                bookingCounts.map(bc => [bc.timeSlotId, Number(bc.totalGuests || 0)])
+            );
+
+            // Group time slots by date
+            const dateMap = new Map<string, typeof timeslots>();
+            timeslots.forEach(ts => {
+                const dateKey = dayjs(ts.date).format('YYYY-MM-DD');
+                if (!dateMap.has(dateKey)) {
+                    dateMap.set(dateKey, []);
+                }
+                dateMap.get(dateKey)!.push(ts);
+            });
+
+            // Calculate summary for each date
+            const dates = Array.from(dateMap.entries()).map(([date, slots]) => {
+                let totalCapacity = 0;
+                let totalBooked = 0;
+                let availableSlots = 0;
+
+                slots.forEach(slot => {
+                    const booked = bookingCountMap.get(slot.id) || 0;
+                    totalCapacity += slot.maxCapacity;
+                    totalBooked += booked;
+                    if (slot.status === 'available' && booked < slot.maxCapacity) {
+                        availableSlots++;
+                    }
+                });
+
+                return {
+                    date,
+                    available: availableSlots > 0,
+                    minPrice: 50, // TODO: Add price to schema
+                    slotsAvailable: availableSlots,
+                    totalSlots: slots.length,
+                    remainingCapacity: totalCapacity - totalBooked,
+                };
+            });
 
             return {
                 experienceId,
                 startDate,
                 endDate,
-                dates: results.map(row => ({
-                    date: dayjs(row.date).format('YYYY-MM-DD'),
-                    available: Number(row.availableSlots || 0) > 0,
-                    minPrice: Number(row.minPrice),
-                    slotsAvailable: Number(row.availableSlots || 0),
-                    totalSlots: Number(row.totalSlots),
-                    remainingCapacity: Number(row.totalCapacity || 0) - Number(row.totalBooked || 0),
-                }))
+                dates: dates.sort((a, b) => a.date.localeCompare(b.date)),
             };
         });
     }

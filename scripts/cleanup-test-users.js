@@ -12,7 +12,7 @@ const {
     AdminDeleteUserCommand,
 } = require('@aws-sdk/client-cognito-identity-provider');
 
-const USER_POOL_ID = 'us-east-1_BmdzbmbF3'; // Your dev user pool ID
+const USER_POOL_ID = 'us-east-1_lOVfEVcpD'; // ohana-user-pool-dev
 const REGION = 'us-east-1';
 
 class TestUserCleanup {

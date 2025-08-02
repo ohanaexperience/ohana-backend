@@ -1,9 +1,9 @@
-handleStripeWebhook:
-    handler: src/webhooks/lambda/stripeWebhook.handler
+handleStripeIdentityWebhook:
+    handler: src/webhooks/lambda/identity.handler
     timeout: 29
     events:
         - http:
-              path: /v1/webhooks/stripe
+              path: /v1/webhooks/stripe/identity
               method: POST
               cors: true
     vpc:
@@ -13,9 +13,35 @@ handleStripeWebhook:
             - !Ref PrivateSubnetA
             - !Ref PrivateSubnetB
     environment:
-        RDS_PROXY_ENDPOINT: !GetAtt PostgresRDSProxy.Endpoint
         POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
         POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
-        USE_RDS_PROXY: true
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
         STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
-        STRIPE_WEBHOOK_SECRET: ${env:STRIPE_WEBHOOK_SECRET}
+        STRIPE_IDENTITY_WEBHOOK_SECRET: ${env:STRIPE_IDENTITY_WEBHOOK_SECRET}
+
+handleStripePaymentWebhook:
+    handler: src/webhooks/lambda/payment.handler
+    timeout: 29
+    events:
+        - http:
+              path: /v1/webhooks/stripe/payment
+              method: POST
+              cors: true
+    vpc:
+        securityGroupIds:
+            - !Ref ProxySecurityGroup
+        subnetIds:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+    environment:
+        POSTGRES_DB: ${self:custom.resourceNames.postgresDB}
+        POSTGRES_USERNAME: ${env:POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+        USE_RDS_PROXY: ${self:custom.useRdsProxy.${self:provider.stage}}
+        RDS_CLUSTER_ENDPOINT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Address
+        RDS_CLUSTER_PORT: !GetAtt PostgresRDSServerlessCluster.Endpoint.Port
+        STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+        STRIPE_PAYMENT_WEBHOOK_SECRET: ${env:STRIPE_PAYMENT_WEBHOOK_SECRET}

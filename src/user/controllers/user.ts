@@ -25,6 +25,19 @@ export class UserController {
         }
     }
 
+    async getPublicProfile(request: { userId: string }) {
+        try {
+            const result = await this.userService.getPublicProfile(request);
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
     async updateProfile(request: UpdateUserProfileRequest) {
         try {
             const result = await this.userService.updateProfile(request);
