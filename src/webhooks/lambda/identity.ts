@@ -12,13 +12,13 @@ import { createDatabaseConfig } from "@/database/proxy-config";
 import { requireBody, zodValidator } from "@/middleware";
 
 const {
-    STRIPE_SECRET_KEY,
+    STRIPE_SECRET_KEY_LIVE,
     STRIPE_IDENTITY_WEBHOOK_SECRET,
 } = process.env;
 
 const dbConfig = createDatabaseConfig();
 const db = DatabaseFactory.create({ postgres: dbConfig });
-const stripeClient = new stripe(STRIPE_SECRET_KEY!);
+const stripeClient = new stripe(STRIPE_SECRET_KEY_LIVE!);
 const webhookController = new WebhookController({
     database: db,
     stripeClient,

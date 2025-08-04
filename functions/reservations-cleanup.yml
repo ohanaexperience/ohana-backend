@@ -1,0 +1,11 @@
+runReservationCleanup:
+  handler: src/reservations/lambda/runCleanup.handler
+  timeout: 60
+  events:
+    - schedule:
+        rate: rate(5 minutes)
+        name: reservation-cleanup-${self:provider.stage}
+        description: Clean up failed payments and expired reservation holds
+        enabled: true
+  environment:
+    REGION: ${self:provider.region}

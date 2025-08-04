@@ -12,10 +12,10 @@ import { DatabaseFactory } from "@/database";
 import { createDatabaseConfig } from "@/database/proxy-config";
 
 const {
-    STRIPE_SECRET_KEY,
+    STRIPE_SECRET_KEY_LIVE,
 } = process.env;
 
-const stripeClient = new stripe(STRIPE_SECRET_KEY!);
+const stripeClient = new stripe(STRIPE_SECRET_KEY_LIVE!);
 const dbConfig = createDatabaseConfig();
 const db = DatabaseFactory.create({ postgres: dbConfig });
 const stripeController = new StripeController({

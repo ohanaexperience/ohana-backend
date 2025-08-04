@@ -84,6 +84,7 @@ export type ReservationEventType =
     | 'payment_initiated' 
     | 'payment_captured' 
     | 'payment_failed'
+    | 'payment_recovered'
     | 'confirmed' 
     | 'cancelled' 
     | 'refunded'

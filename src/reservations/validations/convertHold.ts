@@ -7,6 +7,8 @@ export const convertHoldSchema = z.object({
     body: z.object({
         holdId: z.string().uuid(),
         paymentIntentId: z.string().optional(),
+        paymentMethodId: z.string().optional(),
+        savePaymentMethod: z.boolean().optional(),
     }),
 });
 
@@ -16,4 +18,6 @@ export type ConvertHoldRequest = {
     authorization: string;
     holdId: string;
     paymentIntentId?: string;
+    paymentMethodId?: string;
+    savePaymentMethod?: boolean;
 };

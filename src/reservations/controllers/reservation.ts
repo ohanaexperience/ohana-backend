@@ -1,5 +1,6 @@
 import { ReservationService } from "../services/reservation";
 import { ReservationEventService } from "../services/event";
+import { PaymentService } from "@/payments/services/payment";
 import {
     CreateReservationRequest,
     ConfirmReservationRequest,
@@ -14,11 +15,13 @@ import { decodeToken } from "@/utils";
 export class ReservationController {
     private readonly reservationService: ReservationService;
     private readonly eventService: ReservationEventService;
+    private readonly paymentService: PaymentService;
     private readonly db: any;
 
     constructor(opts: ReservationServiceOptions) {
         this.reservationService = new ReservationService(opts);
         this.eventService = new ReservationEventService(opts.database);
+        this.paymentService = new PaymentService(opts);
         this.db = opts.database;
     }
 
@@ -71,7 +74,9 @@ export class ReservationController {
             const result =
                 await this.reservationService.convertHoldToReservation(
                     request.holdId,
-                    request.paymentIntentId
+                    request.paymentIntentId,
+                    request.paymentMethodId,
+                    request.savePaymentMethod
                 );
 
             return {
@@ -114,6 +119,90 @@ export class ReservationController {
             };
         } catch (err: unknown) {
             return this.handleError(err);
+        }
+    }
+
+    async getPaymentStatus(request: {
+        userId: string;
+        reservationId: string;
+    }) {
+        try {
+            // Verify user owns this reservation
+            const reservation = await this.db.reservations.getById(
+                request.reservationId
+            );
+            
+            if (!reservation || reservation.userId !== request.userId) {
+                return {
+                    statusCode: 404,
+                    body: JSON.stringify({
+                        success: false,
+                        error: "RESERVATION_NOT_FOUND",
+                        message: "Reservation not found",
+                    }),
+                };
+            }
+
+            let paymentStatus = {
+                reservationStatus: reservation.status,
+                paymentIntentId: reservation.paymentIntentId,
+                requiresAction: false,
+                actionType: null as string | null,
+            };
+
+            // Get payment details if payment intent exists
+            if (reservation.paymentIntentId) {
+                try {
+                    // Use the new method that doesn't expose secrets
+                    const stripeStatus = await this.paymentService.getPaymentIntentStatus(
+                        reservation.paymentIntentId
+                    );
+
+                    paymentStatus = {
+                        ...paymentStatus,
+                        stripeStatus: stripeStatus.status,
+                        requiresAction: stripeStatus.requiresAction,
+                        actionType: this.getActionType(stripeStatus.status),
+                        paymentMethod: stripeStatus.paymentMethod,
+                        lastError: stripeStatus.lastError,
+                    };
+
+                    // Update local database if status changed
+                    const payment = await this.db.payments.getByPaymentIntentId(
+                        reservation.paymentIntentId
+                    );
+                    
+                    if (payment) {
+                        paymentStatus.paymentStatus = payment.status;
+                    }
+                } catch (error) {
+                    console.error('Failed to get payment intent status:', error);
+                    // Still return reservation status even if Stripe check fails
+                }
+            }
+
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    success: true,
+                    data: paymentStatus,
+                }),
+            };
+        } catch (err: unknown) {
+            return this.handleError(err);
+        }
+    }
+
+    private getActionType(stripeStatus: string): string | null {
+        switch (stripeStatus) {
+            case 'requires_payment_method':
+                return 'add_payment_method';
+            case 'requires_confirmation':
+                return 'confirm_payment';
+            case 'requires_action':
+                return 'authenticate_payment';
+            default:
+                return null;
         }
     }
 
@@ -183,6 +272,33 @@ export class ReservationController {
                         message: "An unexpected error occurred",
                     }),
                 };
+        }
+    }
+
+    async getUserReservations(request: {
+        userId: string;
+        status?: string;
+        limit?: string;
+        offset?: string;
+    }) {
+        try {
+            const filters = {
+                status: request.status,
+                limit: request.limit ? parseInt(request.limit, 10) : undefined,
+                offset: request.offset ? parseInt(request.offset, 10) : undefined,
+            };
+            
+            const result = await this.reservationService.getUserReservations(
+                request.userId,
+                filters
+            );
+            
+            return {
+                statusCode: 200,
+                body: JSON.stringify(result),
+            };
+        } catch (error) {
+            return this.handleError(error);
         }
     }
 }

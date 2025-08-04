@@ -39,5 +39,17 @@ export default {
                 MESSAGE: `Number of guests must be less than ${RESERVATION_NUMBER_OF_GUESTS_MAX}.`,
             },
         },
+        INVALID_STATUS_TRANSITION: {
+            CODE: "RESERVATION_INVALID_STATUS_TRANSITION",
+            MESSAGE: "Invalid reservation status transition. Only confirmed reservations can be completed.",
+        },
+        EXPERIENCE_NOT_STARTED: {
+            CODE: "RESERVATION_EXPERIENCE_NOT_STARTED",
+            MESSAGE: "Cannot complete reservation before experience has started.",
+        },
+        FORBIDDEN_COMPLETE: {
+            CODE: "RESERVATION_FORBIDDEN_COMPLETE",
+            MESSAGE: "You do not have permission to complete this reservation.",
+        },
     },
 };

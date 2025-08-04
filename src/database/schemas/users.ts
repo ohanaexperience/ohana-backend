@@ -19,6 +19,7 @@ export const usersTable = pgTable("users", {
     firstName: text("first_name"),
     lastName: text("last_name"),
     profileImage: jsonb("profile_image").$type<ImageObject>(),
+    stripeCustomerId: text("stripe_customer_id").unique(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

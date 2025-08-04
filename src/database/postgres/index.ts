@@ -20,6 +20,8 @@ import {
     ReviewsQueryManager,
     PaymentsQueryManager,
     ReservationEventsQueryManager,
+    WebhookEventQueryManager,
+    PaymentMethodsQueryManager,
 } from "./query_managers";
 
 export default class Postgres {
@@ -43,6 +45,8 @@ export default class Postgres {
     private _reviews?: ReviewsQueryManager;
     private _payments?: PaymentsQueryManager;
     private _reservationEvents?: ReservationEventsQueryManager;
+    private _webhookEvents?: WebhookEventQueryManager;
+    private _paymentMethods?: PaymentMethodsQueryManager;
 
     constructor(config: PostgresConfig) {
         this.config = config;
@@ -77,7 +81,11 @@ export default class Postgres {
             user: config.user,
             password,
             ssl: config.ssl || { rejectUnauthorized: false },
-            connectionTimeoutMillis: 10000,
+            connectionTimeoutMillis: 30000, // Increased from 10s to 30s
+            idle_in_transaction_session_timeout: 60000, // 60 seconds
+            query_timeout: 30000, // 30 seconds
+            keepAlive: true,
+            keepAliveInitialDelayMillis: 10000,
         };
 
         // Don't set statement_timeout when using RDS Proxy as it's not supported
@@ -255,6 +263,26 @@ export default class Postgres {
             );
         }
         return this._reservationEvents;
+    }
+
+    get webhookEvents(): WebhookEventQueryManager {
+        if (!this._webhookEvents) {
+            this._webhookEvents = new WebhookEventQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._webhookEvents;
+    }
+
+    get paymentMethods(): PaymentMethodsQueryManager {
+        if (!this._paymentMethods) {
+            this._paymentMethods = new PaymentMethodsQueryManager(
+                () => this.getInstance(),
+                () => this.connect()
+            );
+        }
+        return this._paymentMethods;
     }
 
     private getInstance(): NodePgDatabase {

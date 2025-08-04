@@ -6,15 +6,20 @@ import { APIGatewayEvent } from "aws-lambda";
 
 import { CategoryController } from "../../controllers/category";
 
-import { DatabaseFactory } from "@/database";
-import { createDatabaseConfig } from "@/database/proxy-config";
+import ConnectionManager from "@/database/connection-manager";
 
-const dbConfig = createDatabaseConfig();
-const db = DatabaseFactory.create({ postgres: dbConfig });
-const categoryController = new CategoryController({ database: db });
+// Reuse database connection across Lambda invocations
+let categoryController: CategoryController | null = null;
 
 export const handler = middy(async (event: APIGatewayEvent) => {
     console.log("event", event);
+
+    // Initialize controller with reused connection if not already initialized
+    if (!categoryController) {
+        const connectionManager = ConnectionManager.getInstance();
+        const db = await connectionManager.getConnection();
+        categoryController = new CategoryController({ database: db });
+    }
 
     return await categoryController.getCategories();
 })

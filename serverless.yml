@@ -116,6 +116,7 @@ functions:
     - ${file(functions/admin.yml)}
     - ${file(functions/triggers.yml)}
     - ${file(functions/reviews.yml)}
+    - ${file(functions/payments.yml)}
 
 resources:
     - ${file(resources/storage.yml)}

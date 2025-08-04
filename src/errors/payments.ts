@@ -44,5 +44,13 @@ export default {
             CODE: "PAYMENT_REFUND_FAILED",
             MESSAGE: "Failed to process refund",
         },
+        METHOD_NOT_FOUND: {
+            CODE: "PAYMENT_METHOD_NOT_FOUND",
+            MESSAGE: "Payment method not found",
+        },
+        SETUP_FAILED: {
+            CODE: "PAYMENT_SETUP_FAILED",
+            MESSAGE: "Failed to set up payment. Please try again.",
+        },
     },
 };

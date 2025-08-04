@@ -22,6 +22,21 @@ export class UsersQueryManager extends BaseQueryManager {
         });
     }
 
+    public async getById(userId: string) {
+        return this.getByUserId(userId);
+    }
+
+    public async getByStripeCustomerId(stripeCustomerId: string) {
+        return await this.withDatabase(async (db) => {
+            const results = await db
+                .select()
+                .from(usersTable)
+                .where(eq(usersTable.stripeCustomerId, stripeCustomerId));
+
+            return results[0] || null;
+        });
+    }
+
     public async create(data: InsertUser) {
         return await this.withDatabase(async (db) => {
             return await db.insert(usersTable).values(data).returning();

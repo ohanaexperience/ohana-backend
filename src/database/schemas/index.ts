@@ -8,3 +8,5 @@ export * from "./reservations";
 export * from "./reviews";
 export * from "./payments";
 export * from "./reservation-events";
+export * from "./webhook-events";
+export * from "./payment-methods";

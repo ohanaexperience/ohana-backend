@@ -50,6 +50,20 @@
       "when": 1754027672743,
       "tag": "0006_amusing_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1754133177032,
+      "tag": "0007_real_mesmero",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1754145485947,
+      "tag": "0008_first_alice",
+      "breakpoints": true
     }
   ]
 }

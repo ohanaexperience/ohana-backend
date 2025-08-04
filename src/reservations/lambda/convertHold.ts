@@ -18,12 +18,14 @@ const reservationController = new ReservationController({
 
 export const handler = middy(async (event: ConvertHoldData) => {
     const { authorization } = event.headers;
-    const { holdId, paymentIntentId } = event.body;
+    const { holdId, paymentIntentId, paymentMethodId, savePaymentMethod } = event.body;
 
     return await reservationController.convertHoldToReservation({
         authorization: authorization!,
         holdId,
         paymentIntentId,
+        paymentMethodId,
+        savePaymentMethod,
     });
 })
     .use(httpHeaderNormalizer())

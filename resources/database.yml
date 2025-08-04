@@ -28,7 +28,7 @@ Resources:
             #     - postgresql
             DBClusterParameterGroupName: !Ref PostgresParameterGroup
             ServerlessV2ScalingConfiguration:
-                MinCapacity: 0
+                MinCapacity: 0.5
                 MaxCapacity: 8
             VpcSecurityGroupIds:
                 - !Ref DBSecurityGroup
